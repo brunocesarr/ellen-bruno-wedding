@@ -1,0 +1,36 @@
+# A unique project name (used by local dev only)
+project_id = "ellen-bruno-wedding"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+major_version = 15
+
+[storage]
+enabled = true
+file_size_limit = "50MiB"          # match your free-tier limit
+
+[storage.buckets.wedding-images]
+public = true
+file_size_limit = "5MiB"           # per-file cap for safety
+allowed_mime_types = ["image/png", "image/jpeg", "image/webp"]
+
+[auth]
+enabled = true
+site_url = "http://localhost:3000"
+additional_redirect_urls = [
+"http://localhost:3000/**",
+"https://ellen-bruno-wedding.vercel.app/**",
+"https://ellen-bruno-wedding.netlify.app/**",
+]
+jwt_expiry = 3600
+enable_signup = false               # 🔒 lock down — only you create admins
+
+[auth.email]
+enable_signup = false
+double_confirm_changes = true
+enable_confirmations = false        # set to true if you want email verification

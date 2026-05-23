@@ -1,5 +1,17 @@
 @import 'tailwindcss';
 
+@layer components {
+  .input {
+    @apply w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400;
+  }
+  .btn-primary {
+    @apply rounded-md bg-rose-600 px-4 py-2 text-white hover:bg-rose-700 disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50;
+  }
+}
+
 /* ============================================
  THEME — Ellen & Bruno Wedding
  Terracotta + Dusty Blue + Sage + Cream

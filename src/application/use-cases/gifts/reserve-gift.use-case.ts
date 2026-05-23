@@ -1,0 +1,15 @@
+import type { IGiftsRepository } from '@/src/application/repositories/gifts.repository.interface'
+import { ValidationError } from '@/src/entities/errors/common'
+import { ReserveGiftInputSchema } from '@/src/entities/models/gift'
+
+export function reserveGiftUseCase(deps: { giftsRepo: IGiftsRepository }) {
+  return async (raw: unknown) => {
+    const result = ReserveGiftInputSchema.safeParse(raw)
+    if (!result.success) throw new ValidationError(result.error.flatten())
+    return deps.giftsRepo.reserve(
+      result.data.giftId,
+      result.data.name,
+      result.data.email
+    )
+  }
+}
