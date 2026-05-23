@@ -1,26 +1,274 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================
+ THEME — Ellen & Bruno Wedding
+ Terracotta + Dusty Blue + Sage + Cream
+ ============================================ */
+
+@theme {
+  /* ---- Primary: Terracotta ---- */
+  --color-terracotta: #c17b5a;
+  --color-terracotta-dark: #a5623f;
+  --color-terracotta-light: #d4977a;
+  --color-terracotta-muted: #b8876f;
+
+  /* ---- Accent: Dusty Blue ---- */
+  --color-dusty-blue: #7a9fb8;
+  --color-dusty-blue-dark: #5a86ad;
+  --color-dusty-blue-light: #a8c4d6;
+  --color-dusty-blue-pale: #d4e4ee;
+
+  /* ---- Nature: Sage Green ---- */
+  --color-sage: #7a8a6b;
+  --color-sage-dark: #5e6b52;
+  --color-sage-light: #9dad8e;
+  --color-sage-muted: #b0bda4;
+
+  /* ---- Neutrals ---- */
+  --color-cream: #f8f4ee;
+  --color-cream-dark: #ede7dd;
+  --color-ivory: #fdfbf7;
+  --color-blush: #e8d5cc;
+  --color-blush-rose: #c9a89a;
+  --color-warm-gray: #8a7e76;
+  --color-charcoal: #3d3632;
+
+  /* ---- Dress Code Colors ---- */
+  --color-dress-terracotta: #c17b5a;
+  --color-dress-terracotta-light: #d4977a;
+  --color-dress-dusty-blue: #7a9fb8;
+  --color-dress-dusty-blue-light: #a8c4d6;
+  --color-dress-sage: #7a8a6b;
+  --color-dress-cream: #ede7dd;
+
+  /* Countdown specific */
+  --color-countdown-card: #2e2b28;
+  --color-countdown-line: rgba(255, 255, 255, 0.15);
+  --color-countdown-text: #f5f0e8;
+
+  /* ---- Envelope Colors ---- */
+  --color-envelope-body: #c4875e;
+  --color-envelope-dark: #a66b45;
+  --color-envelope-flap: #b87a52;
+  --color-envelope-inner: #d4a07a;
+  --color-envelope-fold: #b07548;
+  --color-envelope-shadow: rgba(139, 90, 55, 0.25);
+  --color-paper: #fdfaf5;
+  --color-paper-shadow: rgba(0, 0, 0, 0.06);
+  --color-wax-seal: #8b3a3a;
+  --color-wax-seal-light: #a84848;
+
+  /* ---- Typography ---- */
+  --font-script: 'Pinyon Script', cursive;
+  --font-display: 'Cormorant Garamond', serif;
+  --font-body: 'Montserrat', sans-serif;
+  --font-typewriter: 'Special Elite', monospace;
+
+  /* ---- Font Sizes ---- */
+  --text-hero: 4.5rem;
+  --text-hero-lg: 6rem;
+  --text-monogram: 3.5rem;
+  --text-section-title: 2rem;
+  --text-timeline: 2.75rem;
+  --text-subtitle: 1.125rem;
+
+  /* ---- Spacing ---- */
+  --spacing-section: 5rem;
+
+  /* ---- Border Radius ---- */
+  --radius-card: 0.75rem;
+  --radius-button: 2rem;
+  --radius-monogram: 50%;
+
+  /* ---- Shadows ---- */
+  --shadow-soft: 0 4px 20px rgba(193, 123, 90, 0.08);
+  --shadow-card: 0 8px 32px rgba(61, 54, 50, 0.06);
+
+  /* ---- Animations ---- */
+  --animate-fade-in: fade-in 0.8s ease-out forwards;
+  --animate-slide-up: slide-up 0.6s ease-out forwards;
+  --animate-float: float 4s ease-in-out infinite;
+  --animate-rotate-slow: rotate-slow 20s linear infinite;
+
+  /* ---- Envelope Animations ---- */
+  --animate-flap-open: flap-open 0.6s ease-in-out forwards;
+  --animate-letter-slide: letter-slide 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.5s
+    forwards;
+  --animate-letter-content: letter-content-fade 0.6s ease-out 1.2s forwards;
+  --animate-seal-break: seal-break 0.3s ease-in forwards;
+  --animate-bounce-hint: bounce-hint 2s ease-in-out infinite;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ============================================
+ KEYFRAMES
+ ============================================ */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+
+/* Flip Clock Animations */
+@keyframes flip-top {
+  0% {
+    transform: rotateX(0deg);
+  }
+  100% {
+    transform: rotateX(-90deg);
+  }
+}
+
+@keyframes flip-bottom {
+  0% {
+    transform: rotateX(90deg);
+  }
+  100% {
+    transform: rotateX(0deg);
+  }
+}
+
+@keyframes rotate-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes draw-circle {
+  from {
+    stroke-dashoffset: 565;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes grow-leaves {
+  from {
+    opacity: 0;
+    transform: scale(0.8) rotate(-5deg);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+/* ============================================
+ REDUCED MOTION — Accessibility
+ ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ============================================
+ BASE STYLES
+ ============================================ */
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    font-family: var(--font-body);
+    color: var(--color-charcoal);
+    background-color: var(--color-cream);
+    background-image: url('/images/texture-paper.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+
+  ::selection {
+    background-color: var(--color-cream);
+    color: var(--color-ivory);
+  }
+}
+
+/* ============================================
+ CUSTOM UTILITIES
+ ============================================ */
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility animate-on-scroll {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.7s ease-out,
+    transform 0.7s ease-out;
+}
+
+@utility animate-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+@utility paper-texture {
+  background-image: url('/images/texture-paper.jpg');
+  background-size: cover;
+  background-blend-mode: overlay;
+}
+
+@utility monogram-ring {
+  border: 2.5px solid var(--color-terracotta);
+  border-radius: 50%;
+}
+
+@utility h-screen-safe {
+  height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+  );
+}
+
+@utility min-h-screen-safe {
+  min-height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+  );
+}
+
+@utility max-h-screen-safe {
+  max-height: calc(
+    100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
+  );
 }
