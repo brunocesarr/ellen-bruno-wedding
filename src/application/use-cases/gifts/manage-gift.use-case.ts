@@ -20,12 +20,7 @@ export function createGiftUseCase(d: Deps) {
       throw new UnauthenticatedError()
     const result = CreateGiftInputSchema.safeParse(raw)
     if (!result.success) throw new ValidationError(result.error.flatten())
-    return d.giftsRepo.create({
-      name: result.data.name,
-      description: result.data.description ?? null,
-      price: result.data.price,
-      imagePath: result.data.imagePath ?? null,
-    } as any)
+    return d.giftsRepo.create(result.data) // 👈 clean, no cast
   }
 }
 
@@ -35,7 +30,7 @@ export function updateGiftUseCase(d: Deps) {
       throw new UnauthenticatedError()
     const result = UpdateGiftInputSchema.safeParse(raw)
     if (!result.success) throw new ValidationError(result.error.flatten())
-    return d.giftsRepo.update(result.data)
+    return d.giftsRepo.update(result.data) // 👈 clean, no cast
   }
 }
 
@@ -47,7 +42,9 @@ export function deleteGiftUseCase(d: Deps) {
     if (gift?.imagePath) {
       try {
         await d.storageRepo.remove(gift.imagePath)
-      } catch {}
+      } catch {
+        /* best-effort */
+      }
     }
     return d.giftsRepo.delete(id)
   }

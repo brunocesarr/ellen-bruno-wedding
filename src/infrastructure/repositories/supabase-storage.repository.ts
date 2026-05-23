@@ -1,11 +1,10 @@
 import type { IStorageRepository } from '@/src/application/repositories/storage.repository.interface'
-import type { Database } from '@/types/database.types'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { TypedSupabaseClient } from '../supabase/types'
 
 const BUCKET = 'wedding-images'
 
 export class SupabaseStorageRepository implements IStorageRepository {
-  constructor(private readonly client: SupabaseClient<Database>) {}
+  constructor(private readonly client: TypedSupabaseClient) {}
 
   async upload(file: File | Buffer, path: string, contentType?: string) {
     const { data, error } = await this.client.storage

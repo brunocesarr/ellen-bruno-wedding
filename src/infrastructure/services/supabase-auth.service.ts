@@ -1,10 +1,10 @@
 import type { IAuthService } from '@/src/application/services/auth.service.interface'
 import { InvalidCredentialsError } from '@/src/entities/errors/auth'
 import type { AdminUser, SignInInput } from '@/src/entities/models/user'
-import type { SupabaseClient } from '@supabase/supabase-js'
+import { TypedSupabaseClient } from '../supabase/types'
 
 export class SupabaseAuthService implements IAuthService {
-  constructor(private readonly client: SupabaseClient) {}
+  constructor(private readonly client: TypedSupabaseClient) {}
 
   async signIn(input: SignInInput): Promise<AdminUser> {
     const { data, error } = await this.client.auth.signInWithPassword({
