@@ -1,5 +1,6 @@
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
+import { NavigationProgressBar } from '@/components/admin/NavigationProgressBar'
 import { createSupabaseServerClient } from '@/src/infrastructure/supabase/server'
 import { redirect } from 'next/navigation'
 
@@ -21,6 +22,7 @@ export default async function AuthenticatedAdminLayout({
     <div className="admin-shell min-h-screen text-stone-800">
       <div className="mx-auto flex max-w-[1600px]">
         <AdminSidebar />
+        <NavigationProgressBar />
         <div className="flex min-w-0 flex-1 flex-col">
           <AdminTopbar
             user={{
