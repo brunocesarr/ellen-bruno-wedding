@@ -3,7 +3,8 @@
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Divider } from '@/components/ui/Divider'
 import { WEDDING_DETAILS } from '@/lib/constants'
-import { motion, type Variants } from 'motion/react'
+import { Reveal, RevealItem, RevealStagger } from '@/src/components/Reveal'
+import { type Variants } from 'motion/react'
 
 const swatchContainerVariants: Variants = {
   hidden: {},
@@ -26,15 +27,11 @@ export function DressCodeSection() {
   return (
     <SectionWrapper id="dress-code" variant="ivory">
       <div className="text-center">
-        <motion.h2
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-2 font-display text-section-title font-bold uppercase tracking-[0.2em] text-terracotta"
-        >
-          Dress Code
-        </motion.h2>
+        <Reveal>
+          <h2 className="mb-2 font-display text-section-title font-bold uppercase tracking-[0.2em] text-terracotta">
+            Dress Code
+          </h2>
+        </Reveal>
 
         <p className="mb-3 font-body text-xs uppercase tracking-widest text-warm-gray">
           Paleta de cores
@@ -45,20 +42,11 @@ export function DressCodeSection() {
         </p>
 
         {/* Animated Color Swatches */}
-        <motion.div
-          className="flex flex-wrap items-start justify-center gap-5"
-          variants={swatchContainerVariants}
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, amount: 0.5 }}
-        >
+        <RevealStagger className="flex flex-wrap items-start justify-center gap-5">
           {dressCode.map((color) => (
-            <motion.div
+            <RevealItem
               key={color.hex}
-              variants={swatchVariants}
-              className="flex flex-col items-center gap-2"
-              whileHover={{ scale: 1.15, y: -4 }}
-              transition={{ type: 'spring', stiffness: 400 }}
+              className="flex flex-col items-center justify-center gap-2"
             >
               <div
                 className="h-14 w-14 rounded-full shadow-sm ring-1 ring-charcoal/5"
@@ -67,9 +55,9 @@ export function DressCodeSection() {
               <span className="font-body text-[0.65rem] tracking-wide text-warm-gray">
                 {color.name}
               </span>
-            </motion.div>
+            </RevealItem>
           ))}
-        </motion.div>
+        </RevealStagger>
 
         <Divider variant="light" className="mt-10" />
 
@@ -78,13 +66,16 @@ export function DressCodeSection() {
           harmonizar com a decoração do nosso dia especial.
         </p>
 
-        <div className="mt-8 flex items-center justify-center gap-3">
+        <Reveal
+          delay={0.15}
+          className="mt-8 flex items-center justify-center gap-3"
+        >
           <div className="h-px w-8 bg-terracotta/20" />
           <span className="font-display text-xs tracking-wider text-terracotta/60">
             TRAJE ESPORTE FINO
           </span>
           <div className="h-px w-8 bg-terracotta/20" />
-        </div>
+        </Reveal>
       </div>
     </SectionWrapper>
   )

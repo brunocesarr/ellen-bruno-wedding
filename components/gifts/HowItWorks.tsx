@@ -1,3 +1,4 @@
+import { Reveal, RevealItem, RevealStagger } from '@/src/components/Reveal'
 import { Gift, Heart, QrCode } from 'lucide-react'
 
 const STEPS = [
@@ -22,14 +23,14 @@ const STEPS = [
 export function HowItWorks() {
   return (
     <section id="como-funciona" className="mx-auto max-w-7xl px-6 py-20">
-      <header className="mb-12 text-center">
+      <Reveal className="mb-12 text-center">
         <p className="eyebrow">Como funciona</p>
         <h2 className="heading-display mt-4">Três passos simples</h2>
-      </header>
+      </Reveal>
 
-      <ol className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <RevealStagger className="grid grid-cols-1 gap-8 md:grid-cols-3">
         {STEPS.map((step, i) => (
-          <li key={step.title} className="relative text-center">
+          <RevealItem key={step.title} className="relative text-center">
             <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-cream-dark">
               <step.icon className="size-7 text-terracotta" aria-hidden />
             </div>
@@ -40,9 +41,9 @@ export function HowItWorks() {
             <p className="mx-auto mt-2 max-w-xs text-sm text-ink-muted">
               {step.description}
             </p>
-          </li>
+          </RevealItem>
         ))}
-      </ol>
+      </RevealStagger>
     </section>
   )
 }

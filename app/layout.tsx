@@ -1,4 +1,5 @@
 import { RouteLoader } from '@/components/ui/RouteLoader'
+import { MusicToggle } from '@/src/components/MusicToggle'
 import type { Metadata, Viewport } from 'next'
 import {
   Cormorant_Garamond,
@@ -46,14 +47,14 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   // metadataBase is crucial for generating absolute URLs for OG images
-  metadataBase: new URL('https://your-wedding-website.com'), // Replace with your actual domain
+  metadataBase: new URL('https://ellen-bruno-wedding.netlify.app'), // Replace with your actual domain
   title: 'Ellen &amp; Bruno — Wedding Day | 2026',
   description:
     'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
   openGraph: {
     title: 'Ellen &amp; Bruno — Wedding Day',
     description: 'Join us to celebrate our love',
-    url: 'https://your-wedding-website.com', // Add the canonical URL
+    url: 'https://ellen-bruno-wedding.netlify.app', // Add the canonical URL
     type: 'website',
     locale: 'pt_BR',
     images: [
@@ -63,6 +64,7 @@ export const metadata: Metadata = {
         height: 630,
         alt: 'Ellen &amp; Bruno Wedding Invitation',
       },
+      { url: '/api/invitation', width: 1200, height: 630 },
     ],
   },
   // Optional but recommended for Twitter
@@ -101,6 +103,7 @@ export default function RootLayout({
         <NuqsAdapter>
           <RouteLoader />
           {children}
+          <MusicToggle />
         </NuqsAdapter>
       </body>
     </html>
