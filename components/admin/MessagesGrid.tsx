@@ -13,7 +13,7 @@ import {
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import { useTransition } from 'react'
-import { EmptyState } from './EmptyState'
+import { EmptyState } from '../ui/EmptyState'
 
 export function MessagesGrid({ messages }: { messages: MessageViewModel[] }) {
   if (!messages.length) {

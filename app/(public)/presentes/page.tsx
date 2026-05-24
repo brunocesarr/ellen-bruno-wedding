@@ -12,6 +12,7 @@ export const metadata: Metadata = {
   description:
     'Escolha um presente da nossa lista e contribua com a nova vida do casal pelo Pix.',
 }
+export const dynamic = 'force-dynamic'
 
 export default async function GiftsPage() {
   return (
@@ -44,8 +45,8 @@ export default async function GiftsPage() {
 
 async function GiftListSection() {
   const gifts = await listGiftsAdminController()
-  if (!gifts.ok) return null
-  return <GiftFilterBar gifts={gifts.data} />
+  if (!gifts.ok) return <GiftFilterBar gifts={[]} />
+  return <GiftFilterBar gifts={gifts.data ?? []} />
 }
 
 function GridSkeleton() {

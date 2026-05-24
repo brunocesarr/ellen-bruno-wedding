@@ -1,9 +1,9 @@
+import { listMessagesAction } from '@/app/admin/_actions/messages.actions'
 import { MessagesGrid } from '@/components/admin/MessagesGrid'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
 import { Gift, Heart, MessageCircleHeart } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { listMessagesAction } from '../_actions/messages.actions'
 
 export const dynamic = 'force-dynamic'
 

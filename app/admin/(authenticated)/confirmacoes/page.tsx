@@ -1,9 +1,9 @@
+import { listRsvpAction } from '@/app/admin/_actions/rsvp.actions'
 import { ConfirmationsList } from '@/components/admin/ConfirmationsList'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
 import { HeartHandshake, UserCheck, UserX, Users } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { listRsvpAction } from '../_actions/rsvp.actions'
 
 export const dynamic = 'force-dynamic'
 

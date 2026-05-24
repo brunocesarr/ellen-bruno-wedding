@@ -6,7 +6,7 @@ import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-mo
 import { Gift as GiftIcon, Pencil, Search, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState, useTransition } from 'react'
-import { EmptyState } from './EmptyState'
+import { EmptyState } from '../ui/EmptyState'
 import { GiftFormDialog } from './GiftFormDialog'
 import { StatusPill } from './StatusPill'
 

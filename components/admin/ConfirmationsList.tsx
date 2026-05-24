@@ -4,7 +4,7 @@ import { RsvpViewModel } from '@/src/interface-adapters/view-models/rsvp.view-mo
 import { HeartHandshake, Mail, Phone, Search, Users } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import { useMemo, useState } from 'react'
-import { EmptyState } from './EmptyState'
+import { EmptyState } from '../ui/EmptyState'
 import { StatusPill } from './StatusPill'
 
 const TABS = [
