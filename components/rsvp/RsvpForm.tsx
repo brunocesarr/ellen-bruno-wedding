@@ -82,22 +82,6 @@ export function RsvpForm() {
           </FieldSelect>
         </Field>
 
-        <Field
-          label="Acompanhantes"
-          htmlFor="companions"
-          hint="Inclua adultos e crianças. Você não conta."
-          error={fieldError('companions')}
-        >
-          <FieldSelect id="companions" name="companions" defaultValue="0">
-            <option value="0">Nenhum (somente eu)</option>
-            <option value="1">1 acompanhante</option>
-            <option value="2">2 acompanhantes</option>
-            <option value="3">3 acompanhantes</option>
-            <option value="4">4 acompanhantes</option>
-            <option value="5">5 acompanhantes</option>
-          </FieldSelect>
-        </Field>
-
         <div className="md:col-span-2">
           <Field
             label="Mensagem para os noivos"

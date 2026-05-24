@@ -20,7 +20,7 @@ export async function submitRsvpAction(
     email: formData.get('email') || undefined,
     phone: formData.get('phone') || undefined,
     attending: formData.get('attending') === 'true',
-    companions: Number(formData.get('companions') ?? 0),
+    companions: 0,
     dietaryRestrictions: formData.get('dietaryRestrictions') || undefined,
     message: formData.get('message') || undefined,
   })

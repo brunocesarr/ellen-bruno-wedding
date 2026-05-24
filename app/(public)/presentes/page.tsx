@@ -2,7 +2,9 @@ import { GiftCardSkeleton } from '@/components/gifts/GiftCardSkeleton'
 import { GiftFilterBar } from '@/components/gifts/GiftFilterBar'
 import { GiftHero } from '@/components/gifts/GiftHero'
 import { HowItWorks } from '@/components/gifts/HowItWorks'
+import { EmptyState } from '@/components/ui/EmptyState'
 import { listGiftsAdminController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { HeartHandshake } from 'lucide-react'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
@@ -44,7 +46,14 @@ export default async function GiftsPage() {
 
 async function GiftListSection() {
   const gifts = await listGiftsAdminController()
-  if (!gifts.ok) return null
+  if (!gifts.ok)
+    return (
+      <EmptyState
+        icon={<HeartHandshake className="w-12 h-12" />}
+        title="Sem presentes cadastrados"
+        description="Os presentes aparecerão aqui assim que forem adicionados."
+      />
+    )
   return <GiftFilterBar gifts={gifts.data} />
 }
 
