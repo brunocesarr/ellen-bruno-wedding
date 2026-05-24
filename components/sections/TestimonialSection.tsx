@@ -16,19 +16,13 @@ const TESTIMONIALS: Testimonial[] = [
     quote:
       'Encontrei em você o lar que sempre busquei — não em paredes, mas em palavras, gestos e silêncios.',
     author: 'Bruno',
-    context: 'Para Ellen',
+    context: 'Ellen & Bruno',
   },
   {
     quote:
       'Você tem o jeito mais bonito de me fazer sentir em paz. Caminhar ao seu lado é o meu lugar favorito do mundo.',
     author: 'Ellen',
-    context: 'Para Bruno',
-  },
-  {
-    quote:
-      'Ver vocês juntos é assistir a uma história que sempre soubemos que daria certo. Que esse amor floresça por todas as estações.',
-    author: 'Família e amigos',
-    context: 'Sobre Ellen & Bruno',
+    context: 'Ellen & Bruno',
   },
 ]
 
@@ -72,7 +66,7 @@ export function TestimonialSection() {
             id="testimonial-title"
             className="mt-4 font-serif text-3xl tracking-[0.15em] text-amber-900 md:text-4xl"
           >
-            DEPOIMENTOS
+            ...
           </h2>
         </Reveal>
 

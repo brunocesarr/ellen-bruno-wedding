@@ -36,18 +36,12 @@ export function AboutSection() {
 
           <Reveal delay={0.15}>
             <p className="font-serif text-base italic leading-relaxed text-stone-700 md:text-lg">
-              Tudo começou com um simples olhar e se transformou em parceria,
-              cumplicidade e o amor que celebramos hoje. Cada momento — dos
-              pequenos cafés da manhã às grandes viagens — construiu o casal que
-              somos. E agora, queremos dividir esse capítulo tão especial com
-              vocês.
+              Tudo começou com um simples roubo de um beijo e se transformou em
+              parceria, cumplicidade e o amor que celebramos hoje. Cada momento
+              — dos pequenos cafés da manhã às grandes viagens — construiu o
+              casal que somos. E agora, queremos dividir esse capítulo tão
+              especial com vocês.
             </p>
-            <a
-              href="#timeline"
-              className="mt-6 inline-flex items-center gap-2 rounded-full bg-amber-700 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600"
-            >
-              Ler mais
-            </a>
           </Reveal>
         </div>
 

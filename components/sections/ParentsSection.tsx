@@ -3,7 +3,6 @@
 import { Reveal } from '@/components/ui/Reveal'
 import { Heart } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
-import Image from 'next/image'
 
 type Parent = {
   name: string
@@ -20,18 +19,12 @@ const FAMILIES: Family[] = [
   {
     side: 'Pais da noiva',
     coupleName: 'Família Ellen',
-    parents: [
-      { name: 'Maria Silva', photo: '/images/parents/mae-noiva.jpg' },
-      { name: 'João Silva', photo: '/images/parents/pai-noiva.jpg' },
-    ],
+    parents: [{ name: 'Maria Silva' }, { name: 'João Silva' }],
   },
   {
     side: 'Pais do noivo',
     coupleName: 'Família Bruno',
-    parents: [
-      { name: 'Ana Cesar', photo: '/images/parents/mae-noivo.jpg' },
-      { name: 'Carlos Cesar', photo: '/images/parents/pai-noivo.jpg' },
-    ],
+    parents: [{ name: 'Aleluia Moreira Alves Silva' }, { name: 'André Silva' }],
   },
 ]
 
@@ -80,17 +73,6 @@ export function ParentsSection() {
                 {family.side}
               </p>
 
-              {/* Parent photos */}
-              <div className="mt-6 flex items-center justify-center gap-4 md:gap-6">
-                {family.parents.map((parent, pIdx) => (
-                  <ParentPortrait
-                    key={parent.name}
-                    parent={parent}
-                    index={pIdx}
-                  />
-                ))}
-              </div>
-
               {/* Names */}
               <div className="mt-5 space-y-1">
                 {family.parents.map((p) => (
@@ -114,31 +96,5 @@ export function ParentsSection() {
         </div>
       </div>
     </section>
-  )
-}
-
-function ParentPortrait({ parent, index }: { parent: Parent; index: number }) {
-  return (
-    <motion.div
-      initial={{ opacity: 0, scale: 0.9 }}
-      whileInView={{ opacity: 1, scale: 1 }}
-      viewport={{ once: true }}
-      transition={{ duration: 0.5, delay: 0.2 + index * 0.1 }}
-      className="relative h-28 w-28 overflow-hidden rounded-full border-4 border-white shadow-md md:h-36 md:w-36"
-    >
-      {parent.photo ? (
-        <Image
-          src={parent.photo}
-          alt={parent.name}
-          fill
-          sizes="(max-width: 768px) 112px, 144px"
-          className="object-cover"
-        />
-      ) : (
-        <div className="grid h-full w-full place-items-center bg-amber-100 font-serif text-2xl text-amber-800">
-          {parent.name.charAt(0)}
-        </div>
-      )}
-    </motion.div>
   )
 }

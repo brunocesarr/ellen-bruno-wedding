@@ -252,6 +252,10 @@
  Custom utilities — v4 uses @utility (not @layer components)
  ─────────────────────────────────────────────────────────────── */
 
+@utility no-scrollbar {
+  @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
+}
+
 /* Section title (echoes the "DRESS CODE" headline) */
 @utility heading-display {
   font-family: var(--font-display);
