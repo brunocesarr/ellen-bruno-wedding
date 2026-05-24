@@ -1,7 +1,7 @@
 import 'server-only'
 
 import { listPublicSiteImagesUseCase } from '@/src/application/use-cases/site-images/list-public-site-images.use-case'
-import { getContainer } from '@/src/di/container'
+import { getPublicContainer } from '@/src/di/public-container'
 import { resolveStorageUrl } from '@/src/interface-adapters/view-models/_storage'
 import { cache } from 'react'
 import {
@@ -21,15 +21,24 @@ export type ResolvedSiteImageWithKey<K extends string = string> =
     key: K
   }
 
+function isDynamicServerUsageError(error: unknown) {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'digest' in error &&
+    error.digest === 'DYNAMIC_SERVER_USAGE'
+  )
+}
+
 export const getSiteImagesMap = cache(async () => {
   try {
-    const c = await getContainer()
-    const list = await listPublicSiteImagesUseCase(c)()
+    const container = getPublicContainer()
+    const list = await listPublicSiteImagesUseCase(container)()
 
     const map = new Map<string, { url: string; alt: string | null }>()
 
     for (const img of list) {
-      const url = resolveStorageUrl(img.imagePath, c.storageRepo)
+      const url = resolveStorageUrl(img.imagePath, container.storageRepo)
 
       if (url) {
         map.set(normalizeSiteImageKey(img.key), {
@@ -41,6 +50,12 @@ export const getSiteImagesMap = cache(async () => {
 
     return map
   } catch (error) {
+    // Do not swallow Next dynamic-rendering internal errors.
+    // If this ever happens again, the import boundary is wrong.
+    if (isDynamicServerUsageError(error)) {
+      throw error
+    }
+
     console.error('[getSiteImagesMap] failed:', error)
     return new Map<string, { url: string; alt: string | null }>()
   }
@@ -54,7 +69,6 @@ export async function getSiteImage(key: string): Promise<ResolvedSiteImage> {
   const fallback = getFallback(normalizedKey)
 
   return {
-    // Important: never return ""
     src: fromDb?.url || fallback,
     fallback,
     alt: fromDb?.alt || getLabel(normalizedKey),

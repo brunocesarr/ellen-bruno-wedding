@@ -20,6 +20,8 @@ const CountdownSection = dynamic(() =>
   )
 )
 
+export const revalidate = 60
+
 export default function WeddingPage() {
   return (
     <MotionWrapper>

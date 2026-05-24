@@ -13,6 +13,8 @@ import { RsvpSection } from '@/components/sections/RsvpSection'
 import { TestimonialSection } from '@/components/sections/TestimonialSection'
 import { TimelineSection } from '@/components/sections/TimelineSection'
 
+export const revalidate = 60
+
 export default function WeddingPage() {
   return (
     <InvitationPageShell>
