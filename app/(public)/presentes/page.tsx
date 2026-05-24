@@ -1,48 +1,63 @@
-import { listGiftsController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
-import Image from 'next/image'
-import Link from 'next/link'
+import { GiftCardSkeleton } from '@/components/gifts/GiftCardSkeleton'
+import { GiftFilterBar } from '@/components/gifts/GiftFilterBar'
+import { GiftHero } from '@/components/gifts/GiftHero'
+import { HowItWorks } from '@/components/gifts/HowItWorks'
+import { listGiftsAdminController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import type { Metadata } from 'next'
+import { Suspense } from 'react'
 
 export const revalidate = 60
-export const metadata = { title: 'Lista de presentes · Ellen & Bruno' }
+export const metadata: Metadata = {
+  title: 'Lista de presentes · Ellen & Bruno',
+  description:
+    'Escolha um presente da nossa lista e contribua com a nova vida do casal pelo Pix.',
+}
 
 export default async function GiftsPage() {
-  const gifts = await listGiftsController()
   return (
-    <main className="mx-auto max-w-6xl p-6">
-      <h1 className="mb-8 text-3xl font-serif">Lista de presentes</h1>
-      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {gifts.map((g) => (
-          <Link
-            key={g.id}
-            href={`/presentes/${g.id}`}
-            className="group overflow-hidden rounded-xl border bg-white shadow-sm hover:shadow-lg"
-          >
-            <div className="relative aspect-[4/3] bg-slate-100">
-              {g.imageUrl && (
-                <Image
-                  src={g.imageUrl}
-                  alt={g.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  loading="eager"
-                  className="object-cover"
-                />
-              )}
-              {g.isReserved && (
-                <span className="absolute right-2 top-2 rounded-full bg-amber-500 px-3 py-1 text-xs text-white">
-                  Reservado
-                </span>
-              )}
-            </div>
-            <div className="p-4">
-              <h3 className="font-medium">{g.name}</h3>
-              <p className="mt-1 text-lg font-semibold">
-                R$ {g.price.toFixed(2)}
-              </p>
-            </div>
-          </Link>
-        ))}
-      </div>
+    <main className="bg-cream">
+      {/* Hero with polaroid montage */}
+      <GiftHero
+        couplePhoto="/images/couple-main.jpg"
+        emotionPhoto="/images/couple-emotion.jpg"
+        foreverPhoto="/images/couple-forever.jpg"
+      />
+
+      {/* Filterable grid */}
+      <Suspense fallback={<GridSkeleton />}>
+        <GiftListSection />
+      </Suspense>
+
+      {/* How it works */}
+      <HowItWorks />
+
+      {/* Closing message */}
+      <section className="mx-auto max-w-2xl px-6 pb-24 text-center">
+        <p className="accent">Com todo nosso amor 💕</p>
+        <p className="mt-4 text-ink-muted">
+          Obrigado por fazer parte deste momento tão especial das nossas vidas.
+        </p>
+      </section>
     </main>
+  )
+}
+
+async function GiftListSection() {
+  const gifts = await listGiftsAdminController()
+  if (!gifts.ok) return null
+  return <GiftFilterBar gifts={gifts.data} />
+}
+
+function GridSkeleton() {
+  return (
+    <div className="mx-auto max-w-7xl px-6 py-12">
+      <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6 lg:grid-cols-3 xl:grid-cols-4">
+        {Array.from({ length: 8 }).map((_, i) => (
+          <li key={i}>
+            <GiftCardSkeleton />
+          </li>
+        ))}
+      </ul>
+    </div>
   )
 }

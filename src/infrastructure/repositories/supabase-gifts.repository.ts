@@ -26,7 +26,9 @@ const mapRow = (r: GiftRow): Gift => ({
   isReserved: r.is_reserved ?? false,
   reservedByName: r.reserved_by_name,
   reservedByEmail: r.reserved_by_email,
+  reservedMessage: r.reserved_message,
   reservedAt: r.reserved_at ? new Date(r.reserved_at) : null,
+  category: (r.category ?? 'other') as Gift['category'],
 })
 
 export class SupabaseGiftsRepository implements IGiftsRepository {
@@ -51,11 +53,11 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
     return data ? mapRow(data) : null
   }
 
-  async reserve(id: string, name: string, email: string): Promise<Gift> {
+  async reserve(id: string, name: string, message: string): Promise<Gift> {
     const args = {
       p_gift_id: id,
       p_name: name,
-      p_email: email,
+      p_message: message ?? null,
     } satisfies ReserveGiftArgs
 
     const { data, error } = await this.client.rpc('reserve_gift', args)
@@ -116,5 +118,22 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
   async delete(id: string): Promise<void> {
     const { error } = await this.client.from('gifts').delete().eq('id', id)
     if (error) throw error
+  }
+
+  async clearReservation(id: string): Promise<Gift> {
+    const { data, error } = await this.client
+      .from('gifts')
+      .update({
+        is_reserved: false,
+        reserved_by_name: null,
+        reserved_by_email: null,
+        reserved_at: null,
+        reserved_message: null,
+      })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return mapRow(data)
   }
 }

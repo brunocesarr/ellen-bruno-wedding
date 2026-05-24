@@ -1,71 +1,137 @@
 'use client'
-import { submitRsvpAction } from '@/app/(public)/_actions/rsvp.actions'
-import { useActionState } from 'react'
 
-const initial = { ok: false, error: '' } as any
+import {
+  submitRsvpAction,
+  type RsvpActionState,
+} from '@/app/(public)/_actions/rsvp.actions'
+import {
+  Field,
+  FieldInput,
+  FieldSelect,
+  FieldTextarea,
+} from '@/components/ui/Field'
+import { useActionState } from 'react'
+import { AnimatedButton } from '../ui/AnimatedButton'
+
+const initialState: RsvpActionState = { ok: false, error: '' }
 
 export function RsvpForm() {
-  const [state, action, pending] = useActionState(submitRsvpAction, initial)
+  const [state, action, pending] = useActionState(
+    submitRsvpAction,
+    initialState
+  )
 
   if (state.ok) {
     return (
-      <div className="rounded-xl bg-emerald-50 p-6 text-emerald-800">
-        Obrigado, <strong>{state.data.fullName}</strong>! Sua confirmação foi
-        recebida 💕
+      <div className="mx-auto max-w-xl rounded-sm border border-sage/40 bg-sage/5 p-10 text-center">
+        <p className="eyebrow text-sage">Confirmação recebida</p>
+        <h3 className="mt-3 font-display text-3xl text-terracotta">
+          Obrigado, {state.data.fullName.split(' ')[0]}! 💕
+        </h3>
+        <p className="mt-3 text-ink-muted">
+          Recebemos sua confirmação. Mal podemos esperar para celebrar com você.
+        </p>
       </div>
     )
   }
 
+  const fieldError = (key: string): string | undefined =>
+    state.ok ? undefined : state.issues?.fieldErrors?.[key]?.[0]
+
   return (
-    <form action={action} className="space-y-4">
-      <input
-        name="fullName"
-        required
-        placeholder="Nome completo"
-        className="input"
-      />
-      <input
-        name="email"
-        type="email"
-        placeholder="E-mail (opcional)"
-        className="input"
-      />
-      <input name="phone" placeholder="Telefone (opcional)" className="input" />
+    <form action={action} className="mx-auto max-w-4xl">
+      <div className="grid grid-cols-1 gap-x-12 gap-y-7 md:grid-cols-2">
+        <Field
+          label="Seu nome"
+          htmlFor="fullName"
+          required
+          error={fieldError('fullName')}
+        >
+          <FieldInput
+            id="fullName"
+            name="fullName"
+            type="text"
+            placeholder="Como podemos te chamar?"
+            required
+            autoComplete="name"
+          />
+        </Field>
 
-      <fieldset className="space-y-2">
-        <legend className="font-medium">Você comparecerá?</legend>
-        <label className="mr-4">
-          <input type="radio" name="attending" value="true" required /> Sim
-        </label>
-        <label>
-          <input type="radio" name="attending" value="false" /> Não poderei
-        </label>
-      </fieldset>
+        <Field label="Seu e-mail" htmlFor="email" error={fieldError('email')}>
+          <FieldInput
+            id="email"
+            name="email"
+            type="email"
+            placeholder="email@exemplo.com"
+            autoComplete="email"
+          />
+        </Field>
 
-      <input
-        name="companions"
-        type="number"
-        min={0}
-        max={5}
-        defaultValue={0}
-        placeholder="Acompanhantes"
-        className="input"
-      />
-      <textarea
-        name="dietaryRestrictions"
-        placeholder="Restrições alimentares"
-        className="input"
-      />
-      <textarea
-        name="message"
-        placeholder="Mensagem para os noivos (opcional)"
-        className="input"
-      />
+        <Field
+          label="Você comparecerá?"
+          htmlFor="attending"
+          required
+          error={fieldError('attending')}
+        >
+          <FieldSelect id="attending" name="attending" defaultValue="" required>
+            <option value="" disabled>
+              Selecione uma opção
+            </option>
+            <option value="true">Sim, estarei presente 💕</option>
+            <option value="false">Infelizmente não poderei</option>
+          </FieldSelect>
+        </Field>
 
-      {state.error && <p className="text-red-600">{state.error}</p>}
-      <button disabled={pending} className="btn-primary">
-        {pending ? 'Enviando…' : 'Confirmar presença'}
-      </button>
+        <Field
+          label="Acompanhantes"
+          htmlFor="companions"
+          hint="Inclua adultos e crianças. Você não conta."
+          error={fieldError('companions')}
+        >
+          <FieldSelect id="companions" name="companions" defaultValue="0">
+            <option value="0">Nenhum (somente eu)</option>
+            <option value="1">1 acompanhante</option>
+            <option value="2">2 acompanhantes</option>
+            <option value="3">3 acompanhantes</option>
+            <option value="4">4 acompanhantes</option>
+            <option value="5">5 acompanhantes</option>
+          </FieldSelect>
+        </Field>
+
+        <div className="md:col-span-2">
+          <Field
+            label="Mensagem para os noivos"
+            htmlFor="message"
+            hint="Opcional — mas adoraríamos ler ✨"
+            error={fieldError('message')}
+          >
+            <FieldTextarea
+              id="message"
+              name="message"
+              rows={4}
+              placeholder="Compartilhe um carinho, sua expectativa, ou alguma observação importante…"
+              maxLength={1000}
+            />
+          </Field>
+        </div>
+      </div>
+
+      <div className="mt-12 flex flex-col-reverse items-start justify-between gap-6 border-t border-ink/10 pt-8 md:flex-row md:items-center">
+        <p className="max-w-md text-xs leading-relaxed text-ink-muted">
+          Seus dados serão usados apenas para a organização do nosso casamento.
+          Não compartilhamos com terceiros 🤍
+        </p>
+
+        <AnimatedButton pending={pending} pendingLabel="Reservando…">
+          Confirmar presença
+        </AnimatedButton>
+      </div>
+
+      {!state.ok && state.error && !state.issues && (
+        <p className="mt-6 rounded-sm border border-terracotta/30 bg-terracotta/5 p-4 text-sm text-terracotta-dark">
+          {state.error}
+        </p>
+      )}
     </form>
   )
 }

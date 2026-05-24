@@ -6,7 +6,7 @@ export async function reserveGiftAction(_: unknown, formData: FormData) {
   const result = await reserveGiftController({
     giftId: formData.get('giftId'),
     name: formData.get('name'),
-    email: formData.get('email'),
+    message: formData.get('message') || undefined,
   })
   if (result.ok) {
     revalidatePath('/presentes')

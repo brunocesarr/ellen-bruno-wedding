@@ -19,6 +19,7 @@ export function MonogramImage({ size = 'lg', className }: MonogramImageProps) {
       <Image
         src="/images/monogram-eb.png"
         alt="E&B Monogram — Ellen & Bruno"
+        loading="eager"
         fill
         className="object-contain drop-shadow-sm"
         sizes="(max-width: 768px) 224px, 288px"

@@ -39,6 +39,7 @@ export function HeroSection() {
         <Image
           src="/images/hero-bg.jpg"
           alt="Elegant wedding venue with warm lighting"
+          loading="eager"
           fill
           priority
           className="object-cover"

@@ -1,5 +1,6 @@
 'use server'
 import { getContainer } from '@/src/di/container'
+import { listGiftsAdminController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
 import {
   createGiftController,
   deleteGiftController,
@@ -52,4 +53,8 @@ export async function deleteGiftAction(id: string) {
     revalidatePath('/presentes')
   }
   return result
+}
+
+export async function listGiftsAdminAction() {
+  return listGiftsAdminController()
 }

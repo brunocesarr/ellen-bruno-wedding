@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       gifts: {
         Row: {
+          category: Database['public']['Enums']['gift_category']
           created_at: string | null
           description: string | null
           id: string
@@ -26,8 +27,10 @@ export type Database = {
           reserved_at: string | null
           reserved_by_email: string | null
           reserved_by_name: string | null
+          reserved_message: string | null
         }
         Insert: {
+          category?: Database['public']['Enums']['gift_category']
           created_at?: string | null
           description?: string | null
           id?: string
@@ -38,8 +41,10 @@ export type Database = {
           reserved_at?: string | null
           reserved_by_email?: string | null
           reserved_by_name?: string | null
+          reserved_message?: string | null
         }
         Update: {
+          category?: Database['public']['Enums']['gift_category']
           created_at?: string | null
           description?: string | null
           id?: string
@@ -50,6 +55,7 @@ export type Database = {
           reserved_at?: string | null
           reserved_by_email?: string | null
           reserved_by_name?: string | null
+          reserved_message?: string | null
         }
         Relationships: []
       }
@@ -130,8 +136,9 @@ export type Database = {
     }
     Functions: {
       reserve_gift: {
-        Args: { p_email: string; p_gift_id: string; p_name: string }
+        Args: { p_gift_id: string; p_message?: string; p_name: string }
         Returns: {
+          category: Database['public']['Enums']['gift_category']
           created_at: string | null
           description: string | null
           id: string
@@ -142,6 +149,7 @@ export type Database = {
           reserved_at: string | null
           reserved_by_email: string | null
           reserved_by_name: string | null
+          reserved_message: string | null
         }
         SetofOptions: {
           from: '*'
@@ -152,7 +160,7 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      gift_category: 'home' | 'kitchen' | 'travel' | 'experience' | 'other'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -279,6 +287,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      gift_category: ['home', 'kitchen', 'travel', 'experience', 'other'],
+    },
   },
 } as const

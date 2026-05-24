@@ -1,26 +1,35 @@
-import { signOutAction } from '@/app/admin/_actions/auth.actions'
-import Link from 'next/link'
+import { AdminSidebar } from '@/components/admin/AdminSidebar'
+import { AdminTopbar } from '@/components/admin/AdminTopbar'
+import { createSupabaseServerClient } from '@/src/infrastructure/supabase/server'
+import { redirect } from 'next/navigation'
 
-export default function AdminLayout({
+export default async function AdminLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const supabase = await createSupabaseServerClient()
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
+  if (!user) redirect('/admin/login')
+
   return (
-    <div className="min-h-screen">
-      <nav className="flex items-center justify-between border-b bg-white p-4">
-        <div className="flex gap-6">
-          <Link href="/admin">Dashboard</Link>
-          <Link href="/admin/rsvp">Confirmações</Link>
-          <Link href="/admin/gifts">Presentes</Link>
+    <div className="admin-shell min-h-screen text-stone-800">
+      <div className="mx-auto flex max-w-[1600px]">
+        <AdminSidebar />
+        <div className="flex min-w-0 flex-1 flex-col">
+          <AdminTopbar
+            user={{
+              email: user.email ?? '',
+              name: user.user_metadata?.name ?? 'Casal',
+            }}
+          />
+          <main className="min-w-0 flex-1 px-4 pb-16 pt-6 md:px-8 md:pt-8">
+            {children}
+          </main>
         </div>
-        <form action={signOutAction}>
-          <button className="text-sm text-slate-600 hover:underline">
-            Sair
-          </button>
-        </form>
-      </nav>
-      <div className="p-6">{children}</div>
+      </div>
     </div>
   )
 }

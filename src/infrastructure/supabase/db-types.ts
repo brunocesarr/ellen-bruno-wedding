@@ -13,6 +13,8 @@ export type PixConfirmationRow =
   Database['public']['Tables']['pix_confirmations']['Row']
 export type PixConfirmationInsert =
   Database['public']['Tables']['pix_confirmations']['Insert']
+export type PixConfirmationUpdate =
+  Database['public']['Tables']['pix_confirmations']['Update']
 
 // ---- RPCs ----
 export type ReserveGiftArgs =
