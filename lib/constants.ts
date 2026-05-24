@@ -25,12 +25,12 @@ export const WEDDING_DETAILS: WeddingDetails = {
     { time: '00:00', label: 'Encerramento' },
   ],
   dressCode: [
-    { name: 'Terracotta', hex: '#C17B5A' },
-    { name: 'Terracotta Claro', hex: '#D4977A' },
-    { name: 'Azul Sereno', hex: '#7A9FB8' },
-    { name: 'Azul Claro', hex: '#A8C4D6' },
-    { name: 'Sage', hex: '#7A8A6B' },
-    { name: 'Creme', hex: '#EDE7DD' },
+    { name: 'Terracotta', hex: 'var(--color-terracotta)' },
+    { name: 'Terracotta Claro', hex: 'var(--color-terracotta-light)' },
+    { name: 'Azul Sereno', hex: 'var(--color-ocean)' },
+    { name: 'Azul Claro', hex: 'var(--color-ocean-light)' },
+    { name: 'Sage', hex: 'var(--color-sage)' },
+    { name: 'Creme', hex: 'var(--color-cream-dark)' },
   ],
 }
 

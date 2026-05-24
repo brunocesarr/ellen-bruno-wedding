@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import {
   Cormorant_Garamond,
+  Inter,
   Montserrat,
   Pinyon_Script,
   Special_Elite,
@@ -31,6 +32,13 @@ const specialElite = Special_Elite({
   weight: '400',
   subsets: ['latin'],
   variable: '--font-typewriter',
+  display: 'swap',
+})
+
+const inter = Inter({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
+  variable: '--font-inter',
   display: 'swap',
 })
 
@@ -79,12 +87,15 @@ export default function RootLayout({
   return (
     <html
       lang="pt-BR"
-      className={`${pinyonScript.variable} ${cormorant.variable} ${montserrat.variable} ${specialElite.variable} relative`}
+      className={`${pinyonScript.variable} ${cormorant.variable} ${montserrat.variable} ${specialElite.variable} ${inter.variable} relative`}
       data-lt-installed="true"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
     >
-      <body className="font-body antialiased relative bg-ivory">
+      <body
+        className="font-body antialiased relative bg-ivory"
+        cz-shortcut-listen="true"
+      >
         {children}
       </body>
     </html>

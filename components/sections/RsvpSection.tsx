@@ -3,9 +3,7 @@
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Button } from '@/components/ui/Button'
 import { WEDDING_DETAILS } from '@/lib/constants'
-import { cn } from '@/lib/utils'
-import { AnimatePresence, motion, type Variants } from 'motion/react'
-import { useCallback, useState, type FormEvent } from 'react'
+import { motion, type Variants } from 'motion/react'
 
 const formVariants: Variants = {
   hidden: { opacity: 0, y: 20 },
@@ -22,35 +20,7 @@ const formItemVariants: Variants = {
 }
 
 export function RsvpSection() {
-  const { displayDate, time, couple } = WEDDING_DETAILS
-  const [status, setStatus] = useState<
-    'idle' | 'loading' | 'success' | 'error'
-  >('idle')
-  const [guestName, setGuestName] = useState('')
-
-  const handleSubmit = useCallback(
-    async (e: FormEvent) => {
-      e.preventDefault()
-      if (!guestName.trim()) return
-
-      setStatus('loading')
-      try {
-        const response = await fetch('/api/rsvp', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: guestName,
-            attending: true,
-            timestamp: new Date().toISOString(),
-          }),
-        })
-        setStatus(response.ok ? 'success' : 'error')
-      } catch {
-        setStatus('error')
-      }
-    },
-    [guestName]
-  )
+  const { displayDate, time } = WEDDING_DETAILS
 
   return (
     <SectionWrapper id="rsvp" variant="cream" className="pb-28">
@@ -88,77 +58,22 @@ export function RsvpSection() {
           Por favor, confirme abaixo.
         </motion.p>
 
-        {/* Form / Success */}
-        <div className="mt-10">
-          <AnimatePresence mode="wait">
-            {status === 'success' ? (
-              <motion.div
-                key="success"
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ type: 'spring', stiffness: 200 }}
-                className="space-y-3"
-              >
-                <p className="font-display text-xl text-terracotta">
-                  Obrigado, {guestName}! ✿
-                </p>
-                <p className="font-body text-sm text-warm-gray">
-                  Estamos ansiosos para celebrar com você
-                </p>
-              </motion.div>
-            ) : (
-              <motion.form
-                key="form"
-                onSubmit={handleSubmit}
-                className="mx-auto max-w-xs space-y-4"
-                variants={formVariants}
-                initial="hidden"
-                whileInView="visible"
-                viewport={{ once: true }}
-              >
-                <motion.div variants={formItemVariants}>
-                  <input
-                    type="text"
-                    value={guestName}
-                    onChange={(e) => setGuestName(e.target.value)}
-                    placeholder="Seu nome completo"
-                    required
-                    className={cn(
-                      'w-full rounded-button border border-blush bg-ivory px-6 py-3.5',
-                      'font-body text-sm text-charcoal placeholder:text-warm-gray/50',
-                      'transition-all duration-200',
-                      'focus:border-terracotta focus:ring-2 focus:ring-terracotta/10 focus:outline-none'
-                    )}
-                  />
-                </motion.div>
-
-                <motion.div variants={formItemVariants}>
-                  <Button
-                    type="submit"
-                    disabled={status === 'loading'}
-                    variant="primary"
-                    size="lg"
-                    className="w-full"
-                  >
-                    {status === 'loading'
-                      ? 'Enviando...'
-                      : 'Confirmar Presença'}
-                  </Button>
-                </motion.div>
-
-                {status === 'error' && (
-                  <motion.p
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    className="font-body text-xs text-red-500"
-                  >
-                    Erro ao enviar. Tente novamente.
-                  </motion.p>
-                )}
-              </motion.form>
-            )}
-          </AnimatePresence>
-        </div>
+        <motion.a
+          variants={formItemVariants}
+          href="/rsvp"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="inline-block"
+        >
+          <Button
+            type="submit"
+            variant="primary"
+            size="lg"
+            className="min-w-fit min-h-4 mt-6 hover:cursor-pointer"
+          >
+            Confirmar Presença
+          </Button>
+        </motion.a>
       </div>
     </SectionWrapper>
   )

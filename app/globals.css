@@ -1,15 +1,8 @@
 @import 'tailwindcss';
 
-@layer components {
-  .input {
-    @apply w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400;
-  }
-  .btn-primary {
-    @apply rounded-md bg-rose-600 px-4 py-2 text-white hover:bg-rose-700 disabled:opacity-50;
-  }
-  .btn-secondary {
-    @apply rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50;
-  }
+:root {
+  --font-display: var(--font-display-loaded), 'Cormorant Garamond', serif;
+  --font-sans: var(--font-sans-loaded), 'Inter', system-ui, sans-serif;
 }
 
 /* ============================================
@@ -19,10 +12,15 @@
 
 @theme {
   /* ---- Primary: Terracotta ---- */
-  --color-terracotta: #c17b5a;
-  --color-terracotta-dark: #a5623f;
-  --color-terracotta-light: #d4977a;
+  --color-terracotta: #b97a57;
+  --color-terracotta-light: #d4a187;
+  --color-terracotta-dark: #9b5e3f;
   --color-terracotta-muted: #b8876f;
+
+  /* ---- Primary: Ocean ---- */
+  --color-ocean: #7a9ab8;
+  --color-ocean-light: #b6cadd;
+  --color-ocean-dark: #5c7b98;
 
   /* ---- Accent: Dusty Blue ---- */
   --color-dusty-blue: #7a9fb8;
@@ -31,19 +29,23 @@
   --color-dusty-blue-pale: #d4e4ee;
 
   /* ---- Nature: Sage Green ---- */
-  --color-sage: #7a8a6b;
+  --color-sage: #7b8e6b;
+  --color-sage-light: #a4b395;
   --color-sage-dark: #5e6b52;
-  --color-sage-light: #9dad8e;
   --color-sage-muted: #b0bda4;
 
   /* ---- Neutrals ---- */
-  --color-cream: #f8f4ee;
-  --color-cream-dark: #ede7dd;
+  --color-cream: #f5efe6;
+  --color-cream-dark: #ebe3d4;
   --color-ivory: #fdfbf7;
   --color-blush: #e8d5cc;
   --color-blush-rose: #c9a89a;
   --color-warm-gray: #8a7e76;
   --color-charcoal: #3d3632;
+
+  /* ---- Nature: Ink Green ---- */
+  --color-ink: #3f3a36;
+  --color-ink-muted: #857f78;
 
   /* ---- Dress Code Colors ---- */
   --color-dress-terracotta: #c17b5a;
@@ -72,9 +74,13 @@
 
   /* ---- Typography ---- */
   --font-script: 'Pinyon Script', cursive;
-  --font-display: 'Cormorant Garamond', serif;
+  --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
   --font-body: 'Montserrat', sans-serif;
   --font-typewriter: 'Special Elite', monospace;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+
+  /* ── Custom letter-spacing token ─────────────────────────── */
+  --tracking-widest-2: 0.32em;
 
   /* ---- Font Sizes ---- */
   --text-hero: 4.5rem;
@@ -220,7 +226,9 @@
 
   body {
     font-family: var(--font-body);
-    color: var(--color-charcoal);
+    font-feature-settings: 'ss01', 'cv11';
+    -webkit-font-smoothing: antialiased;
+    color: var(--color-ink);
     background-color: var(--color-cream);
     background-image: url('/images/texture-paper.jpg');
     background-size: cover;
@@ -230,8 +238,120 @@
   }
 
   ::selection {
-    background-color: var(--color-cream);
-    color: var(--color-ivory);
+    background: var(--color-terracotta-light);
+    color: white;
+  }
+}
+
+/* ───────────────────────────────────────────────────────────────
+ Custom utilities — v4 uses @utility (not @layer components)
+ ─────────────────────────────────────────────────────────────── */
+
+/* Section title (echoes the "DRESS CODE" headline) */
+@utility heading-display {
+  font-family: var(--font-display);
+  font-weight: 300;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest-2);
+  color: var(--color-terracotta);
+  font-size: 2.25rem;
+  line-height: 1.1;
+  @media (width >= 48rem) {
+    font-size: 3rem;
+  }
+}
+
+@utility eyebrow {
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-widest-2);
+  color: var(--color-ink-muted);
+}
+
+@utility accent {
+  font-family: var(--font-display);
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--color-terracotta-dark);
+  @media (width >= 48rem) {
+    font-size: 1.5rem;
+  }
+}
+
+/* Underline-style form input (like the SO♥RO reference) */
+@utility field-input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid
+    color-mix(in oklab, var(--color-ink) 20%, transparent);
+  background: transparent;
+  padding: 0.625rem 0;
+  font-size: 1rem;
+  color: var(--color-ink);
+  outline: none;
+  transition: border-color 200ms ease;
+
+  &::placeholder {
+    color: color-mix(in oklab, var(--color-ink-muted) 60%, transparent);
+  }
+
+  &:focus {
+    border-color: var(--color-terracotta);
+  }
+}
+
+/* Buttons */
+@utility btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--color-terracotta);
+  color: var(--color-cream);
+  padding: 0.875rem 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+  transition: background 200ms ease;
+
+  &:hover {
+    background: var(--color-terracotta-dark);
+  }
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+@utility btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid color-mix(in oklab, var(--color-ink) 20%, transparent);
+  color: var(--color-ink);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  border-radius: 2px;
+
+  &:hover {
+    background: color-mix(in oklab, var(--color-ink) 5%, transparent);
+  }
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-md border border-slate-300 px-3 py-2 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400;
+  }
+  .btn-primary {
+    @apply rounded-md bg-rose-600 px-4 py-2 text-white hover:bg-rose-700 disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50;
   }
 }
 
