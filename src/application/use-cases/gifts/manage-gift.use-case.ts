@@ -16,36 +16,71 @@ type Deps = {
 
 export function createGiftUseCase(d: Deps) {
   return async (raw: unknown) => {
-    if (!(await d.authService.getCurrentUser()))
+    if (!(await d.authService.getCurrentUser())) {
       throw new UnauthenticatedError()
+    }
+
     const result = CreateGiftInputSchema.safeParse(raw)
-    if (!result.success) throw new ValidationError(result.error.flatten())
-    return d.giftsRepo.create(result.data) // 👈 clean, no cast
+
+    if (!result.success) {
+      throw new ValidationError(result.error.flatten())
+    }
+
+    return d.giftsRepo.create(result.data)
   }
 }
 
 export function updateGiftUseCase(d: Deps) {
   return async (raw: unknown) => {
-    if (!(await d.authService.getCurrentUser()))
+    if (!(await d.authService.getCurrentUser())) {
       throw new UnauthenticatedError()
+    }
+
     const result = UpdateGiftInputSchema.safeParse(raw)
-    if (!result.success) throw new ValidationError(result.error.flatten())
-    return d.giftsRepo.update(result.data) // 👈 clean, no cast
+
+    if (!result.success) {
+      throw new ValidationError(result.error.flatten())
+    }
+
+    const previous = await d.giftsRepo.getById(result.data.id)
+
+    const updated = await d.giftsRepo.update(result.data)
+
+    /**
+     * If a new image was uploaded, remove old image from storage.
+     */
+    if (
+      previous?.imagePath &&
+      result.data.imagePath &&
+      previous.imagePath !== result.data.imagePath
+    ) {
+      try {
+        await d.storageRepo.remove(previous.imagePath)
+      } catch {
+        // best-effort cleanup
+      }
+    }
+
+    return updated
   }
 }
 
 export function deleteGiftUseCase(d: Deps) {
   return async (id: string) => {
-    if (!(await d.authService.getCurrentUser()))
+    if (!(await d.authService.getCurrentUser())) {
       throw new UnauthenticatedError()
+    }
+
     const gift = await d.giftsRepo.getById(id)
+
     if (gift?.imagePath) {
       try {
         await d.storageRepo.remove(gift.imagePath)
       } catch {
-        /* best-effort */
+        // best-effort
       }
     }
+
     return d.giftsRepo.delete(id)
   }
 }

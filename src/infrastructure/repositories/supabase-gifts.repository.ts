@@ -80,14 +80,17 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
       description: data.description ?? null,
       price: data.price,
       image_path: data.imagePath ?? null,
-    } satisfies GiftInsert // 👈 the magic
+      category: data.category ?? 'other',
+    } satisfies GiftInsert
 
     const { data: row, error } = await this.client
       .from('gifts')
       .insert(payload)
       .select()
       .single()
+
     if (error) throw error
+
     return mapRow(row)
   }
 
@@ -103,7 +106,10 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
       ...(rest.imagePath !== undefined && {
         image_path: rest.imagePath ?? null,
       }),
-    } // 👈 typed object, not satisfies
+      ...(rest.category !== undefined && {
+        category: rest.category,
+      }),
+    }
 
     const { data: row, error } = await this.client
       .from('gifts')
@@ -111,7 +117,9 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
       .eq('id', id)
       .select()
       .single()
+
     if (error) throw error
+
     return mapRow(row)
   }
 
