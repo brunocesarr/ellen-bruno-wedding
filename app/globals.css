@@ -37,6 +37,11 @@
   /* ---- Neutrals ---- */
   --color-cream: #f5efe6;
   --color-cream-dark: #ebe3d4;
+  --color-cream-50: #faf6ef;
+  --color-cream-100: #f5efe4;
+  --color-cream-200: #ede2cd;
+  --color-amber-brand: #a8763e;
+  --color-amber-brand-dark: #7a5530;
   --color-ivory: #fdfbf7;
   --color-blush: #e8d5cc;
   --color-blush-rose: #c9a89a;
@@ -353,6 +358,10 @@
   .btn-secondary {
     @apply rounded-md border border-slate-300 px-4 py-2 hover:bg-slate-50;
   }
+}
+
+.admin-shell {
+  background: linear-gradient(180deg, #faf6ef 0%, #f5efe4 100%);
 }
 
 /* ============================================

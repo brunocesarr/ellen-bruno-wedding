@@ -2,7 +2,7 @@ import { GiftCardSkeleton } from '@/components/gifts/GiftCardSkeleton'
 import { GiftFilterBar } from '@/components/gifts/GiftFilterBar'
 import { GiftHero } from '@/components/gifts/GiftHero'
 import { HowItWorks } from '@/components/gifts/HowItWorks'
-import { listGiftsController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { listGiftsAdminController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
@@ -43,8 +43,9 @@ export default async function GiftsPage() {
 }
 
 async function GiftListSection() {
-  const gifts = await listGiftsController()
-  return <GiftFilterBar gifts={gifts} />
+  const gifts = await listGiftsAdminController()
+  if (!gifts.ok) return null
+  return <GiftFilterBar gifts={gifts.data} />
 }
 
 function GridSkeleton() {

@@ -1,11 +1,11 @@
 'use client'
 
-import type { GiftView } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import { AnimatePresence, motion } from 'motion/react'
 import { parseAsStringLiteral, useQueryStates } from 'nuqs'
 import { GiftGrid } from './GiftGrid'
 
-type Props = { gifts: GiftView[] }
+type Props = { gifts: GiftViewModel[] }
 
 const STATUS_OPTIONS = ['all', 'available', 'reserved'] as const
 const SORT_OPTIONS = ['recent', 'price-asc', 'price-desc'] as const
@@ -45,8 +45,8 @@ export function GiftFilterBar({ gifts }: Props) {
 
   // Apply filters
   let filtered = gifts.filter((g) => {
-    if (status === 'available' && g.isReserved) return false
-    if (status === 'reserved' && !g.isReserved) return false
+    if (status === 'available' && g.status === 'reserved') return false
+    if (status === 'reserved' && g.status !== 'reserved') return false
     if (category !== 'all' && g.category !== category) return false
     return true
   })
@@ -63,8 +63,8 @@ export function GiftFilterBar({ gifts }: Props) {
     category === 'all' ? gifts : gifts.filter((g) => g.category === category)
   const counts = {
     all: inCategory.length,
-    available: inCategory.filter((g) => !g.isReserved).length,
-    reserved: inCategory.filter((g) => g.isReserved).length,
+    available: inCategory.filter((g) => g.status !== 'reserved').length,
+    reserved: inCategory.filter((g) => g.status === 'reserved').length,
   }
 
   return (

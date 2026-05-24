@@ -1,5 +1,5 @@
+import { MusicToggle } from '@/components/ui/MusicToggle'
 import { RouteLoader } from '@/components/ui/RouteLoader'
-import { MusicToggle } from '@/src/components/MusicToggle'
 import type { Metadata, Viewport } from 'next'
 import {
   Cormorant_Garamond,

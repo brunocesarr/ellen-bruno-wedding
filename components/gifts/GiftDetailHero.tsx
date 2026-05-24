@@ -2,13 +2,13 @@
 
 import { BrushStroke } from '@/components/ui/BrushStroke'
 import { PriceTag } from '@/components/ui/PriceTag'
-import type { GiftView } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import { ArrowLeft, Heart } from 'lucide-react'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-type Props = { gift: GiftView }
+type Props = { gift: GiftViewModel }
 
 export function GiftDetailHero({ gift }: Props) {
   return (
@@ -73,10 +73,10 @@ export function GiftDetailHero({ gift }: Props) {
           >
             <span
               className={`tag-pill self-start ${
-                gift.isReserved ? 'tag-reserved' : 'tag-available'
+                gift.status === 'reserved' ? 'tag-reserved' : 'tag-available'
               }`}
             >
-              {gift.isReserved ? '🔒 Reservado' : '✨ Disponível'}
+              {gift.status === 'reserved' ? '🔒 Reservado' : '✨ Disponível'}
             </span>
 
             <h1 className="mt-4 font-display text-4xl leading-tight text-ink md:text-5xl">

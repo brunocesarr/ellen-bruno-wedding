@@ -1,7 +1,7 @@
 'use client'
 
 import { PriceTag } from '@/components/ui/PriceTag'
-import type { GiftView } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import { Heart } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
 import Image from 'next/image'
@@ -9,7 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
-type Props = { gift: GiftView }
+type Props = { gift: GiftViewModel }
 
 export function GiftCard({ gift }: Props) {
   const router = useRouter()
@@ -55,10 +55,10 @@ export function GiftCard({ gift }: Props) {
 
           <span
             className={`tag-pill absolute left-3 top-3 ${
-              gift.isReserved ? 'tag-reserved' : 'tag-available'
+              gift.status === 'reserved' ? 'tag-reserved' : 'tag-available'
             }`}
           >
-            {gift.isReserved ? '🔒 Reservado' : '✨ Disponível'}
+            {gift.status === 'reserved' ? '🔒 Reservado' : '✨ Disponível'}
           </span>
 
           {/* Loading overlay */}

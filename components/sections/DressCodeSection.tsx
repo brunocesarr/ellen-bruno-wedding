@@ -2,8 +2,8 @@
 
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Divider } from '@/components/ui/Divider'
+import { Reveal, RevealItem, RevealStagger } from '@/components/ui/Reveal'
 import { WEDDING_DETAILS } from '@/lib/constants'
-import { Reveal, RevealItem, RevealStagger } from '@/src/components/Reveal'
 import { type Variants } from 'motion/react'
 
 const swatchContainerVariants: Variants = {

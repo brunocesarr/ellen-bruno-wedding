@@ -4,6 +4,7 @@ import { getGiftUseCase } from '@/src/application/use-cases/gifts/get-gift.use-c
 import { generatePixQrUseCase } from '@/src/application/use-cases/pix/generate-pix-qr.use-case'
 import { getContainer } from '@/src/di/container'
 import { GiftNotFoundError } from '@/src/entities/errors/gifts'
+import { toGiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 
@@ -43,10 +44,10 @@ export default async function GiftDetailPage({
     description: `Presente: ${gift.name}`,
   })
 
-  const giftView = {
-    ...gift,
-    imageUrl: gift.imagePath ? storageRepo.getPublicUrl(gift.imagePath) : null,
-  }
+  const giftView = toGiftViewModel(
+    { ...gift, status: gift.isReserved ? 'reserved' : 'pending' },
+    storageRepo
+  )
 
   return (
     <main className="bg-cream">

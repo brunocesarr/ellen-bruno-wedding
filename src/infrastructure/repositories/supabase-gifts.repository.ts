@@ -119,4 +119,21 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
     const { error } = await this.client.from('gifts').delete().eq('id', id)
     if (error) throw error
   }
+
+  async clearReservation(id: string): Promise<Gift> {
+    const { data, error } = await this.client
+      .from('gifts')
+      .update({
+        is_reserved: false,
+        reserved_by_name: null,
+        reserved_by_email: null,
+        reserved_at: null,
+        reserved_message: null,
+      })
+      .eq('id', id)
+      .select()
+      .single()
+    if (error) throw error
+    return mapRow(data)
+  }
 }

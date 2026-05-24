@@ -1,7 +1,7 @@
-import type { GiftView } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import { GiftCard } from './GiftCard'
 
-type Props = { gifts: GiftView[] }
+type Props = { gifts: GiftViewModel[] }
 
 export function GiftGrid({ gifts }: Props) {
   if (gifts.length === 0) {

@@ -1,4 +1,4 @@
-import { Reveal, RevealItem, RevealStagger } from '@/src/components/Reveal'
+import { Reveal, RevealItem, RevealStagger } from '@/components/ui/Reveal'
 import { Gift, Heart, QrCode } from 'lucide-react'
 
 const STEPS = [

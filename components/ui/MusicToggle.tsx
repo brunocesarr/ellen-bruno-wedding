@@ -87,7 +87,7 @@ export function MusicToggle({
         transition={{ delay: 1.2, duration: 0.6 }}
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.92 }}
-        className="fixed top-6 right-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/30 text-stone-700 shadow-lg backdrop-blur-md transition-colors hover:bg-white/50"
+        className="fixed bottom-6 left-6 z-50 flex h-12 w-12 items-center justify-center rounded-full border border-white/40 bg-white/30 text-stone-700 shadow-lg backdrop-blur-md transition-colors hover:bg-white/50"
       >
         <motion.span
           animate={isPlaying && !reduce ? { rotate: 360 } : { rotate: 0 }}
