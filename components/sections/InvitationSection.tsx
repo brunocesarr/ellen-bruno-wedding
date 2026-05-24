@@ -1,6 +1,5 @@
 'use client'
 
-import { FloralFrame } from '@/components/layout/FloralFrame'
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Divider } from '@/components/ui/Divider'
 import { WEDDING_DETAILS } from '@/lib/constants'
@@ -23,11 +22,6 @@ export function InvitationSection() {
 
   return (
     <SectionWrapper id="invitation" variant="cream">
-      <FloralFrame
-        src="/images/wreath-top.png"
-        position="top"
-        className="opacity-70"
-      />
       <motion.div
         className="text-center"
         variants={containerVariants}

@@ -1,25 +1,8 @@
 'use client'
 
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
-import { Divider } from '@/components/ui/Divider'
-import { Reveal, RevealItem, RevealStagger } from '@/components/ui/Reveal'
+import { Reveal } from '@/components/ui/Reveal'
 import { WEDDING_DETAILS } from '@/lib/constants'
-import { type Variants } from 'motion/react'
-
-const swatchContainerVariants: Variants = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.08 } },
-}
-
-const swatchVariants: Variants = {
-  hidden: { opacity: 0, scale: 0, y: 10 },
-  visible: {
-    opacity: 1,
-    scale: 1,
-    y: 0,
-    transition: { type: 'spring', stiffness: 300, damping: 20 },
-  },
-}
 
 export function DressCodeSection() {
   const { dressCode } = WEDDING_DETAILS
@@ -33,37 +16,20 @@ export function DressCodeSection() {
           </h2>
         </Reveal>
 
-        <p className="mb-3 font-body text-xs uppercase tracking-widest text-warm-gray">
-          Paleta de cores
+        <p className="mb-3 font-body text-md uppercase tracking-widest text-warm-gray">
+          Queridos convidados
         </p>
 
-        <p className="mx-auto mb-10 max-w-xs font-display text-base italic text-warm-gray">
-          Terracotta & Azul
+        <p className="mx-auto max-w-xl font-body text-sm leading-[1.8] text-warm-gray">
+          Para que todos aproveitem a ocasião com conforto e elegância,
+          sugerimos um traje esporte fino. Isso significa vestidos leves,
+          macacões, calças de alfaiataria e camisas sociais - sem a necessidade
+          de gravata ou ternos. Só pedimos para que evitem roupas nas cores
+          branco, beje, off-white e terracota que será exclusivo dos padrinhos.
         </p>
-
-        {/* Animated Color Swatches */}
-        <RevealStagger className="flex flex-wrap items-start justify-center gap-5">
-          {dressCode.map((color) => (
-            <RevealItem
-              key={color.hex}
-              className="flex flex-col items-center justify-center gap-2"
-            >
-              <div
-                className="h-14 w-14 rounded-full shadow-sm ring-1 ring-charcoal/5"
-                style={{ backgroundColor: color.hex }}
-              />
-              <span className="font-body text-[0.65rem] tracking-wide text-warm-gray">
-                {color.name}
-              </span>
-            </RevealItem>
-          ))}
-        </RevealStagger>
-
-        <Divider variant="light" className="mt-10" />
-
-        <p className="mx-auto max-w-xs font-body text-sm leading-[1.8] text-warm-gray">
-          Pedimos gentilmente que escolham trajes nas cores acima para
-          harmonizar com a decoração do nosso dia especial.
+        <p className="mx-auto max-w-xl font-body text-sm leading-[1.8] text-warm-gray">
+          Queremos que vocês se sintam bem e aproveitem cada momento dessa
+          celebração ao nosso lado.
         </p>
 
         <Reveal
@@ -72,7 +38,7 @@ export function DressCodeSection() {
         >
           <div className="h-px w-8 bg-terracotta/20" />
           <span className="font-display text-xs tracking-wider text-terracotta/60">
-            TRAJE ESPORTE FINO
+            VIVAM O NOSSO MOMENTO
           </span>
           <div className="h-px w-8 bg-terracotta/20" />
         </Reveal>
