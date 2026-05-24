@@ -3,7 +3,8 @@
 import { motion, useReducedMotion, type Variants } from 'motion/react'
 import type { ReactNode } from 'react'
 
-type Props = {
+// ─── Single-element reveal ──────────────────────────────────────
+type RevealProps = {
   children: ReactNode
   delay?: number
   y?: number
@@ -19,7 +20,7 @@ export function Reveal({
   duration = 0.7,
   className,
   as = 'div',
-}: Props) {
+}: RevealProps) {
   const reduce = useReducedMotion()
   const MotionTag = motion[as] as typeof motion.div
 
@@ -42,15 +43,18 @@ export function Reveal({
   )
 }
 
+// ─── Stagger container (parent) ─────────────────────────────────
+type RevealStaggerProps = {
+  children: ReactNode
+  stagger?: number
+  className?: string
+}
+
 export function RevealStagger({
   children,
   stagger = 0.12,
   className,
-}: {
-  children: ReactNode
-  stagger?: number
-  className?: string
-}) {
+}: RevealStaggerProps) {
   return (
     <motion.div
       className={className}
@@ -67,15 +71,14 @@ export function RevealStagger({
   )
 }
 
-export function RevealItem({
-  children,
-  y = 20,
-  className,
-}: {
+// ─── Stagger child (individual item) ────────────────────────────
+type RevealItemProps = {
   children: ReactNode
   y?: number
   className?: string
-}) {
+}
+
+export function RevealItem({ children, y = 20, className }: RevealItemProps) {
   const reduce = useReducedMotion()
   return (
     <motion.div

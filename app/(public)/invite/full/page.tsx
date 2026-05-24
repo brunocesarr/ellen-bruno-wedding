@@ -1,12 +1,17 @@
 'use client'
 
+import { AboutSection } from '@/components/sections/AboutSection'
 import { CountdownSection } from '@/components/sections/CountdownSection'
 import { DressCodeSection } from '@/components/sections/DressCodeSection'
+import { GallerySection } from '@/components/sections/GallerySection'
+import { GiftsTeaserSection } from '@/components/sections/GiftsTeaserSection'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { InvitationSection } from '@/components/sections/InvitationSection'
 import { LocationSection } from '@/components/sections/LocationSection'
 import { MonogramSection } from '@/components/sections/MonogramSection'
+import { ParentsSection } from '@/components/sections/ParentsSection'
 import { RsvpSection } from '@/components/sections/RsvpSection'
+import { TestimonialSection } from '@/components/sections/TestimonialSection'
 import { TimelineSection } from '@/components/sections/TimelineSection'
 import { motion } from 'motion/react'
 
@@ -21,12 +26,16 @@ export default function WeddingPage() {
       <HeroSection />
       <MonogramSection />
       <CountdownSection />
+      <AboutSection />
+      <TestimonialSection />
+      <GallerySection />
+      <ParentsSection />
       <InvitationSection />
       <LocationSection />
       <TimelineSection />
       <DressCodeSection />
+      <GiftsTeaserSection />
       <RsvpSection />
-
       {/* Footer */}
       <footer className="bg-cream px-6 py-8 text-center">
         <p className="font-script text-2xl text-terracotta">E.B</p>

@@ -13,7 +13,7 @@ export type GalleryPhoto = {
 }
 
 type Props = {
-  photos: GalleryPhoto[] // 5–7 photos work best
+  photos?: GalleryPhoto[]
   eyebrow?: string
   title?: string
   accent?: string
@@ -30,7 +30,7 @@ const POSITIONS = [
 ]
 
 export function PhotoGallery({
-  photos,
+  photos = [],
   eyebrow = 'Nossa história',
   title = 'Momentos',
   accent = 'Cada foto, uma lembrança',
@@ -38,7 +38,7 @@ export function PhotoGallery({
   const ref = useRef<HTMLDivElement>(null)
 
   return (
-    <section className="relative overflow-hidden cream-grain py-20 md:py-28">
+    <section className="relative overflow-hidden bg-white cream-grain py-20 md:py-28">
       <BrushStroke
         color="terracotta"
         className="absolute -left-4 top-1/2 hidden h-12 w-56 -translate-y-1/2 md:block"
