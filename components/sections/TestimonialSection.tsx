@@ -14,14 +14,14 @@ type Testimonial = {
 const TESTIMONIALS: Testimonial[] = [
   {
     quote:
-      'Encontrei em você o lar que sempre busquei — não em paredes, mas em palavras, gestos e silêncios.',
-    author: 'Bruno',
+      'Para que todos vejam, e saimba, e considerem, e juntamente entendam que a mão do Senhor fez isso, e o santo de Isral o criou',
+    author: 'Isaias 41:20',
     context: 'Ellen & Bruno',
   },
   {
     quote:
-      'Você tem o jeito mais bonito de me fazer sentir em paz. Caminhar ao seu lado é o meu lugar favorito do mundo.',
-    author: 'Ellen',
+      'Encontrei em você o lar que sempre busquei — não em paredes, mas em palavras, gestos e silêncios.',
+    author: '',
     context: 'Ellen & Bruno',
   },
 ]

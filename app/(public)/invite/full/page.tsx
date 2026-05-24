@@ -1,5 +1,4 @@
-'use client'
-
+import { InvitationPageShell } from '@/components/invite/InvitationPageShell'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CountdownSection } from '@/components/sections/CountdownSection'
 import { DressCodeSection } from '@/components/sections/DressCodeSection'
@@ -13,16 +12,10 @@ import { ParentsSection } from '@/components/sections/ParentsSection'
 import { RsvpSection } from '@/components/sections/RsvpSection'
 import { TestimonialSection } from '@/components/sections/TestimonialSection'
 import { TimelineSection } from '@/components/sections/TimelineSection'
-import { motion } from 'motion/react'
 
 export default function WeddingPage() {
   return (
-    <motion.main
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="mx-auto h-screen-safe w-full md:w-5xl shadow-2xl shadow-charcoal/5"
-    >
+    <InvitationPageShell>
       <HeroSection />
       <MonogramSection />
       <CountdownSection />
@@ -43,6 +36,6 @@ export default function WeddingPage() {
           com amor, 2026
         </p>
       </footer>
-    </motion.main>
+    </InvitationPageShell>
   )
 }

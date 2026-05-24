@@ -21,3 +21,9 @@ export type ReserveGiftArgs =
   Database['public']['Functions']['reserve_gift']['Args']
 export type ReserveGiftReturn =
   Database['public']['Functions']['reserve_gift']['Returns']
+
+export type SiteImageRow = Database['public']['Tables']['site_images']['Row']
+export type SiteImageInsert =
+  Database['public']['Tables']['site_images']['Insert']
+export type SiteImageUpdate =
+  Database['public']['Tables']['site_images']['Update']

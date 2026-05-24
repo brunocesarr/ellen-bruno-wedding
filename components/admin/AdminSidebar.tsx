@@ -5,6 +5,7 @@ import {
   ChartBar,
   Gift,
   HeartHandshake,
+  ImageIcon,
   LayoutDashboard,
   Menu,
   MessageCircleHeart,
@@ -21,6 +22,7 @@ const NAV = [
   { href: '/admin/confirmacoes', label: 'Confirmações', icon: HeartHandshake },
   { href: '/admin/mensagens', label: 'Mensagens', icon: MessageCircleHeart },
   { href: '/admin/resumo', label: 'Resumo', icon: ChartBar },
+  { href: '/admin/imagens', label: 'Imagens', icon: ImageIcon },
 ]
 
 export function AdminSidebar() {

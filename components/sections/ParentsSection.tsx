@@ -19,7 +19,10 @@ const FAMILIES: Family[] = [
   {
     side: 'Pais da noiva',
     coupleName: 'Família Ellen',
-    parents: [{ name: 'Maria Silva' }, { name: 'João Silva' }],
+    parents: [
+      { name: 'Maria Cleuza Martins Lopes' },
+      { name: 'Walter Alves Lopes' },
+    ],
   },
   {
     side: 'Pais do noivo',

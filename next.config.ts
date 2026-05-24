@@ -1,23 +1,24 @@
 import type { NextConfig } from 'next'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? ''
-const supabaseHostname = supabaseUrl ? new URL(supabaseUrl).hostname : ''
+const supabaseHost = new URL(
+  process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co'
+).hostname
 
-const config: NextConfig = {
+const nextConfig: NextConfig = {
   images: {
-    remotePatterns: supabaseHostname
-      ? [
-          {
-            protocol: 'https',
-            hostname: supabaseHostname,
-            pathname: '/storage/v1/object/public/**',
-          },
-        ]
-      : [],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: supabaseHost,
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
     formats: ['image/avif', 'image/webp'],
     qualities: [70, 75, 85],
   },
-  experimental: { serverActions: { bodySizeLimit: '5mb' } },
+  experimental: {
+    serverActions: { bodySizeLimit: '5mb' },
+  },
 }
 
-export default config
+export default nextConfig
