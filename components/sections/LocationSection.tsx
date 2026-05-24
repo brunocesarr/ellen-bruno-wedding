@@ -88,6 +88,7 @@ export function LocationSection() {
         <Image
           src="/images/venue.jpg"
           alt="Local do evento com decoração elegante"
+          loading="eager"
           fill
           className="object-cover"
           sizes="(max-width: 768px) 100vw, 448px"

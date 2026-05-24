@@ -22,6 +22,7 @@ export function MonogramSection() {
           <Image
             src="/images/monogram-eb.png"
             alt={`Monograma ${couple.bride} & ${couple.groom}`}
+            loading="eager"
             fill
             className="object-contain rounded-lg drop-shadow-lg"
             sizes="(max-width: 640px) 224px, (max-width: 768px) 256px, 288px"

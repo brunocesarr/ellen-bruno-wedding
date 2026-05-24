@@ -1,3 +1,4 @@
+import { RouteLoader } from '@/components/ui/RouteLoader'
 import type { Metadata, Viewport } from 'next'
 import {
   Cormorant_Garamond,
@@ -6,6 +7,7 @@ import {
   Pinyon_Script,
   Special_Elite,
 } from 'next/font/google'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 import './globals.css'
 
 const pinyonScript = Pinyon_Script({
@@ -96,7 +98,10 @@ export default function RootLayout({
         className="font-body antialiased relative bg-ivory"
         cz-shortcut-listen="true"
       >
-        {children}
+        <NuqsAdapter>
+          <RouteLoader />
+          {children}
+        </NuqsAdapter>
       </body>
     </html>
   )

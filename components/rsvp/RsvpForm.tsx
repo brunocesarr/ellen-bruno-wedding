@@ -11,6 +11,7 @@ import {
   FieldTextarea,
 } from '@/components/ui/Field'
 import { useActionState } from 'react'
+import { AnimatedButton } from '../ui/AnimatedButton'
 
 const initialState: RsvpActionState = { ok: false, error: '' }
 
@@ -121,13 +122,9 @@ export function RsvpForm() {
           Não compartilhamos com terceiros 🤍
         </p>
 
-        <button
-          type="submit"
-          disabled={pending}
-          className="btn-primary self-end md:self-auto"
-        >
-          {pending ? 'Enviando…' : 'Confirmar presença'}
-        </button>
+        <AnimatedButton pending={pending} pendingLabel="Reservando…">
+          Confirmar presença
+        </AnimatedButton>
       </div>
 
       {!state.ok && state.error && !state.issues && (

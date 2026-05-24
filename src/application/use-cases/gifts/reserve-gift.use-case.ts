@@ -9,7 +9,7 @@ export function reserveGiftUseCase(deps: { giftsRepo: IGiftsRepository }) {
     return deps.giftsRepo.reserve(
       result.data.giftId,
       result.data.name,
-      result.data.email
+      result.data.message
     )
   }
 }

@@ -404,3 +404,74 @@
     100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
   );
 }
+
+/* ───────────────────────────────────────────────────────────────
+ Polaroid + decorative utilities (added on top of existing tokens)
+ ─────────────────────────────────────────────────────────────── */
+
+@utility polaroid {
+  background: white;
+  padding: 0.75rem 0.75rem 2.5rem;
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.12);
+  border-radius: 2px;
+  transition: transform 400ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@utility polaroid-tilt-left {
+  transform: rotate(-6deg);
+  &:hover {
+    transform: rotate(-3deg) scale(1.03);
+  }
+}
+
+@utility polaroid-tilt-right {
+  transform: rotate(7deg);
+  &:hover {
+    transform: rotate(3deg) scale(1.03);
+  }
+}
+
+@utility tag-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.625rem;
+  border-radius: 9999px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+@utility tag-available {
+  background: color-mix(in oklab, var(--color-sage) 12%, transparent);
+  color: var(--color-sage);
+}
+
+@utility tag-reserved {
+  background: color-mix(in oklab, var(--color-terracotta) 12%, transparent);
+  color: var(--color-terracotta-dark);
+}
+
+@utility hover-lift {
+  transition:
+    transform 300ms ease,
+    box-shadow 300ms ease;
+  &:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 32px rgba(63, 58, 54, 0.12);
+  }
+}
+
+/* Decorative grain texture (subtle) */
+@utility cream-grain {
+  background-color: var(--color-cream);
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    color-mix(in oklab, var(--color-ink) 4%, transparent) 1px,
+    transparent 0
+  );
+  background-size: 24px 24px;
+}
