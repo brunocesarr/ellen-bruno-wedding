@@ -7,7 +7,7 @@ import { formatCurrencyBRL, formatRelativeTime } from '@/lib/format'
 import { Gift, HeartHandshake, MessageCircleHeart, Wallet } from 'lucide-react'
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { getDashboardStatsAction } from './_actions/dashboard.actions'
+import { getDashboardStatsAction } from '../_actions/dashboard.actions'
 
 export const dynamic = 'force-dynamic'
 

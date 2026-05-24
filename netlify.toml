@@ -1,0 +1,19 @@
+[build]
+command = "pnpm build"
+publish = ".next"
+
+[[plugins]]
+package = "@netlify/plugin-nextjs"
+
+# Force admin pages to never be cached at the edge
+[[headers]]
+for = "/admin/*"
+[headers.values]
+  Cache-Control = "no-store, no-cache, must-revalidate, max-age=0"
+  Netlify-Cache-Tag = "admin"
+
+# Same for the public presentes page (so reservations show up immediately)
+[[headers]]
+for = "/presentes"
+[headers.values]
+  Cache-Control = "public, max-age=0, must-revalidate"

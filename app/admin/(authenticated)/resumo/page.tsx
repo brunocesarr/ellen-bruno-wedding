@@ -1,3 +1,4 @@
+import { getDashboardStatsAction } from '@/app/admin/_actions/dashboard.actions'
 import { DonutChart } from '@/components/admin/charts/DonutChart'
 import { ReservationsChart } from '@/components/admin/charts/ReservationsChart'
 import { SectionCard } from '@/components/admin/SectionCard'
@@ -5,7 +6,6 @@ import { StatCard } from '@/components/admin/StatCard'
 import { formatCurrencyBRL } from '@/lib/format'
 import { Download } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { getDashboardStatsAction } from '../_actions/dashboard.actions'
 
 export const dynamic = 'force-dynamic'
 

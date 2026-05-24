@@ -1,10 +1,10 @@
+import { listGiftsAdminAction } from '@/app/admin/_actions/gifts.actions'
 import { GiftFormDialog } from '@/components/admin/GiftFormDialog'
 import { GiftsTable } from '@/components/admin/GiftsTable'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
 import { Gift, Plus } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { listGiftsAdminAction } from '../_actions/gifts.actions'
 
 export const dynamic = 'force-dynamic'
 
