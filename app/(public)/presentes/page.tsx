@@ -2,6 +2,7 @@ import { GiftCardSkeleton } from '@/components/gifts/GiftCardSkeleton'
 import { GiftFilterBar } from '@/components/gifts/GiftFilterBar'
 import { GiftHero } from '@/components/gifts/GiftHero'
 import { HowItWorks } from '@/components/gifts/HowItWorks'
+import { HomeButton } from '@/components/public/HomeButton'
 import { listGiftsController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
@@ -17,6 +18,8 @@ export const dynamic = 'force-dynamic'
 export default async function GiftsPage() {
   return (
     <main className="bg-cream">
+      <HomeButton />
+
       {/* Hero with polaroid montage */}
       <GiftHero
         couplePhoto="/images/couple-main.jpg"

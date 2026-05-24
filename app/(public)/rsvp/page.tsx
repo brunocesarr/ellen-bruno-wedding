@@ -1,3 +1,4 @@
+import { HomeButton } from '@/components/public/HomeButton'
 import { RsvpForm } from '@/components/rsvp/RsvpForm'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import type { Metadata } from 'next'
@@ -10,6 +11,8 @@ export const metadata: Metadata = {
 export default function RsvpPage() {
   return (
     <main className="relative overflow-hidden bg-cream">
+      <HomeButton href="/invite/full" />
+
       {/* soft top gradient */}
       <div
         aria-hidden
