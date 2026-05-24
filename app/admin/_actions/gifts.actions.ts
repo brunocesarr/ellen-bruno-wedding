@@ -1,6 +1,6 @@
 'use server'
 import { getContainer } from '@/src/di/container'
-import { listGiftsAdminController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { listGiftsController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
 import {
   createGiftController,
   deleteGiftController,
@@ -55,6 +55,6 @@ export async function deleteGiftAction(id: string) {
   return result
 }
 
-export async function listGiftsAdminAction() {
-  return listGiftsAdminController()
+export async function listGiftsAction() {
+  return listGiftsController()
 }

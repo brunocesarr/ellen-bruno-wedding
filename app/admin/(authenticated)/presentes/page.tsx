@@ -1,17 +1,15 @@
-import { listGiftsAdminAction } from '@/app/admin/_actions/gifts.actions'
+import { listGiftsAction } from '@/app/admin/_actions/gifts.actions'
 import { GiftFormDialog } from '@/components/admin/GiftFormDialog'
 import { GiftsTable } from '@/components/admin/GiftsTable'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
 import { Gift, Plus } from 'lucide-react'
-import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PresentesPage() {
-  const result = await listGiftsAdminAction()
+  const result = await listGiftsAction()
   if (!result.ok) {
-    if (result.error === 'unauthorized') redirect('/admin/login')
     throw new Error(result.error)
   }
   const gifts = result.data

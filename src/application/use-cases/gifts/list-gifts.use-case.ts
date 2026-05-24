@@ -1,7 +1,6 @@
 import type { IGiftsRepository } from '@/src/application/repositories/gifts.repository.interface'
 import type { IPixConfirmationsRepository } from '@/src/application/repositories/pix-confirmations.repository.interface'
 import type { IAuthService } from '@/src/application/services/auth.service.interface'
-import { UnauthenticatedError } from '@/src/entities/errors/auth'
 import type {
   GiftWithStatus,
   ReservationStatus,
@@ -13,11 +12,8 @@ type Deps = {
   authService: IAuthService
 }
 
-export function listGiftsAdminUseCase(d: Deps) {
+export function listGiftsUseCase(d: Deps) {
   return async (): Promise<GiftWithStatus[]> => {
-    if (!(await d.authService.getCurrentUser()))
-      throw new UnauthenticatedError()
-
     const [gifts, pixList] = await Promise.all([
       d.giftsRepo.list(),
       d.pixRepo.list(),
