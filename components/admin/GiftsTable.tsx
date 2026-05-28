@@ -1,8 +1,8 @@
 'use client'
 
 import { deleteGiftAction } from '@/app/admin/_actions/gifts.actions'
-import { deleteGift } from '@/lib/admin/gifts'
 import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
+import { deleteGift } from '@/src/lib/admin/gifts'
 import { Gift as GiftIcon, Pencil, Search, Trash2 } from 'lucide-react'
 import Image from 'next/image'
 import { useMemo, useState, useTransition } from 'react'

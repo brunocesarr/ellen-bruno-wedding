@@ -2,7 +2,7 @@
 
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Button } from '@/components/ui/Button'
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { motion, type Variants } from 'motion/react'
 
 const formItemVariants: Variants = {

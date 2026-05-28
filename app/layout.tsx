@@ -48,7 +48,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   // metadataBase is crucial for generating absolute URLs for OG images
   metadataBase: new URL('https://ellen-bruno-wedding.netlify.app'), // Replace with your actual domain
-  title: 'Ellen &amp; Bruno — Wedding Day | 2026',
+  title: 'Ellen & Bruno — Wedding Day | 2026',
   description:
     'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
   openGraph: {

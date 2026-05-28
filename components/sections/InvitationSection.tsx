@@ -2,7 +2,7 @@
 
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Divider } from '@/components/ui/Divider'
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { motion, type Variants } from 'motion/react'
 
 const containerVariants: Variants = {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useHydrated } from '@/hooks/useHydrated'
-import { cn } from '@/lib/utils'
+import { cn } from '@/src/lib/utils'
 import { motion, type Variants } from 'motion/react'
 import type { ReactNode } from 'react'
 

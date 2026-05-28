@@ -1,4 +1,4 @@
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { ImageResponse } from 'next/og'
 
 export const runtime = 'edge'

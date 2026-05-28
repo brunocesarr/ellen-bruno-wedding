@@ -1,6 +1,6 @@
 'use client'
 
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { motion, useScroll, useTransform } from 'motion/react'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'

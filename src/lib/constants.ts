@@ -1,4 +1,4 @@
-import type { WeddingDetails } from '../types'
+import type { WeddingDetails } from '../../types'
 
 export const WEDDING_DETAILS: WeddingDetails = {
   couple: {

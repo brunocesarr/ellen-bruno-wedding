@@ -3,7 +3,7 @@
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { FlipCard } from '@/components/ui/FlipCard'
 import { useCountdown } from '@/hooks/useCountdown'
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { motion, type Variants } from 'motion/react'
 
 const cardContainerVariants: Variants = {

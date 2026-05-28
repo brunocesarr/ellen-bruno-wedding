@@ -1,7 +1,7 @@
 'use client'
 
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { motion } from 'motion/react'
 import Image from 'next/image'
 

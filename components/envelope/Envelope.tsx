@@ -1,6 +1,6 @@
 'use client'
 
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import {
   AnimatePresence,
   motion,

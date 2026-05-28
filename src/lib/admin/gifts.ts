@@ -102,7 +102,6 @@ export async function upsertGift(input: {
 
 export async function deleteGift(id: string) {
   const supabase = await createSupabaseServerClient()
-  // Clean up dependent pix confirmations first to avoid FK violation
   await supabase.from('pix_confirmations').delete().eq('gift_id', id)
   const { error } = await supabase.from('gifts').delete().eq('id', id)
   if (error) throw error

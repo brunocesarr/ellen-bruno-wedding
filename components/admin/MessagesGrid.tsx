@@ -1,9 +1,9 @@
 'use client'
 
 import { markAsThankedAction } from '@/app/admin/_actions/messages.actions'
-import { type GuestMessage } from '@/lib/admin/messages'
-import { formatRelativeTime } from '@/lib/format'
 import { MessageViewModel } from '@/src/interface-adapters/view-models/message.view-model'
+import { type GuestMessage } from '@/src/lib/admin/messages'
+import { formatRelativeTime } from '@/src/lib/format'
 import {
   CheckCircle2,
   Gift as GiftIcon,

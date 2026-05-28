@@ -1,10 +1,9 @@
 'use client'
 
-import { WEDDING_DETAILS } from '@/lib/constants'
+import { WEDDING_DETAILS } from '@/src/lib/constants'
 import {
   ChartBar,
   Gift,
-  HeartHandshake,
   ImageIcon,
   LayoutDashboard,
   Menu,
@@ -21,7 +20,6 @@ const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/convidados', label: 'Convidados', icon: Users },
   { href: '/admin/presentes', label: 'Presentes', icon: Gift },
-  { href: '/admin/confirmacoes', label: 'Confirmações', icon: HeartHandshake },
   { href: '/admin/mensagens', label: 'Mensagens', icon: MessageCircleHeart },
   { href: '/admin/resumo', label: 'Resumo', icon: ChartBar },
   { href: '/admin/imagens', label: 'Imagens', icon: ImageIcon },
