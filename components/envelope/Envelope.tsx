@@ -45,7 +45,7 @@ const ctaVariants: Variants = {
   },
 }
 
-export function Envelope() {
+export function Envelope({ token }: { token: string }) {
   const [state, setState] = useState<State>('closed')
   const shouldReduceMotion = useReducedMotion()
   const { couple, displayDate, time, location } = WEDDING_DETAILS
@@ -571,7 +571,7 @@ export function Envelope() {
           {isOpen && (
             <motion.a
               key="cta"
-              href="/invite/full"
+              href={`/invite/full?token=${token}`}
               variants={ctaVariants}
               initial="hidden"
               animate="visible"

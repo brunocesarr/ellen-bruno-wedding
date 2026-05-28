@@ -11,7 +11,7 @@ import { notFound } from 'next/navigation'
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string; token?: string }>
 }): Promise<Metadata> {
   const { id } = await params
   const { giftsRepo } = await getContainer()
@@ -26,9 +26,9 @@ export async function generateMetadata({
 export default async function GiftDetailPage({
   params,
 }: {
-  params: Promise<{ id: string }>
+  params: Promise<{ id: string; token?: string }>
 }) {
-  const { id } = await params
+  const { id, token } = await params
   const { giftsRepo, pixService, storageRepo } = await getContainer()
 
   let gift
@@ -49,9 +49,11 @@ export default async function GiftDetailPage({
     storageRepo
   )
 
+  console.log('GiftDetailPage render:', { id, token })
+
   return (
     <main className="bg-cream">
-      <GiftDetailHero gift={giftView} />
+      <GiftDetailHero gift={giftView} token={token} />
       <GiftPaymentSection
         giftId={gift.id}
         qrImage={pix.qrImage}

@@ -2,16 +2,28 @@ import { HomeButton } from '@/components/public/HomeButton'
 import { RsvpForm } from '@/components/rsvp/RsvpForm'
 import { SectionHeading } from '@/components/ui/SectionHeading'
 import type { Metadata } from 'next'
+import { redirect } from 'next/navigation'
+import { getInviteContextAction } from '../_actions/guests.actions'
 
 export const metadata: Metadata = {
   title: 'Confirme sua presença · Ellen & Bruno',
   description: 'Confirme sua presença no nosso casamento.',
 }
 
-export default function RsvpPage() {
+type Props = { searchParams: Promise<{ token?: string }> }
+
+export default async function RsvpPage({ searchParams }: Props) {
+  const { token } = await searchParams
+  if (!token) redirect('/')
+
+  const res = await getInviteContextAction(token)
+  if (!res.ok) redirect('/')
+
+  const { guest, partyMembers } = res.data
+
   return (
     <main className="relative overflow-hidden bg-cream">
-      <HomeButton href="/invite/full" />
+      <HomeButton href={'/invite/full?token=' + token} />
 
       {/* soft top gradient */}
       <div
@@ -25,7 +37,7 @@ export default function RsvpPage() {
           eyebrow="Confirmação de presença"
           accent="Pedimos o carinho de uma resposta"
         />
-        <RsvpForm />
+        <RsvpForm invite={{ guest, partyMembers }} />
       </section>
     </main>
   )

@@ -5,21 +5,16 @@ import { Button } from '@/components/ui/Button'
 import { WEDDING_DETAILS } from '@/lib/constants'
 import { motion, type Variants } from 'motion/react'
 
-const formVariants: Variants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { staggerChildren: 0.1, delayChildren: 0.2 },
-  },
-}
-
 const formItemVariants: Variants = {
   hidden: { opacity: 0, y: 12 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
 }
 
-export function RsvpSection() {
+type Props = {
+  token?: string
+}
+
+export function RsvpSection({ token }: Props) {
   const { displayDate, time } = WEDDING_DETAILS
 
   return (
@@ -60,7 +55,7 @@ export function RsvpSection() {
 
         <motion.a
           variants={formItemVariants}
-          href="/rsvp"
+          href={`/rsvp?token=${token}`}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           className="inline-block"

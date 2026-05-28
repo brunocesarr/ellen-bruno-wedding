@@ -59,6 +59,45 @@ export type Database = {
         }
         Relationships: []
       }
+      guests: {
+        Row: {
+          confirmed_at: string | null
+          created_at: string
+          first_name: string
+          id: string
+          invite_token: string
+          last_name: string
+          notes: string | null
+          party_id: string
+          status: Database['public']['Enums']['guest_status']
+          updated_at: string
+        }
+        Insert: {
+          confirmed_at?: string | null
+          created_at?: string
+          first_name: string
+          id?: string
+          invite_token?: string
+          last_name: string
+          notes?: string | null
+          party_id?: string
+          status?: Database['public']['Enums']['guest_status']
+          updated_at?: string
+        }
+        Update: {
+          confirmed_at?: string | null
+          created_at?: string
+          first_name?: string
+          id?: string
+          invite_token?: string
+          last_name?: string
+          notes?: string | null
+          party_id?: string
+          status?: Database['public']['Enums']['guest_status']
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pix_confirmations: {
         Row: {
           amount: number
@@ -102,6 +141,7 @@ export type Database = {
           dietary_restrictions: string | null
           email: string | null
           full_name: string
+          guest_id: string | null
           id: string
           message: string | null
           phone: string | null
@@ -113,6 +153,7 @@ export type Database = {
           dietary_restrictions?: string | null
           email?: string | null
           full_name: string
+          guest_id?: string | null
           id?: string
           message?: string | null
           phone?: string | null
@@ -124,11 +165,20 @@ export type Database = {
           dietary_restrictions?: string | null
           email?: string | null
           full_name?: string
+          guest_id?: string | null
           id?: string
           message?: string | null
           phone?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'rsvp_guest_id_fkey'
+            columns: ['guest_id']
+            isOneToOne: false
+            referencedRelation: 'guests'
+            referencedColumns: ['id']
+          },
+        ]
       }
       site_images: {
         Row: {
@@ -194,9 +244,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      set_guest_statuses: {
+        Args: { p_updates: Json }
+        Returns: {
+          confirmed_at: string | null
+          created_at: string
+          first_name: string
+          id: string
+          invite_token: string
+          last_name: string
+          notes: string | null
+          party_id: string
+          status: Database['public']['Enums']['guest_status']
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: '*'
+          to: 'guests'
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
     }
     Enums: {
       gift_category: 'home' | 'kitchen' | 'travel' | 'experience' | 'other'
+      guest_status: 'going' | 'pending' | 'not_going'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -325,6 +397,7 @@ export const Constants = {
   public: {
     Enums: {
       gift_category: ['home', 'kitchen', 'travel', 'experience', 'other'],
+      guest_status: ['going', 'pending', 'not_going'],
     },
   },
 } as const

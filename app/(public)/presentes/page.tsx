@@ -15,10 +15,16 @@ export const metadata: Metadata = {
 }
 export const dynamic = 'force-dynamic'
 
-export default async function GiftsPage() {
+type Props = { searchParams: Promise<{ token?: string }> }
+
+export default async function GiftsPage({ searchParams }: Props) {
+  const { token } = await searchParams
+
   return (
     <main className="bg-cream">
-      <HomeButton />
+      <HomeButton
+        href={token ? '/invite/full?token=' + token : '/invite/full'}
+      />
 
       {/* Hero with polaroid montage */}
       <GiftHero
@@ -29,7 +35,7 @@ export default async function GiftsPage() {
 
       {/* Filterable grid */}
       <Suspense fallback={<GridSkeleton />}>
-        <GiftListSection />
+        <GiftListSection token={token} />
       </Suspense>
 
       {/* How it works */}
@@ -46,10 +52,10 @@ export default async function GiftsPage() {
   )
 }
 
-async function GiftListSection() {
+async function GiftListSection({ token }: { token?: string }) {
   const gifts = await listGiftsController()
-  if (!gifts.ok) return <GiftFilterBar gifts={[]} />
-  return <GiftFilterBar gifts={gifts.data ?? []} />
+  if (!gifts.ok) return <GiftFilterBar gifts={[]} token={token} />
+  return <GiftFilterBar gifts={gifts.data ?? []} token={token} />
 }
 
 function GridSkeleton() {

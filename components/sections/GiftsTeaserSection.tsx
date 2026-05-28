@@ -8,7 +8,11 @@ import Link from 'next/link'
 
 const POLAROID_KEYS = ['polaroid-1', 'polaroid-2', 'polaroid-3'] as const
 
-export async function GiftsTeaserSection() {
+type Props = {
+  token?: string
+}
+
+export async function GiftsTeaserSection({ token }: Props) {
   const photos = await getOrderedSiteImages(POLAROID_KEYS)
   const polaroids: Polaroid[] =
     POLAROID_KEYS.map((k, i) => {
@@ -48,7 +52,7 @@ export async function GiftsTeaserSection() {
 
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
-                  href="/presentes"
+                  href={token ? '/presentes?token=' + token : '/presentes'}
                   className="inline-flex items-center gap-2 rounded-full bg-amber-700 px-7 py-3 text-sm font-medium uppercase tracking-wider text-white shadow-md transition hover:bg-amber-600 hover:shadow-lg"
                 >
                   Ver presentes

@@ -1,32 +1,59 @@
 'use client'
 
-import {
-  submitRsvpAction,
-  type RsvpActionState,
-} from '@/app/(public)/_actions/rsvp.actions'
+import { confirmAttendanceAction } from '@/app/(public)/_actions/guests.actions'
 import {
   Field,
   FieldInput,
   FieldSelect,
   FieldTextarea,
 } from '@/components/ui/Field'
+import { Guest } from '@/src/entities/models/guest'
 import { useActionState } from 'react'
 import { AnimatedButton } from '../ui/AnimatedButton'
 
-const initialState: RsvpActionState = { ok: false, error: '' }
+type ConfirmActionState = Awaited<
+  ReturnType<typeof confirmAttendanceAction>
+> | null
 
-export function RsvpForm() {
-  const [state, action, pending] = useActionState(
-    submitRsvpAction,
-    initialState
+type Props = {
+  invite: { guest: Guest; partyMembers: Guest[] }
+}
+
+export function RsvpForm({ invite }: Props) {
+  const isTokenized = !!invite
+
+  const [state, action, pending] = useActionState<ConfirmActionState, FormData>(
+    async (_prev, formData) => {
+      const ownerStatus = formData.get('owner-status') as 'going' | 'not_going'
+
+      const attendees: { guestId: string; status: 'going' | 'not_going' }[] = [
+        { guestId: invite.guest.id, status: ownerStatus },
+        ...invite.partyMembers
+          .filter((m) => formData.get(`companion-${m.id}`) === 'on')
+          .map((m) => ({ guestId: m.id, status: 'going' as const })),
+      ]
+
+      const message = (formData.get('message') as string | null) ?? undefined
+
+      return confirmAttendanceAction({
+        inviteToken: invite.guest.inviteToken,
+        attendees,
+        message,
+      })
+    },
+    null
   )
 
-  if (state.ok) {
+  const fullName = isTokenized
+    ? `${invite!.guest.firstName} ${invite!.guest.lastName}`
+    : ''
+
+  if (state && state.ok) {
     return (
       <div className="mx-auto max-w-xl rounded-sm border border-sage/40 bg-sage/5 p-10 text-center">
         <p className="eyebrow text-sage">Confirmação recebida</p>
         <h3 className="mt-3 font-display text-3xl text-terracotta">
-          Obrigado, {state.data.fullName.split(' ')[0]}! 💕
+          Obrigado, {invite?.guest.firstName}! 💕
         </h3>
         <p className="mt-3 text-ink-muted">
           Recebemos sua confirmação. Mal podemos esperar para celebrar com você.
@@ -35,8 +62,21 @@ export function RsvpForm() {
     )
   }
 
-  const fieldError = (key: string): string | undefined =>
-    state.ok ? undefined : state.issues?.fieldErrors?.[key]?.[0]
+  const fieldError = (path: string): string | undefined => {
+    if (!state || state.ok) return undefined
+    const issues = state.issues
+    if (!Array.isArray(issues)) return undefined
+
+    const match = issues.find(
+      (i): i is { path: (string | number)[]; message: string } =>
+        typeof i === 'object' &&
+        i !== null &&
+        Array.isArray((i as { path?: unknown }).path) &&
+        typeof (i as { message?: unknown }).message === 'string'
+    )
+
+    return match?.path.join('.') === path ? match.message : undefined
+  }
 
   return (
     <form action={action} className="mx-auto max-w-4xl">
@@ -52,9 +92,34 @@ export function RsvpForm() {
             name="fullName"
             type="text"
             placeholder="Como podemos te chamar?"
-            required
             autoComplete="name"
+            defaultValue={fullName}
+            readOnly={isTokenized}
+            disabled={isTokenized}
+            required={!isTokenized}
+            aria-readonly={isTokenized}
+            className={isTokenized ? 'cursor-not-allowed' : ''}
           />
+        </Field>
+
+        <Field
+          label="Você comparecerá?"
+          htmlFor="attending"
+          required
+          error={fieldError('attending')}
+        >
+          <FieldSelect
+            id="attending"
+            name="owner-status"
+            defaultValue=""
+            required
+          >
+            <option value="" disabled>
+              Selecione uma opção
+            </option>
+            <option value="going">Sim, estarei presente 💕</option>
+            <option value="not_going">Infelizmente não poderei</option>
+          </FieldSelect>
         </Field>
 
         <Field label="Seu e-mail" htmlFor="email" error={fieldError('email')}>
@@ -67,20 +132,32 @@ export function RsvpForm() {
           />
         </Field>
 
-        <Field
-          label="Você comparecerá?"
-          htmlFor="attending"
-          required
-          error={fieldError('attending')}
-        >
-          <FieldSelect id="attending" name="attending" defaultValue="" required>
-            <option value="" disabled>
-              Selecione uma opção
-            </option>
-            <option value="true">Sim, estarei presente 💕</option>
-            <option value="false">Infelizmente não poderei</option>
-          </FieldSelect>
-        </Field>
+        {invite!.partyMembers.length > 0 && (
+          <div className="md:col-span-2">
+            <Field
+              label="Confirmar acompanhantes?"
+              htmlFor="companion"
+              error={fieldError('attending')}
+            >
+              {invite!.partyMembers.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex items-center justify-start gap-4"
+                >
+                  <FieldInput
+                    type="checkbox"
+                    name={`companion-${m.id}`}
+                    defaultChecked={m.status === 'going'}
+                    className="w-[16px] h-[16px] text-terracotta focus:ring-terracotta/50"
+                  />
+                  <span>
+                    {m.firstName} {m.lastName}
+                  </span>
+                </div>
+              ))}
+            </Field>
+          </div>
+        )}
 
         <div className="md:col-span-2">
           <Field
@@ -111,7 +188,7 @@ export function RsvpForm() {
         </AnimatedButton>
       </div>
 
-      {!state.ok && state.error && !state.issues && (
+      {state && !state.ok && state.error && !state.issues && (
         <p className="mt-6 rounded-sm border border-terracotta/30 bg-terracotta/5 p-4 text-sm text-terracotta-dark">
           {state.error}
         </p>

@@ -27,3 +27,7 @@ export type SiteImageInsert =
   Database['public']['Tables']['site_images']['Insert']
 export type SiteImageUpdate =
   Database['public']['Tables']['site_images']['Update']
+
+export type GuestRow = Database['public']['Tables']['guests']['Row']
+export type GuestInsert = Database['public']['Tables']['guests']['Insert']
+export type GuestUpdate = Database['public']['Tables']['guests']['Update']

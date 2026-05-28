@@ -8,9 +8,9 @@ import { motion } from 'motion/react'
 import Image from 'next/image'
 import Link from 'next/link'
 
-type Props = { gift: GiftViewModel }
+type Props = { gift: GiftViewModel; token?: string }
 
-export function GiftDetailHero({ gift }: Props) {
+export function GiftDetailHero({ gift, token }: Props) {
   return (
     <section className="relative cream-grain">
       <BrushStroke
@@ -24,7 +24,7 @@ export function GiftDetailHero({ gift }: Props) {
 
       <div className="mx-auto max-w-7xl px-6 py-8 md:py-12">
         <Link
-          href="/presentes"
+          href={token ? '/presentes?token=' + token : '/presentes'}
           className="inline-flex items-center gap-2 text-sm font-medium text-ink-muted transition hover:text-terracotta"
         >
           <ArrowLeft className="size-4" />

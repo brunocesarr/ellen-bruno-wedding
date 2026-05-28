@@ -9,9 +9,9 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
-type Props = { gift: GiftViewModel }
+type Props = { gift: GiftViewModel; token?: string }
 
-export function GiftCard({ gift }: Props) {
+export function GiftCard({ gift, token }: Props) {
   const router = useRouter()
   const [isPending, startTransition] = useTransition()
   const [pressed, setPressed] = useState(false)
@@ -19,7 +19,11 @@ export function GiftCard({ gift }: Props) {
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault()
     setPressed(true)
-    startTransition(() => router.push(`/presentes/${gift.id}`))
+    startTransition(() =>
+      router.push(
+        token ? `/presentes/${gift.id}?token=${token}` : `/presentes/${gift.id}`
+      )
+    )
   }
 
   return (
@@ -33,7 +37,11 @@ export function GiftCard({ gift }: Props) {
       className="overflow-hidden rounded-2xl bg-white shadow-sm"
     >
       <Link
-        href={`/presentes/${gift.id}`}
+        href={
+          token
+            ? `/presentes/${gift.id}?token=${token}`
+            : `/presentes/${gift.id}`
+        }
         onClick={handleClick}
         className="block"
       >

@@ -5,7 +5,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { parseAsStringLiteral, useQueryStates } from 'nuqs'
 import { GiftGrid } from './GiftGrid'
 
-type Props = { gifts: GiftViewModel[] }
+type Props = { gifts: GiftViewModel[]; token?: string }
 
 const STATUS_OPTIONS = ['all', 'available', 'reserved'] as const
 const SORT_OPTIONS = ['recent', 'price-asc', 'price-desc'] as const
@@ -33,7 +33,7 @@ const CATEGORY_LABELS: Record<(typeof CATEGORY_OPTIONS)[number], string> = {
   other: '🎁 Outros',
 }
 
-export function GiftFilterBar({ gifts }: Props) {
+export function GiftFilterBar({ gifts, token }: Props) {
   const [{ status, sort, category }, setQuery] = useQueryStates(
     {
       status: parseAsStringLiteral(STATUS_OPTIONS).withDefault('all'),
@@ -130,7 +130,7 @@ export function GiftFilterBar({ gifts }: Props) {
           exit={{ opacity: 0, y: -10 }}
           transition={{ duration: 0.3 }}
         >
-          <GiftGrid gifts={filtered} />
+          <GiftGrid gifts={filtered} token={token} />
         </motion.div>
       </AnimatePresence>
     </div>

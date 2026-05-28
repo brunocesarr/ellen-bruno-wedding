@@ -1,3 +1,4 @@
+import { getInviteContextAction } from '@/app/(public)/_actions/guests.actions'
 import { InvitationPageShell } from '@/components/invite/InvitationPageShell'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CountdownSection } from '@/components/sections/CountdownSection'
@@ -12,10 +13,25 @@ import { ParentsSection } from '@/components/sections/ParentsSection'
 import { RsvpSection } from '@/components/sections/RsvpSection'
 import { TestimonialSection } from '@/components/sections/TestimonialSection'
 import { TimelineSection } from '@/components/sections/TimelineSection'
+import { Metadata } from 'next'
+import { redirect } from 'next/navigation'
 
 export const revalidate = 60
 
-export default function WeddingPage() {
+export const metadata: Metadata = {
+  title: 'Convite • Ellen & Bruno',
+  robots: { index: false, follow: false },
+}
+
+type Props = { searchParams: Promise<{ token?: string }> }
+
+export default async function FullInvitePage({ searchParams }: Props) {
+  const { token } = await searchParams
+  if (!token) redirect('/')
+
+  const res = await getInviteContextAction(token)
+  if (!res.ok) redirect('/')
+
   return (
     <InvitationPageShell>
       <HeroSection />
@@ -29,8 +45,8 @@ export default function WeddingPage() {
       <LocationSection />
       <TimelineSection />
       <DressCodeSection />
-      <GiftsTeaserSection />
-      <RsvpSection />
+      <GiftsTeaserSection token={token} />
+      <RsvpSection token={token} />
       {/* Footer */}
       <footer className="bg-cream px-6 py-8 text-center">
         <p className="font-script text-2xl text-terracotta">E.B</p>

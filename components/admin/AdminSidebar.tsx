@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   MessageCircleHeart,
+  Users,
   X,
 } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -18,6 +19,7 @@ import { useState } from 'react'
 
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/admin/convidados', label: 'Convidados', icon: Users },
   { href: '/admin/presentes', label: 'Presentes', icon: Gift },
   { href: '/admin/confirmacoes', label: 'Confirmações', icon: HeartHandshake },
   { href: '/admin/mensagens', label: 'Mensagens', icon: MessageCircleHeart },
