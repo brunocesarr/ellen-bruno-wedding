@@ -1,56 +1,48 @@
 'use client'
 
-import { deleteGuestAction } from '@/app/admin/_actions/guests.actions'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { useGuestDeletion } from '@/hooks/useGuestDeletion'
 import type { Guest, GuestStatus } from '@/src/entities/models/guest'
-import { isNonEmpty } from '@/types/types'
 import {
   Copy,
   Link as LinkIcon,
   Pencil,
   Search,
+  StickyNote,
   Trash2,
   UserPlus,
   Users,
 } from 'lucide-react'
-import { useMemo, useState, useTransition } from 'react'
+import { useMemo, useState } from 'react'
 import { EmptyState } from '../ui/EmptyState'
 import { GuestFormDialog } from './GuestFormDialog'
+import { GuestNotesDialog } from './GuestNotesDialog'
 import { StatusPill } from './StatusPill'
 
 /* ------------------------------------------------------------------ */
-/*  Types & helpers                                                   */
+/*  Types & helpers (unchanged)                                       */
 /* ------------------------------------------------------------------ */
 
-type StatusFilter = 'all' | GuestStatus
-
 type NonEmptyArray<T> = readonly [T, ...T[]]
+type StatusFilter = 'all' | GuestStatus
+type Party = { partyId: string; members: NonEmptyArray<Guest> }
 
-type Party = {
-  partyId: string
-  members: NonEmptyArray<Guest>
-}
-
-/** Local label/tone reuse — maps domain status -> existing StatusPill tone. */
 const STATUS_PILL: Record<GuestStatus, 'confirmed' | 'pending' | 'declined'> = {
   going: 'confirmed',
   pending: 'pending',
   not_going: 'declined',
 }
-
 const STATUS_LABEL: Record<GuestStatus, string> = {
   going: 'Confirmado',
   pending: 'Pendente',
   not_going: 'Não vai',
 }
 
-function fullName(g: Guest) {
-  return `${g.firstName} ${g.lastName}`.trim()
-}
-
-function inviteUrlFor(token: string) {
-  if (typeof window === 'undefined') return `/invite?token=${token}`
-  return `${window.location.origin}/invite?token=${token}`
-}
+const fullName = (g: Guest) => `${g.firstName} ${g.lastName}`.trim()
+const inviteUrlFor = (token: string) =>
+  typeof window === 'undefined'
+    ? `/invite?token=${token}`
+    : `${window.location.origin}/invite?token=${token}`
 
 function groupByParty(guests: Guest[]): Party[] {
   const map = new Map<string, Guest[]>()
@@ -62,14 +54,10 @@ function groupByParty(guests: Guest[]): Party[] {
 
   const parties: Party[] = []
   for (const [partyId, members] of map) {
-    if (members.length === 0) continue // makes the type guard explicit
-
+    if (members.length === 0) continue
     const sorted = [...members].sort(
       (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-    )
-
-    if (!isNonEmpty(sorted)) continue
-
+    ) as unknown as NonEmptyArray<Guest>
     parties.push({ partyId, members: sorted })
   }
 
@@ -79,22 +67,19 @@ function groupByParty(guests: Guest[]): Party[] {
   )
 }
 
-function partyMatchesQuery(party: Party, q: string) {
-  if (!q) return true
-  const needle = q.toLowerCase()
-  return party.members.some((m) => fullName(m).toLowerCase().includes(needle))
-}
-
 function filterPartyMembers(party: Party, status: StatusFilter): Party | null {
   if (status === 'all') return party
   const members = party.members.filter((m) => m.status === status)
   if (members.length === 0) return null
-  if (!isNonEmpty(members)) return null
   return {
     ...party,
-    members: members,
+    members: members as unknown as NonEmptyArray<Guest>,
   }
 }
+
+const partyMatchesQuery = (party: Party, q: string) =>
+  !q ||
+  party.members.some((m) => fullName(m).toLowerCase().includes(q.toLowerCase()))
 
 /* ------------------------------------------------------------------ */
 /*  Main component                                                    */
@@ -104,47 +89,42 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
   const [list, setList] = useState<Guest[]>(guests)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [pendingId, setPendingId] = useState<string | null>(null)
   const [copiedToken, setCopiedToken] = useState<string | null>(null)
-  const [, startTransition] = useTransition()
 
-  const parties = useMemo(() => {
-    return groupByParty(list)
-      .map((p) => filterPartyMembers(p, statusFilter))
-      .filter((p): p is Party => p !== null)
-      .filter((p) => partyMatchesQuery(p, query))
-  }, [list, query, statusFilter])
+  const deletion = useGuestDeletion({
+    onSuccess: (id) => setList((prev) => prev.filter((g) => g.id !== id)),
+  })
 
-  const totals = useMemo(() => {
-    return list.reduce(
-      (acc, g) => {
-        acc[g.status] += 1
-        return acc
-      },
-      { going: 0, pending: 0, not_going: 0 } as Record<GuestStatus, number>
-    )
-  }, [list])
+  const parties = useMemo(
+    () =>
+      groupByParty(list)
+        .map((p) => filterPartyMembers(p, statusFilter))
+        .filter((p): p is Party => p !== null)
+        .filter((p) => partyMatchesQuery(p, query)),
+    [list, query, statusFilter]
+  )
 
-  function handleSaved(saved: Guest) {
+  const totals = useMemo(
+    () =>
+      list.reduce(
+        (acc, g) => {
+          acc[g.status] += 1
+          return acc
+        },
+        { going: 0, pending: 0, not_going: 0 } as Record<GuestStatus, number>
+      ),
+    [list]
+  )
+
+  const handleSaved = (saved: Guest) =>
     setList((prev) => {
       const exists = prev.some((g) => g.id === saved.id)
       return exists
         ? prev.map((g) => (g.id === saved.id ? saved : g))
         : [saved, ...prev]
     })
-  }
 
-  function handleDelete(g: Guest) {
-    if (!confirm(`Remover "${fullName(g)}"?`)) return
-    setPendingId(g.id)
-    startTransition(async () => {
-      const res = await deleteGuestAction(g.id)
-      if (res.ok) setList((prev) => prev.filter((x) => x.id !== g.id))
-      setPendingId(null)
-    })
-  }
-
-  async function handleCopyInvite(token: string) {
+  const handleCopyInvite = async (token: string) => {
     const url = inviteUrlFor(token)
     try {
       await navigator.clipboard.writeText(url)
@@ -157,25 +137,11 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
 
   if (!list.length) {
     return (
-      <>
-        <GuestFormDialog
-          onSaved={handleSaved}
-          trigger={
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-amber-700 px-5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600"
-            >
-              <UserPlus className="h-4 w-4" />
-              Novo convidado
-            </button>
-          }
-        />
-        <EmptyState
-          icon={<Users className="h-4 w-4" />}
-          title="Nenhum convidado cadastrado"
-          description="Comece adicionando o primeiro convidado para gerar o link individual de convite."
-        />
-      </>
+      <EmptyState
+        icon={<Users className="h-4 w-4" />}
+        title="Nenhum convidado cadastrado"
+        description="Comece adicionando o primeiro convidado para gerar o link individual de convite."
+      />
     )
   }
 
@@ -241,35 +207,54 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
               key={party.partyId}
               party={party}
               copiedToken={copiedToken}
-              pendingId={pendingId}
               onCopyInvite={handleCopyInvite}
-              onDelete={handleDelete}
+              onRequestDelete={deletion.request}
               onSaved={handleSaved}
             />
           ))}
         </div>
       )}
+
+      <ConfirmDialog
+        open={deletion.isOpen}
+        onOpenChange={(open) => (open ? null : deletion.cancel())}
+        tone="danger"
+        pending={deletion.pending}
+        title="Remover convidado?"
+        description={
+          deletion.target ? (
+            <>
+              Esta ação não pode ser desfeita.{' '}
+              <strong className="text-stone-800">
+                {fullName(deletion.target)}
+              </strong>{' '}
+              será removido(a) da lista e perderá o acesso ao convite.
+            </>
+          ) : null
+        }
+        confirmLabel={deletion.pending ? 'Removendo...' : 'Remover'}
+        cancelLabel="Cancelar"
+        onConfirm={deletion.confirm}
+      />
     </div>
   )
 }
 
 /* ------------------------------------------------------------------ */
-/*  Party card (groups associated guests)                             */
+/*  Party card                                                        */
 /* ------------------------------------------------------------------ */
 
 function PartyCard({
   party,
   copiedToken,
-  pendingId,
   onCopyInvite,
-  onDelete,
+  onRequestDelete,
   onSaved,
 }: {
   party: Party
   copiedToken: string | null
-  pendingId: string | null
   onCopyInvite: (token: string) => void
-  onDelete: (g: Guest) => void
+  onRequestDelete: (g: Guest) => void
   onSaved: (g: Guest) => void
 }) {
   const [head, ...companions] = party.members
@@ -337,16 +322,14 @@ function PartyCard({
             <GuestRow
               guest={head}
               isHead
-              pendingId={pendingId}
-              onDelete={onDelete}
+              onRequestDelete={onRequestDelete}
               onSaved={onSaved}
             />
             {companions.map((g) => (
               <GuestRow
                 key={g.id}
                 guest={g}
-                pendingId={pendingId}
-                onDelete={onDelete}
+                onRequestDelete={onRequestDelete}
                 onSaved={onSaved}
               />
             ))}
@@ -361,8 +344,7 @@ function PartyCard({
             key={g.id}
             guest={g}
             isHead={g.id === head.id}
-            pendingId={pendingId}
-            onDelete={onDelete}
+            onRequestDelete={onRequestDelete}
             onSaved={onSaved}
           />
         ))}
@@ -378,18 +360,14 @@ function PartyCard({
 function GuestRow({
   guest,
   isHead,
-  pendingId,
-  onDelete,
+  onRequestDelete,
   onSaved,
 }: {
   guest: Guest
   isHead?: boolean
-  pendingId: string | null
-  onDelete: (g: Guest) => void
+  onRequestDelete: (g: Guest) => void
   onSaved: (g: Guest) => void
 }) {
-  const isDeleting = pendingId === guest.id
-
   return (
     <tr className="transition-colors hover:bg-stone-50/60">
       <td className="px-4 py-3">
@@ -421,7 +399,7 @@ function GuestRow({
       </td>
 
       <td className="px-4 py-3 text-stone-500">
-        <span className="line-clamp-1">{guest.notes ?? '—'}</span>
+        <NotesIndicator guest={guest} />
       </td>
 
       <td className="px-4 py-3">
@@ -441,9 +419,8 @@ function GuestRow({
           />
           <button
             type="button"
-            onClick={() => onDelete(guest)}
-            disabled={isDeleting}
-            className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50 disabled:opacity-50"
+            onClick={() => onRequestDelete(guest)}
+            className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50"
             aria-label="Remover"
           >
             <Trash2 className="h-4 w-4" />
@@ -461,18 +438,14 @@ function GuestRow({
 function GuestMobileCard({
   guest,
   isHead,
-  pendingId,
-  onDelete,
+  onRequestDelete,
   onSaved,
 }: {
   guest: Guest
   isHead: boolean
-  pendingId: string | null
-  onDelete: (g: Guest) => void
+  onRequestDelete: (g: Guest) => void
   onSaved: (g: Guest) => void
 }) {
-  const isDeleting = pendingId === guest.id
-
   return (
     <article className="rounded-xl border border-stone-200 bg-white p-4">
       <div className="flex items-start gap-3">
@@ -488,15 +461,12 @@ function GuestMobileCard({
             {isHead ? 'Titular do convite' : 'Acompanhante'} ·{' '}
             {STATUS_LABEL[guest.status]}
           </p>
-          {guest.notes && (
-            <p className="mt-2 line-clamp-2 text-xs text-stone-500">
-              {guest.notes}
-            </p>
-          )}
         </div>
       </div>
 
-      <div className="mt-3 flex justify-end gap-2">
+      <div className="mt-3 flex flex-wrap justify-end gap-2">
+        <NotesIndicator guest={guest} variant="button" />
+
         <GuestFormDialog
           guest={guest}
           onSaved={onSaved}
@@ -511,14 +481,55 @@ function GuestMobileCard({
         />
         <button
           type="button"
-          onClick={() => onDelete(guest)}
-          disabled={isDeleting}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-sm text-rose-700 disabled:opacity-50"
+          onClick={() => onRequestDelete(guest)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-sm text-rose-700"
         >
           <Trash2 className="h-3.5 w-3.5" /> Remover
         </button>
       </div>
     </article>
+  )
+}
+
+/* ------------------------------------------------------------------ */
+/*  Notes indicator (shared by row + mobile card)                     */
+/* ------------------------------------------------------------------ */
+
+function NotesIndicator({
+  guest,
+  variant = 'pill',
+}: {
+  guest: Guest
+  variant?: 'pill' | 'button'
+}) {
+  if (!guest.notes) return variant === 'pill' ? <span>—</span> : null
+
+  const trigger =
+    variant === 'pill' ? (
+      <button
+        type="button"
+        aria-label={`Ver observações de ${fullName(guest)}`}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-amber-200 transition hover:bg-amber-100"
+      >
+        <StickyNote className="h-3.5 w-3.5" />
+        <span>Observações</span>
+      </button>
+    ) : (
+      <button
+        type="button"
+        aria-label={`Ver observações de ${fullName(guest)}`}
+        className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-sm text-amber-800 ring-1 ring-amber-200 transition hover:bg-amber-100"
+      >
+        <StickyNote className="h-3.5 w-3.5" /> Observações
+      </button>
+    )
+
+  return (
+    <GuestNotesDialog
+      guestName={fullName(guest)}
+      notes={guest.notes}
+      trigger={trigger}
+    />
   )
 }
 
