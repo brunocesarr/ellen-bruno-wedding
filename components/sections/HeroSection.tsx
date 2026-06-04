@@ -1,25 +1,28 @@
 'use client'
 
 import { WEDDING_DETAILS } from '@/src/lib/constants'
-import { motion, useScroll, useTransform } from 'motion/react'
+import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import Image from 'next/image'
 import { useEffect, useRef, useState } from 'react'
 
 export function HeroSection() {
   const { couple, displayDate } = WEDDING_DETAILS
   const ref = useRef<HTMLElement | null>(null)
+  const reduce = useReducedMotion()
 
-  const [isHydrated, setIsHydrated] = useState(false)
+  const [parallaxOn, setParallaxOn] = useState(false)
   useEffect(() => {
-    const id = requestAnimationFrame(() => setIsHydrated(true))
-    return () => cancelAnimationFrame(id)
-  }, [])
+    const mq = window.matchMedia('(min-width: 768px)')
+    setParallaxOn(mq.matches && !reduce)
+    const onChange = () => setParallaxOn(mq.matches && !reduce)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [reduce])
 
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
   })
-
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const textY = useTransform(scrollYProgress, [0, 1], ['0%', '50%'])
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
@@ -29,30 +32,26 @@ export function HeroSection() {
       id="hero"
       ref={ref}
       className="relative flex h-screen-safe flex-col items-center justify-center overflow-hidden"
-      style={{ position: 'relative' }} // ← FIX: explicit position
     >
-      {/* Parallax Background */}
       <motion.div
         className="absolute inset-0 z-0"
-        style={isHydrated ? { y: backgroundY } : { y: '0%' }}
+        style={parallaxOn ? { y: backgroundY } : undefined}
       >
         <Image
           src="/images/hero-bg.jpg"
           alt="Elegant wedding venue with warm lighting"
-          loading="eager"
           fill
           priority
           className="object-cover"
           sizes="100vw"
-          quality={85}
+          quality={80}
         />
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal/25 via-charcoal/5 to-charcoal/35" />
       </motion.div>
 
-      {/* Content */}
       <motion.div
         className="relative z-20 flex flex-col items-center px-6 text-center text-ivory"
-        style={isHydrated ? { y: textY, opacity } : { y: '0%', opacity: 1 }}
+        style={parallaxOn ? { y: textY, opacity } : undefined}
       >
         <motion.p
           initial={{ opacity: 0, y: 20 }}

@@ -1,17 +1,16 @@
 'use client'
 
-import { useHydrated } from '@/hooks/useHydrated'
-import { motion } from 'motion/react'
+import { motion, useReducedMotion } from 'motion/react'
 
 export function MotionWrapper({ children }: { children: React.ReactNode }) {
-  const isHydrated = useHydrated()
+  const reduce = useReducedMotion()
 
   return (
     <motion.main
-      initial={isHydrated ? { opacity: 0 } : false}
+      initial={reduce ? false : { opacity: 0.001 }}
       animate={{ opacity: 1 }}
-      transition={{ duration: 0.5 }}
-      className="relative mx-auto min-h-screen-safe w-full overflow-y-auto shadow-2xl shadow-charcoal/5"
+      transition={{ duration: 0.4, ease: 'easeOut' }}
+      className="relative min-h-screen w-full overflow-x-hidden shadow-sm"
     >
       {children}
     </motion.main>

@@ -10,11 +10,9 @@ type Props = Omit<ImageProps, 'src' | 'alt' | 'onError'> & {
 }
 
 function safeSrc(src?: string | null, fallback?: string | null) {
-  return src && src.trim().length > 0
-    ? src
-    : fallback && fallback.trim().length > 0
-      ? fallback
-      : null
+  if (src && src.trim().length > 0) return src
+  if (fallback && fallback.trim().length > 0) return fallback
+  return null
 }
 
 export function SmartImage({
@@ -23,6 +21,8 @@ export function SmartImage({
   alt,
   fill,
   className,
+  priority,
+  sizes,
   ...props
 }: Props) {
   const [currentSrc, setCurrentSrc] = useState<string | null>(() =>
@@ -43,6 +43,8 @@ export function SmartImage({
           'grid place-items-center bg-stone-100 text-xs text-stone-400',
           className ?? '',
         ].join(' ')}
+        role="img"
+        aria-label={alt ?? 'Imagem indisponível'}
       >
         Sem imagem
       </div>
@@ -55,11 +57,12 @@ export function SmartImage({
       fill={fill}
       src={currentSrc}
       alt={alt ?? ''}
-      loading="eager"
+      loading={priority ? undefined : 'lazy'}
+      priority={priority}
+      sizes={sizes ?? (fill ? '100vw' : undefined)}
       className={className}
       onError={() => {
         const nextFallback = safeSrc(fallback, null)
-
         if (!errored && nextFallback && currentSrc !== nextFallback) {
           setErrored(true)
           setCurrentSrc(nextFallback)

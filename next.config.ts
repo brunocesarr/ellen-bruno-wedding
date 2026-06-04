@@ -1,23 +1,26 @@
 import type { NextConfig } from 'next'
 
-const supabaseHost = new URL(
-  process.env.NEXT_PUBLIC_SUPABASE_URL ?? 'https://placeholder.supabase.co'
-).hostname
-
 const nextConfig: NextConfig = {
+  reactStrictMode: true,
+  poweredByHeader: false,
+
+  experimental: {
+    optimizePackageImports: ['lucide-react', 'motion'],
+    serverActions: { bodySizeLimit: '5mb' },
+  },
+
   images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [360, 640, 768, 1024, 1280, 1920],
+    imageSizes: [16, 32, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: supabaseHost,
-        pathname: '/storage/v1/object/public/**',
+        hostname: '**.supabase.co', // keep your existing Supabase host
       },
     ],
-    formats: ['image/avif', 'image/webp'],
-    qualities: [70, 75, 85],
-  },
-  experimental: {
-    serverActions: { bodySizeLimit: '5mb' },
+    qualities: [70, 75, 80, 85],
   },
 }
 

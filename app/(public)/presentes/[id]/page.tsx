@@ -49,8 +49,6 @@ export default async function GiftDetailPage({
     storageRepo
   )
 
-  console.log('GiftDetailPage render:', { id, token })
-
   return (
     <main className="bg-cream">
       <GiftDetailHero gift={giftView} token={token} />

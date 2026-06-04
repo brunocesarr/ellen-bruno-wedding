@@ -83,6 +83,7 @@
   --font-body: 'Montserrat', sans-serif;
   --font-typewriter: 'Special Elite', monospace;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+  --font-inter: var(--font-body); /* alias removed font to the body font */
 
   /* ── Custom letter-spacing token ─────────────────────────── */
   --tracking-widest-2: 0.32em;

@@ -3,7 +3,6 @@ import { RouteLoader } from '@/components/ui/RouteLoader'
 import type { Metadata, Viewport } from 'next'
 import {
   Cormorant_Garamond,
-  Inter,
   Montserrat,
   Pinyon_Script,
   Special_Elite,
@@ -16,6 +15,7 @@ const pinyonScript = Pinyon_Script({
   subsets: ['latin', 'latin-ext'],
   variable: '--font-script',
   display: 'swap',
+  preload: false,
 })
 
 const cormorant = Cormorant_Garamond({
@@ -27,6 +27,7 @@ const cormorant = Cormorant_Garamond({
 
 const montserrat = Montserrat({
   subsets: ['latin'],
+  weight: ['300', '400', '500', '600'],
   variable: '--font-body',
   display: 'swap',
 })
@@ -36,41 +37,33 @@ const specialElite = Special_Elite({
   subsets: ['latin'],
   variable: '--font-typewriter',
   display: 'swap',
-})
-
-const inter = Inter({
-  subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
-  variable: '--font-inter',
-  display: 'swap',
+  preload: false,
 })
 
 export const metadata: Metadata = {
-  // metadataBase is crucial for generating absolute URLs for OG images
-  metadataBase: new URL('https://ellen-bruno-wedding.netlify.app'), // Replace with your actual domain
+  metadataBase: new URL('https://ellen-bruno-wedding.netlify.app'),
   title: 'Ellen & Bruno — Wedding Day | 2026',
   description:
     'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
   openGraph: {
-    title: 'Ellen &amp; Bruno — Wedding Day',
+    title: 'Ellen & Bruno — Wedding Day',
     description: 'Join us to celebrate our love',
-    url: 'https://ellen-bruno-wedding.netlify.app', // Add the canonical URL
+    url: 'https://ellen-bruno-wedding.netlify.app',
     type: 'website',
     locale: 'pt_BR',
     images: [
       {
-        url: '/monogram-eb.png', // Place your OG image in the /public folder
+        url: '/monogram-eb.png',
         width: 1200,
         height: 630,
-        alt: 'Ellen &amp; Bruno Wedding Invitation',
+        alt: 'Ellen & Bruno Wedding Invitation',
       },
       { url: '/api/invitation', width: 1200, height: 630 },
     ],
   },
-  // Optional but recommended for Twitter
   twitter: {
     card: 'summary_large_image',
-    title: 'Ellen &amp; Bruno — Wedding Day',
+    title: 'Ellen & Bruno — Wedding Day',
     description: 'Join us to celebrate our love',
     images: ['/monogram-eb.png'],
   },
@@ -85,13 +78,11 @@ export const viewport: Viewport = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode
-}>) {
+}: Readonly<{ children: React.ReactNode }>) {
   return (
     <html
       lang="pt-BR"
-      className={`${pinyonScript.variable} ${cormorant.variable} ${montserrat.variable} ${specialElite.variable} ${inter.variable} relative`}
+      className={`${pinyonScript.variable} ${cormorant.variable} ${montserrat.variable} ${specialElite.variable} relative`}
       data-lt-installed="true"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
