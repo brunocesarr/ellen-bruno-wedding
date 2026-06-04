@@ -12,3 +12,6 @@ for = "/images/*"
 for = "/audio/*"
 [headers.values]
   Cache-Control = "public, max-age=2592000"
+
+[build]
+command = "pnpm build"

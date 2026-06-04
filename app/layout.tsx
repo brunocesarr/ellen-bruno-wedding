@@ -1,6 +1,6 @@
-import { MusicToggle } from '@/components/ui/MusicToggle'
 import { RouteLoader } from '@/components/ui/RouteLoader'
 import type { Metadata, Viewport } from 'next'
+import dynamic from 'next/dynamic'
 import {
   Cormorant_Garamond,
   Montserrat,
@@ -76,6 +76,10 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
+const MusicToggleButton = dynamic(() =>
+  import('@/components/ui/MusicToggle').then((m) => m.MusicToggle)
+)
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -94,7 +98,7 @@ export default function RootLayout({
         <NuqsAdapter>
           <RouteLoader />
           {children}
-          <MusicToggle />
+          <MusicToggleButton />
         </NuqsAdapter>
       </body>
     </html>
