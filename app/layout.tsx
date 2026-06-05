@@ -87,7 +87,10 @@ export default function RootLayout({
       data-scroll-behavior="smooth"
       className={`${pinyonScript.variable} ${cormorant.variable} ${montserrat.variable} ${specialElite.variable} relative`}
     >
-      <body className="font-body antialiased relative bg-ivory">
+      <body
+        className="font-body antialiased relative bg-ivory"
+        cz-shortcut-listen="true"
+      >
         <NuqsAdapter>
           <RouteLoader />
           {children}
