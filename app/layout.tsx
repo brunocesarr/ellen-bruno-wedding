@@ -12,26 +12,25 @@ import './globals.css'
 
 const pinyonScript = Pinyon_Script({
   weight: '400',
-  subsets: ['latin', 'latin-ext'],
+  subsets: ['latin'],
   variable: '--font-script',
   display: 'swap',
-  preload: false,
+  preload: false, // decorative
 })
-
 const cormorant = Cormorant_Garamond({
   weight: ['400', '700'],
   subsets: ['latin'],
   variable: '--font-display',
   display: 'swap',
+  preload: true, // hero/LCP heading
 })
-
 const montserrat = Montserrat({
-  subsets: ['latin'],
   weight: ['300', '400', '500', '600'],
+  subsets: ['latin'],
   variable: '--font-body',
   display: 'swap',
+  preload: true, // base body font
 })
-
 const specialElite = Special_Elite({
   weight: '400',
   subsets: ['latin'],
@@ -40,31 +39,31 @@ const specialElite = Special_Elite({
   preload: false,
 })
 
+// Audio toggle is non-critical -> client-only & lazy
+
+const MusicToggleButton = dynamic(() =>
+  import('@/components/ui/MusicToggle').then((m) => m.MusicToggle)
+)
+
 export const metadata: Metadata = {
   metadataBase: new URL('https://ellen-bruno-wedding.netlify.app'),
   title: 'Ellen & Bruno — Wedding Day | 2026',
   description:
     'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
   openGraph: {
-    title: 'Ellen & Bruno — Wedding Day',
-    description: 'Join us to celebrate our love',
+    title: 'Ellen & Bruno — Wedding Day | 2026',
+    description:
+      'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
     url: 'https://ellen-bruno-wedding.netlify.app',
     type: 'website',
     locale: 'pt_BR',
-    images: [
-      {
-        url: '/monogram-eb.png',
-        width: 1200,
-        height: 630,
-        alt: 'Ellen & Bruno Wedding Invitation',
-      },
-      { url: '/api/invitation', width: 1200, height: 630 },
-    ],
+    images: ['/monogram-eb.png', '/api/invitation'],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Ellen & Bruno — Wedding Day',
-    description: 'Join us to celebrate our love',
+    title: 'Ellen & Bruno — Wedding Day | 2026',
+    description:
+      'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
     images: ['/monogram-eb.png'],
   },
 }
@@ -76,25 +75,19 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-const MusicToggleButton = dynamic(() =>
-  import('@/components/ui/MusicToggle').then((m) => m.MusicToggle)
-)
-
 export default function RootLayout({
   children,
-}: Readonly<{ children: React.ReactNode }>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <html
       lang="pt-BR"
-      className={`${pinyonScript.variable} ${cormorant.variable} ${montserrat.variable} ${specialElite.variable} relative`}
-      data-lt-installed="true"
       suppressHydrationWarning
       data-scroll-behavior="smooth"
+      className={`${pinyonScript.variable} ${cormorant.variable} ${montserrat.variable} ${specialElite.variable} relative`}
     >
-      <body
-        className="font-body antialiased relative bg-ivory"
-        cz-shortcut-listen="true"
-      >
+      <body className="font-body antialiased relative bg-ivory">
         <NuqsAdapter>
           <RouteLoader />
           {children}
