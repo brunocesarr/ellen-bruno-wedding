@@ -1,10 +1,10 @@
 import { MotionWrapper } from '@/components/layout/MotionWrapper'
 import { AboutSection } from '@/components/sections/AboutSection'
+import FooterSection from '@/components/sections/FooterSection'
 import { GallerySection } from '@/components/sections/GallerySection'
 import { GiftsTeaserSection } from '@/components/sections/GiftsTeaserSection'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { TestimonialSection } from '@/components/sections/TestimonialSection'
-import { InviteLink } from '@/components/ui/InviteLink'
 import dynamic from 'next/dynamic'
 
 // Corrected dynamic imports
@@ -32,14 +32,7 @@ export default function WeddingPage() {
       <TestimonialSection />
       <GallerySection />
       <GiftsTeaserSection />
-      {/* Footer */}
-      <footer className="bg-cream px-6 py-8 text-center">
-        <p className="font-script text-2xl text-terracotta">E.B</p>
-        <p className="mt-2 font-body text-[0.65rem] uppercase tracking-[0.3em] text-warm-gray/70">
-          com amor, 2026
-        </p>
-      </footer>
-      <InviteLink />
+      <FooterSection />
     </MotionWrapper>
   )
 }
