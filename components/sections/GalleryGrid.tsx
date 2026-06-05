@@ -66,7 +66,10 @@ export function GalleryGrid({ photos }: { photos: Photo[] }) {
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-stone-900/80 backdrop-blur-sm" />
 
-          <Dialog.Content className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-12">
+          <Dialog.Content
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-12"
+            aria-describedby={undefined}
+          >
             {openIndex && photos[openIndex] && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}

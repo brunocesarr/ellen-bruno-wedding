@@ -4,6 +4,7 @@ import { GiftHero } from '@/components/gifts/GiftHero'
 import { HowItWorks } from '@/components/gifts/HowItWorks'
 import { HomeButton } from '@/components/public/HomeButton'
 import { listGiftsController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
+import { getOrderedSiteImages } from '@/src/lib/get-site-image'
 import type { Metadata } from 'next'
 import { Suspense } from 'react'
 
@@ -17,8 +18,15 @@ export const dynamic = 'force-dynamic'
 
 type Props = { searchParams: Promise<{ token?: string }> }
 
+const POLAROIDS_KEYS = [
+  'couple-main',
+  'couple-emotion',
+  'couple-forever',
+] as const
+
 export default async function GiftsPage({ searchParams }: Props) {
   const { token } = await searchParams
+  const photos = await getOrderedSiteImages(POLAROIDS_KEYS)
 
   return (
     <main className="bg-cream">
@@ -26,12 +34,14 @@ export default async function GiftsPage({ searchParams }: Props) {
         href={token ? '/invite/full?token=' + token : '/invite/full'}
       />
 
-      {/* Hero with polaroid montage */}
-      <GiftHero
-        couplePhoto="/images/couple-main.jpg"
-        emotionPhoto="/images/couple-emotion.jpg"
-        foreverPhoto="/images/couple-forever.jpg"
-      />
+      {photos.length >= 3 && photos[0] && photos[1] && photos[2] && (
+        /* Hero with polaroid montage */
+        <GiftHero
+          couplePhoto={photos[0]?.src ?? photos[0]?.fallback}
+          emotionPhoto={photos[1]?.src ?? photos[1]?.fallback}
+          foreverPhoto={photos[2]?.src ?? photos[2]?.fallback}
+        />
+      )}
 
       {/* Filterable grid */}
       <Suspense fallback={<GridSkeleton />}>

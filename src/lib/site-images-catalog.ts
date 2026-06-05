@@ -2,7 +2,6 @@ export type SiteImageSection =
   | 'hero'
   | 'about'
   | 'gallery'
-  | 'parents'
   | 'polaroids'
   | 'couple'
   | 'decorative'
@@ -52,7 +51,7 @@ export const SITE_IMAGE_CATALOG: SiteImageDef[] = [
   },
 
   // public/images/gallery/1.jpg ... 7.jpg
-  ...Array.from({ length: 7 }, (_, i) => {
+  ...Array.from({ length: 4 }, (_, i) => {
     const number = i + 1
     const padded = String(number).padStart(2, '0')
 
@@ -64,35 +63,6 @@ export const SITE_IMAGE_CATALOG: SiteImageDef[] = [
       aspect: 'portrait' as const,
     }
   }),
-
-  {
-    key: 'parent-mae-noiva',
-    section: 'parents',
-    label: 'Mãe da noiva',
-    fallback: '/images/parents/mae-noiva.jpg',
-    aspect: 'square',
-  },
-  {
-    key: 'parent-pai-noiva',
-    section: 'parents',
-    label: 'Pai da noiva',
-    fallback: '/images/parents/pai-noiva.jpg',
-    aspect: 'square',
-  },
-  {
-    key: 'parent-mae-noivo',
-    section: 'parents',
-    label: 'Mãe do noivo',
-    fallback: '/images/parents/mae-noivo.jpg',
-    aspect: 'square',
-  },
-  {
-    key: 'parent-pai-noivo',
-    section: 'parents',
-    label: 'Pai do noivo',
-    fallback: '/images/parents/pai-noivo.jpg',
-    aspect: 'square',
-  },
 
   {
     key: 'polaroid-1',
@@ -187,7 +157,6 @@ export const SECTION_LABELS: Record<SiteImageSection, string> = {
   hero: 'Capa',
   about: 'Sobre Nós',
   gallery: 'Galeria',
-  parents: 'Nossos Pais',
   polaroids: 'Polaroids',
   couple: 'Casal',
   venue: 'Local',

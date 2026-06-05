@@ -5,7 +5,7 @@ import { createStaticPix, hasError } from 'pix-utils'
 function toAscii(value: string): string {
   return value
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') 
+    .replace(/[\u0300-\u036f]/g, '')
     .replace(/[^\x20-\x7E]/g, '')
     .replace(/\s+/g, ' ')
     .trim()

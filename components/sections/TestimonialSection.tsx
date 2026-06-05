@@ -18,12 +18,6 @@ const TESTIMONIALS: Testimonial[] = [
     author: 'Isaias 41:20',
     context: 'Ellen & Bruno',
   },
-  {
-    quote:
-      'Encontrei em você o lar que sempre busquei — não em paredes, mas em palavras, gestos e silêncios.',
-    author: '',
-    context: 'Ellen & Bruno',
-  },
 ]
 
 export function TestimonialSection() {
@@ -73,14 +67,16 @@ export function TestimonialSection() {
         {/* Carousel */}
         <div className="relative mt-12 md:mt-16">
           <div className="flex items-center justify-center gap-3 md:gap-6">
-            <button
-              type="button"
-              onClick={prev}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-amber-800 transition hover:bg-amber-100 md:h-12 md:w-12"
-              aria-label="Depoimento anterior"
-            >
-              <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
-            </button>
+            {TESTIMONIALS.length > 1 && (
+              <button
+                type="button"
+                onClick={prev}
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-amber-800 transition hover:bg-amber-100 md:h-12 md:w-12"
+                aria-label="Depoimento anterior"
+              >
+                <ChevronLeft className="h-5 w-5 md:h-6 md:w-6" />
+              </button>
+            )}
 
             <div className="relative min-h-[200px] flex-1 md:min-h-[240px]">
               <AnimatePresence mode="wait">
@@ -109,14 +105,16 @@ export function TestimonialSection() {
               </AnimatePresence>
             </div>
 
-            <button
-              type="button"
-              onClick={next}
-              className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-amber-800 transition hover:bg-amber-100 md:h-12 md:w-12"
-              aria-label="Próximo depoimento"
-            >
-              <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
-            </button>
+            {TESTIMONIALS.length > 1 && (
+              <button
+                type="button"
+                onClick={next}
+                className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full text-amber-800 transition hover:bg-amber-100 md:h-12 md:w-12"
+                aria-label="Próximo depoimento"
+              >
+                <ChevronRight className="h-5 w-5 md:h-6 md:w-6" />
+              </button>
+            )}
           </div>
 
           {/* Pagination dots */}
