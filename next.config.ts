@@ -3,11 +3,10 @@ import type { NextConfig } from 'next'
 const nextConfig: NextConfig = {
   reactStrictMode: true,
   poweredByHeader: false,
-  compress: true, // gzip/br on the Next server layer
-  productionBrowserSourceMaps: false, // stop shipping/exposing source maps
+  compress: true,
+  productionBrowserSourceMaps: false,
 
   experimental: {
-    // Tree-shakes the icon/motion/radix barrels -> smaller initial bundle
     optimizePackageImports: [
       'lucide-react',
       'motion',
@@ -18,19 +17,18 @@ const nextConfig: NextConfig = {
       'react-hook-form',
     ],
     serverActions: { bodySizeLimit: '5mb' },
-    optimizeCss: true, // critical-CSS inlining + CSS minification
+    // optimizeCss: true, // requires `beasties` -> run: pnpm add -D beasties (or keep disabled)
   },
 
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [360, 640, 768, 1024, 1280, 1920],
     imageSizes: [16, 32, 64, 96, 128, 256, 384],
-    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co' }],
     qualities: [70, 75, 80, 85],
   },
 
-  // Long-cache immutable build assets at the framework layer too
   async headers() {
     return [
       {

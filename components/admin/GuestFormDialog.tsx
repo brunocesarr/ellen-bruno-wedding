@@ -28,7 +28,10 @@ import { z } from 'zod'
 const guestFormSchema = CreateGuestInputSchema.extend({
   notes: z.string().max(500, 'Máximo 500 caracteres').optional().default(''),
 })
-type GuestFormValues = z.infer<typeof guestFormSchema>
+// `.default()` on `notes`/`status` makes the schema input ≠ output, so we
+// keep both types and pass them to useForm's <Input, Context, Output> generics.
+type GuestFormInput = z.input<typeof guestFormSchema>
+type GuestFormValues = z.output<typeof guestFormSchema>
 
 const STATUS_OPTIONS: { value: GuestStatus; label: string }[] = [
   { value: 'pending', label: 'Pendente' },
@@ -61,7 +64,7 @@ export function GuestFormDialog({
   const [open, setOpen] = useState(false)
   const [serverError, setServerError] = useState<string | null>(null)
 
-  const defaultValues: GuestFormValues = {
+  const defaultValues: GuestFormInput = {
     firstName: guest?.firstName ?? '',
     lastName: guest?.lastName ?? '',
     status: guest?.status ?? 'pending',
@@ -74,7 +77,7 @@ export function GuestFormDialog({
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
-  } = useForm<GuestFormValues>({
+  } = useForm<GuestFormInput, unknown, GuestFormValues>({
     resolver: zodResolver(guestFormSchema),
     defaultValues,
     mode: 'onSubmit',
