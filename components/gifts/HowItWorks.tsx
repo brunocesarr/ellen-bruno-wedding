@@ -1,5 +1,5 @@
 import { Reveal, RevealItem, RevealStagger } from '@/components/ui/Reveal'
-import { Gift, Heart, QrCode } from 'lucide-react'
+import { Gift, Heart, QrCode, ShieldCheck } from 'lucide-react'
 
 const STEPS = [
   {
@@ -11,6 +11,12 @@ const STEPS = [
     icon: QrCode,
     title: 'Pague pelo Pix',
     description: 'Use o QR Code ou copie o código. Simples, rápido e seguro.',
+  },
+  {
+    icon: ShieldCheck,
+    title: 'Confira o destinatário',
+    description:
+      'Ao abrir o app do banco, confirme que os dados do Pix mostram "Bruno César" ou "Ellen Lopes" como recebedor antes de finalizar.',
   },
   {
     icon: Heart,
@@ -28,7 +34,7 @@ export function HowItWorks() {
         <h2 className="heading-display mt-4">Três passos simples</h2>
       </Reveal>
 
-      <RevealStagger className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <RevealStagger className="grid grid-cols-1 gap-8 md:grid-cols-4">
         {STEPS.map((step, i) => (
           <RevealItem key={step.title} className="relative text-center">
             <div className="mx-auto flex size-16 items-center justify-center rounded-full bg-cream-dark">
