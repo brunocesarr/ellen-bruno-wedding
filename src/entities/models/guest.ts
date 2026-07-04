@@ -10,6 +10,7 @@ export const GuestSchema = z.object({
   lastName: z.string().min(1).max(80),
   status: GuestStatusSchema,
   inviteToken: z.string().uuid(),
+  partyInviteToken: z.string().uuid(),
   partyId: z.string().uuid(),
   notes: z.string().max(500).nullable(),
   confirmedAt: z.date().nullable(),

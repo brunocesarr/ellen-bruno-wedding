@@ -9,6 +9,8 @@ export interface IGuestsRepository {
   list(): Promise<Guest[]>
   findById(id: string): Promise<Guest | null>
   findByInviteToken(token: string): Promise<Guest | null>
+  /** Finds any guest whose party shares this token; used to resolve group invite links. */
+  findByPartyInviteToken(token: string): Promise<Guest | null>
   listByPartyId(partyId: string): Promise<Guest[]>
   create(input: CreateGuestInput): Promise<Guest>
   update(input: UpdateGuestInput): Promise<Guest>

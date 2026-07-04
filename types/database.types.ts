@@ -69,6 +69,7 @@ export type Database = {
           last_name: string
           notes: string | null
           party_id: string
+          party_invite_token: string
           status: Database['public']['Enums']['guest_status']
           updated_at: string
         }
@@ -81,6 +82,7 @@ export type Database = {
           last_name: string
           notes?: string | null
           party_id?: string
+          party_invite_token?: string
           status?: Database['public']['Enums']['guest_status']
           updated_at?: string
         }
@@ -93,6 +95,7 @@ export type Database = {
           last_name?: string
           notes?: string | null
           party_id?: string
+          party_invite_token?: string
           status?: Database['public']['Enums']['guest_status']
           updated_at?: string
         }

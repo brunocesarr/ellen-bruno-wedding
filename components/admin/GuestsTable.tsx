@@ -273,11 +273,11 @@ function PartyCard({
         <div className="flex items-center gap-2">
           <button
             type="button"
-            onClick={() => onCopyInvite(head.inviteToken)}
+            onClick={() => onCopyInvite(head.partyInviteToken)}
             className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-stone-700 ring-1 ring-stone-200 transition hover:bg-stone-50"
-            title="Copiar link do convite"
+            title="Copiar link do grupo"
           >
-            {copiedToken === head.inviteToken ? (
+            {copiedToken === head.partyInviteToken ? (
               <>
                 <LinkIcon className="h-3.5 w-3.5 text-emerald-600" />
                 Copiado!
@@ -285,7 +285,7 @@ function PartyCard({
             ) : (
               <>
                 <Copy className="h-3.5 w-3.5" />
-                Copiar convite
+                Link do grupo
               </>
             )}
           </button>
@@ -322,6 +322,8 @@ function PartyCard({
             <GuestRow
               guest={head}
               isHead
+              copiedToken={copiedToken}
+              onCopyInvite={onCopyInvite}
               onRequestDelete={onRequestDelete}
               onSaved={onSaved}
             />
@@ -329,6 +331,8 @@ function PartyCard({
               <GuestRow
                 key={g.id}
                 guest={g}
+                copiedToken={copiedToken}
+                onCopyInvite={onCopyInvite}
                 onRequestDelete={onRequestDelete}
                 onSaved={onSaved}
               />
@@ -344,6 +348,8 @@ function PartyCard({
             key={g.id}
             guest={g}
             isHead={g.id === head.id}
+            copiedToken={copiedToken}
+            onCopyInvite={onCopyInvite}
             onRequestDelete={onRequestDelete}
             onSaved={onSaved}
           />
@@ -360,11 +366,15 @@ function PartyCard({
 function GuestRow({
   guest,
   isHead,
+  copiedToken,
+  onCopyInvite,
   onRequestDelete,
   onSaved,
 }: {
   guest: Guest
   isHead?: boolean
+  copiedToken: string | null
+  onCopyInvite: (token: string) => void
   onRequestDelete: (g: Guest) => void
   onSaved: (g: Guest) => void
 }) {
@@ -404,6 +414,19 @@ function GuestRow({
 
       <td className="px-4 py-3">
         <div className="flex justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => onCopyInvite(guest.inviteToken)}
+            className="rounded-lg p-2 text-stone-500 transition hover:bg-stone-100"
+            aria-label="Copiar link individual"
+            title="Copiar link individual"
+          >
+            {copiedToken === guest.inviteToken ? (
+              <LinkIcon className="h-4 w-4 text-emerald-600" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+          </button>
           <GuestFormDialog
             guest={guest}
             onSaved={onSaved}
@@ -438,11 +461,15 @@ function GuestRow({
 function GuestMobileCard({
   guest,
   isHead,
+  copiedToken,
+  onCopyInvite,
   onRequestDelete,
   onSaved,
 }: {
   guest: Guest
   isHead: boolean
+  copiedToken: string | null
+  onCopyInvite: (token: string) => void
   onRequestDelete: (g: Guest) => void
   onSaved: (g: Guest) => void
 }) {
@@ -466,6 +493,22 @@ function GuestMobileCard({
 
       <div className="mt-3 flex flex-wrap justify-end gap-2">
         <NotesIndicator guest={guest} variant="button" />
+
+        <button
+          type="button"
+          onClick={() => onCopyInvite(guest.inviteToken)}
+          className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"
+        >
+          {copiedToken === guest.inviteToken ? (
+            <>
+              <LinkIcon className="h-3.5 w-3.5 text-emerald-600" /> Copiado!
+            </>
+          ) : (
+            <>
+              <Copy className="h-3.5 w-3.5" /> Link individual
+            </>
+          )}
+        </button>
 
         <GuestFormDialog
           guest={guest}

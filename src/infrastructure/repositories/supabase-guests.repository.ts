@@ -10,25 +10,13 @@ import type {
 import { GuestRow, GuestUpdate } from '@/src/infrastructure/supabase/db-types'
 import type { TypedSupabaseClient } from '@/src/infrastructure/supabase/types'
 
-type Row = {
-  id: string
-  first_name: string
-  last_name: string
-  status: GuestStatus
-  invite_token: string
-  party_id: string
-  notes: string | null
-  confirmed_at: string | null
-  created_at: string
-  updated_at: string
-}
-
 const mapRow = (row: GuestRow): Guest => ({
   id: row.id,
   firstName: row.first_name,
   lastName: row.last_name,
   status: row.status as GuestStatus,
   inviteToken: row.invite_token,
+  partyInviteToken: row.party_invite_token,
   partyId: row.party_id,
   notes: row.notes,
   confirmedAt: row.confirmed_at ? new Date(row.confirmed_at) : null,
@@ -45,7 +33,7 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
       .select('*')
       .order('created_at', { ascending: false })
     if (error) throw new Error(error.message)
-    return (data as Row[]).map(mapRow)
+    return (data as GuestRow[]).map(mapRow)
   }
 
   async findById(id: string): Promise<Guest | null> {
@@ -55,7 +43,7 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
       .eq('id', id)
       .maybeSingle()
     if (error) throw new Error(error.message)
-    return data ? mapRow(data as Row) : null
+    return data ? mapRow(data as GuestRow) : null
   }
 
   async findByInviteToken(token: string): Promise<Guest | null> {
@@ -65,7 +53,19 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
       .eq('invite_token', token)
       .maybeSingle()
     if (error) throw new Error(error.message)
-    return data ? mapRow(data as Row) : null
+    return data ? mapRow(data as GuestRow) : null
+  }
+
+  async findByPartyInviteToken(token: string): Promise<Guest | null> {
+    const { data, error } = await this.supabase
+      .from('guests')
+      .select('*')
+      .eq('party_invite_token', token)
+      .order('created_at', { ascending: true })
+      .limit(1)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    return data ? mapRow(data as GuestRow) : null
   }
 
   async listByPartyId(partyId: string): Promise<Guest[]> {
@@ -75,7 +75,7 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
       .eq('party_id', partyId)
       .order('created_at', { ascending: true })
     if (error) throw new Error(error.message)
-    return (data as Row[]).map(mapRow)
+    return (data as GuestRow[]).map(mapRow)
   }
 
   async create(input: CreateGuestInput): Promise<Guest> {
@@ -91,7 +91,7 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
       .select('*')
       .single()
     if (error) throw new Error(error.message)
-    return mapRow(data as Row)
+    return mapRow(data as GuestRow)
   }
 
   async update(input: UpdateGuestInput): Promise<Guest> {

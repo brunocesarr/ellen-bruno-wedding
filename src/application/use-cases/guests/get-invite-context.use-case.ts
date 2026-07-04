@@ -7,7 +7,10 @@ export const getInviteContextUseCase =
   async (token: string): Promise<InviteContext> => {
     if (!token) throw new InvalidInviteTokenError()
 
-    const guest = await deps.guestsRepo.findByInviteToken(token)
+    const guest =
+      (await deps.guestsRepo.findByInviteToken(token)) ??
+      (await deps.guestsRepo.findByPartyInviteToken(token))
+
     if (!guest) throw new InvalidInviteTokenError()
 
     const party = await deps.guestsRepo.listByPartyId(guest.partyId)
