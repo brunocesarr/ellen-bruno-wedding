@@ -2,11 +2,14 @@ import type { IGuestsRepository } from '@/src/application/repositories/guests.re
 import { ValidationError } from '@/src/entities/errors/common'
 import { InvalidInviteTokenError } from '@/src/entities/errors/guests'
 import { ConfirmAttendanceInputSchema } from '@/src/entities/models/guest'
+import { z } from 'zod'
 
-export const confirmAttendanceUseCase =
-  (deps: { guestsRepo: IGuestsRepository }) => async (raw: unknown) => {
+export function confirmAttendanceUseCase(deps: {
+  guestsRepo: IGuestsRepository
+}) {
+  return async (raw: unknown) => {
     const parsed = ConfirmAttendanceInputSchema.safeParse(raw)
-    if (!parsed.success) throw new ValidationError(parsed.error.issues)
+    if (!parsed.success) throw new ValidationError(z.flattenError(parsed.error))
 
     const { inviteToken, attendees } = parsed.data
 
@@ -26,3 +29,4 @@ export const confirmAttendanceUseCase =
       attendees.map((a) => ({ id: a.guestId, status: a.status }))
     )
   }
+}

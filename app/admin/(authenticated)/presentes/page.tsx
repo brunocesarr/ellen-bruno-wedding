@@ -3,16 +3,15 @@ import { GiftFormDialog } from '@/components/admin/GiftFormDialog'
 import { GiftsTable } from '@/components/admin/GiftsTable'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
+import { buttonPrimary } from '@/src/lib/class-names'
+import { unwrapForPage } from '@/src/lib/server-action-result'
+import { cn } from '@/src/lib/utils'
 import { Gift, Plus } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
 export default async function PresentesPage() {
-  const result = await listGiftsAction()
-  if (!result.ok) {
-    throw new Error(result.error)
-  }
-  const gifts = result.data
+  const gifts = unwrapForPage(await listGiftsAction())
   const totalValue = gifts.reduce((s, g) => s + (g.price ?? 0), 0)
   const reservedValue = gifts
     .filter((g) => g.status !== 'pending')
@@ -31,7 +30,7 @@ export default async function PresentesPage() {
         </div>
         <GiftFormDialog
           trigger={
-            <button className="inline-flex items-center gap-2 rounded-full bg-amber-700 px-5 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600">
+            <button className={cn(buttonPrimary, 'py-2.5')}>
               <Plus className="h-4 w-4" /> Novo presente
             </button>
           }

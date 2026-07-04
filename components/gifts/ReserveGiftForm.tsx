@@ -2,11 +2,15 @@
 
 import { reserveGiftAction } from '@/app/(public)/_actions/gifts.actions'
 import { Field, FieldInput, FieldTextarea } from '@/components/ui/Field'
+import type { ActionResult } from '@/src/lib/server-action-result'
 import { motion } from 'motion/react'
 import { useActionState } from 'react'
 import { AnimatedButton } from '../ui/AnimatedButton'
 
-const initial = { ok: false, error: '' } as any
+const initial: ActionResult<{ id: string; name: string }> = {
+  ok: false,
+  error: '',
+}
 
 export function ReserveGiftForm({ giftId }: { giftId: string }) {
   const [state, action, pending] = useActionState(reserveGiftAction, initial)

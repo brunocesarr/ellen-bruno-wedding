@@ -26,7 +26,7 @@ export function ReservationsChart({ data }: { data: Point[] }) {
     ''
   )
 
-  let dot = points[points.length - 1]
+  const dot = points[points.length - 1]
   if (!dot) return null
 
   const area = path + ` L ${dot.x} 100 L 0 100 Z`

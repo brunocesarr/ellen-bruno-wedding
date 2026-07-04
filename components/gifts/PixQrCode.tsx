@@ -1,8 +1,8 @@
 'use client'
 
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { Check, Copy } from 'lucide-react'
 import { AnimatePresence, motion } from 'motion/react'
-import { useState } from 'react'
 
 export function PixQrCode({
   qrImage,
@@ -11,13 +11,8 @@ export function PixQrCode({
   qrImage: string
   brCode: string
 }) {
-  const [copied, setCopied] = useState(false)
-
-  const copy = async () => {
-    await navigator.clipboard.writeText(brCode)
-    setCopied(true)
-    setTimeout(() => setCopied(false), 2400)
-  }
+  const { isCopied, copy } = useCopyToClipboard()
+  const copied = isCopied(brCode)
 
   return (
     <div className="space-y-4 rounded-3xl bg-white p-6 shadow-sm md:p-8">
@@ -37,7 +32,7 @@ export function PixQrCode({
         </code>
       </div>
 
-      <button onClick={copy} className="btn-primary w-full">
+      <button onClick={() => copy(brCode)} className="btn-primary w-full">
         <AnimatePresence mode="wait">
           {copied ? (
             <motion.span

@@ -1,10 +1,12 @@
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
 /**
- * Combines class names, filtering out falsy values.
+ * Combines class names and resolves conflicting Tailwind utilities
+ * (e.g. `px-2` + `px-4` → `px-4`), so later classes win as expected.
  */
-export function cn(
-  ...classes: (string | boolean | undefined | null)[]
-): string {
-  return classes.filter(Boolean).join(' ')
+export function cn(...classes: ClassValue[]): string {
+  return twMerge(clsx(classes))
 }
 
 /**

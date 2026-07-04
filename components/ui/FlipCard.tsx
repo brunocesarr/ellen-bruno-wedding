@@ -1,5 +1,3 @@
-'use client'
-
 interface FlipCardProps {
   value: number
   label: string

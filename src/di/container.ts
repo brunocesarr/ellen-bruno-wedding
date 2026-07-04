@@ -9,8 +9,14 @@ import { SupabaseStorageRepository } from '@/src/infrastructure/repositories/sup
 import { PixUtilsService } from '@/src/infrastructure/services/pix-utils.service'
 import { SupabaseAuthService } from '@/src/infrastructure/services/supabase-auth.service'
 import { createSupabaseServerClient } from '@/src/infrastructure/supabase/server'
+import { cache } from 'react'
 
-export async function getContainer() {
+/**
+ * Builds the authenticated dependency container. Wrapped in React `cache()` so
+ * the Supabase server client and repositories are instantiated once per request,
+ * even when several controllers resolve the container during the same render.
+ */
+export const getContainer = cache(async () => {
   const supabase = await createSupabaseServerClient()
   return {
     rsvpRepo: new SupabaseRsvpRepository(supabase),
@@ -22,5 +28,5 @@ export async function getContainer() {
     pixService: new PixUtilsService(),
     guestsRepo: new SupabaseGuestsRepository(supabase),
   }
-}
+})
 export type Container = Awaited<ReturnType<typeof getContainer>>

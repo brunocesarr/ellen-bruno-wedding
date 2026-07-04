@@ -22,7 +22,7 @@ export function markAsThankedUseCase(d: Deps) {
     const existing = await d.pixRepo.listByGiftId(giftId)
 
     if (existing.length > 0) {
-      let item = existing[0]
+      const item = existing[0]
       if (!item) throw new GiftNotFoundError()
       return d.pixRepo.update(item.id, { confirmed: true })
     }

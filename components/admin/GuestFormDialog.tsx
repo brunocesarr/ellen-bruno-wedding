@@ -4,6 +4,8 @@ import {
   createGuestAction,
   updateGuestAction,
 } from '@/app/admin/_actions/guests.actions'
+import { FormField as Field } from '@/components/ui/FormField'
+import { inputField as inputClassName } from '@/src/lib/class-names'
 import {
   CreateGuestInputSchema,
   GUEST_STATUSES,
@@ -279,33 +281,6 @@ export function GuestFormDialog({
     </Dialog.Root>
   )
 }
-
-/* ----- Local helpers (mirrors GiftFormDialog) --------------------- */
-
-function Field({
-  label,
-  error,
-  children,
-}: {
-  label: string
-  error?: string
-  children: React.ReactNode
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-stone-600">
-        {label}
-      </span>
-      {children}
-      {error && (
-        <span className="mt-1 block text-xs text-rose-600">{error}</span>
-      )}
-    </label>
-  )
-}
-
-const inputClassName =
-  'w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition placeholder:text-stone-300 focus:border-amber-600'
 
 const dotByStatus: Record<GuestStatus, string> = {
   pending: 'bg-amber-500',

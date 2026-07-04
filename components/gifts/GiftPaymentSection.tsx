@@ -1,6 +1,7 @@
 'use client'
 
 import { motion } from 'motion/react'
+import Link from 'next/link'
 import { PixQrCode } from './PixQrCode'
 import { ReserveGiftForm } from './ReserveGiftForm'
 
@@ -44,9 +45,9 @@ export function GiftPaymentSection({
               &ldquo;{reservedMessage}&rdquo;
             </blockquote>
           )}
-          <a href="/presentes" className="btn-ghost mt-8">
+          <Link href="/presentes" className="btn-ghost mt-8">
             Ver outros presentes
-          </a>
+          </Link>
         </div>
       </motion.section>
     )

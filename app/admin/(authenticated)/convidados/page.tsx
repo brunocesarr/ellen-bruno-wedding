@@ -1,16 +1,12 @@
 import { listGuestsAction } from '@/app/admin/_actions/guests.actions'
 import { GuestsTable } from '@/components/admin/GuestsTable'
 import { SectionCard } from '@/components/admin/SectionCard'
-import { redirect } from 'next/navigation'
+import { unwrapForPage } from '@/src/lib/server-action-result'
 
 export const dynamic = 'force-dynamic'
 
 export default async function GuestsPage() {
-  const res = await listGuestsAction()
-  if (!res.ok) {
-    if (res.error === 'unauthorized') redirect('/admin/login')
-    throw new Error(res.error)
-  }
+  const guests = unwrapForPage(await listGuestsAction())
 
   return (
     <section className="space-y-8">
@@ -27,7 +23,7 @@ export default async function GuestsPage() {
         title="Lista de convidados"
         description="Convidados são organizados em grupos para que cada convite confirme seus acompanhantes."
       >
-        <GuestsTable guests={res.data} />
+        <GuestsTable guests={guests} />
       </SectionCard>
     </section>
   )

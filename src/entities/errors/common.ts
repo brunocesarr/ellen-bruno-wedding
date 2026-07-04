@@ -1,5 +1,11 @@
+/** Shape produced by Zod's `flattenError` — carried on validation failures. */
+export type ValidationIssues = {
+  formErrors: string[]
+  fieldErrors: Record<string, string[]>
+}
+
 export class ValidationError extends Error {
-  constructor(public readonly issues: unknown) {
+  constructor(public readonly issues: ValidationIssues) {
     super('Dados inválidos')
     this.name = 'ValidationError'
   }

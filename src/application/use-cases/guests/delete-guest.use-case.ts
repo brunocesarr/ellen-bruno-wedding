@@ -1,5 +1,5 @@
 import type { IGuestsRepository } from '@/src/application/repositories/guests.repository.interface'
 
-export const deleteGuestUseCase =
-  (deps: { guestsRepo: IGuestsRepository }) => (id: string) =>
-    deps.guestsRepo.delete(id)
+export function deleteGuestUseCase(deps: { guestsRepo: IGuestsRepository }) {
+  return (id: string) => deps.guestsRepo.delete(id)
+}

@@ -4,18 +4,13 @@ import { ReservationsChart } from '@/components/admin/charts/ReservationsChart'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
 import { formatCurrencyBRL } from '@/src/lib/format'
+import { unwrapForPage } from '@/src/lib/server-action-result'
 import { Download } from 'lucide-react'
-import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
 export default async function ResumoPage() {
-  const result = await getDashboardStatsAction()
-  if (!result.ok) {
-    if (result.error === 'unauthorized') redirect('/admin/login')
-    throw new Error(result.error)
-  }
-  const stats = result.data
+  const stats = unwrapForPage(await getDashboardStatsAction())
 
   return (
     <div className="space-y-6">

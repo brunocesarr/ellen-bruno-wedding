@@ -2,18 +2,13 @@ import { listMessagesAction } from '@/app/admin/_actions/messages.actions'
 import { MessagesGrid } from '@/components/admin/MessagesGrid'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
+import { unwrapForPage } from '@/src/lib/server-action-result'
 import { Gift, Heart, MessageCircleHeart } from 'lucide-react'
-import { redirect } from 'next/navigation'
 
 export const dynamic = 'force-dynamic'
 
 export default async function MensagensPage() {
-  const result = await listMessagesAction()
-  if (!result.ok) {
-    if (result.error === 'unauthorized') redirect('/admin/login')
-    throw new Error(result.error)
-  }
-  const messages = result.data
+  const messages = unwrapForPage(await listMessagesAction())
 
   return (
     <div className="space-y-6">

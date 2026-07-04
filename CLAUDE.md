@@ -55,9 +55,19 @@ src/
 
 **Data flow:** Next.js Server Action → controller → use case → repository → Supabase.
 
-Controllers use `handle()` from `src/interface-adapters/controllers/_handle.ts` to normalize errors into `{ ok: true, data }` / `{ ok: false, error }` responses.
+**Controllers** all wrap their use case in `handle()` from `src/interface-adapters/controllers/_handle.ts`, which returns the canonical `ActionResult<T>` (`{ ok: true, data } | { ok: false, error, issues? }`). Never hand-roll try/catch in a controller — `handle()` maps `UnauthenticatedError → 'unauthorized'`, `ValidationError → { error, issues }`, and any other `Error → error.message`. The one exception is a page-orchestration read like `get-gift-detail.controller.ts`, which throws so the page can call `notFound()`.
 
-Use cases validate raw input with Zod and throw typed domain errors (`ValidationError`, `NotFoundError`, etc.) — never catch/swallow inside use cases.
+**Use cases** are `export function xUseCase(deps) { return async (input) => … }` factories. They validate raw input with Zod and throw typed domain errors (`ValidationError` carrying `z.flattenError(...)`, `GiftNotFoundError`, etc.) — never catch/swallow inside a use case.
+
+**`getContainer()` / `getPublicContainer()`** are wrapped in React `cache()`, so the Supabase client + repositories are built once per request even when several controllers resolve the container in one render.
+
+### Shared utilities (`src/lib/`)
+
+Server actions and controllers compose these instead of re-implementing them:
+- **`server-action-result.ts`** — the `ActionResult<T>` type + `unwrapForPage()` (redirect-on-unauthorized / throw / return data) used by every admin page.
+- **`revalidate.ts`** — `revalidateGroup('gifts' | 'guests' | 'messages' | 'siteImages' | 'invite')`; the single source of truth for which paths a mutation invalidates. Never hardcode `revalidatePath` lists in actions.
+- **`form-data.ts`** — typed `FormData` extractors (`getString`, `getOptionalString`, `getBoolean`, `getNumber`, `getFile`).
+- **`storage-upload.ts`** — `uploadImageIfPresent(storageRepo, file, pathPrefix)` (validation + upload + `cleanup()` on failure), shared by gift and site-image uploads.
 
 ## App Router structure
 
@@ -84,7 +94,6 @@ app/
     auth/callback/        # Supabase OAuth callback route
   api/
     invitation/           # SSR invitation card image route
-    rsvp/                 # RSVP webhook/API route
     keep-alive/           # Supabase keep-alive ping
 
 components/
@@ -106,6 +115,9 @@ components/
 - **URL state:** `nuqs` for type-safe search param state.
 - **Images:** Use `<SmartImage>` (`components/ui/SmartImage.tsx`) wrapper instead of raw `<img>` or `next/image` directly — it handles Supabase storage URLs and fallback logic. Remote images must come from `*.supabase.co` (configured in `next.config.ts`).
 - **Server Actions body limit:** 5 MB (set in `next.config.ts` `serverActions.bodySizeLimit`).
+- **Server-first components:** components are Server Components by default. Add `'use client'` only to the interactive leaf that needs state/effects/event handlers/browser APIs — keep static parents on the server.
+- **Clipboard:** use the `useCopyToClipboard()` hook (`hooks/`) rather than re-implementing `navigator.clipboard` + timeout state.
+- **Linting:** `next lint` was removed in Next 16 — the `lint` script runs the ESLint CLI (`eslint .`) directly. `eslint.config.mjs` pins the React version to avoid an eslint-plugin-react/ESLint 10 crash.
 
 ## Testing
 

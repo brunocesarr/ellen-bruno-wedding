@@ -15,14 +15,6 @@ export class SupabaseAuthService implements IAuthService {
     return { id: data.user.id, email: data.user.email! }
   }
 
-  async signInWithOtp(email: string, redirectTo: string) {
-    const { error } = await this.client.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: redirectTo },
-    })
-    if (error) throw error
-  }
-
   async signOut() {
     await this.client.auth.signOut()
   }

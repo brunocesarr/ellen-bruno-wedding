@@ -1,4 +1,5 @@
 import type { IPixService } from '@/src/application/services/pix.service.interface'
+import { PixError } from '@/src/entities/errors/pix'
 import type { PixQr } from '@/src/entities/models/pix'
 import { createStaticPix, hasError } from 'pix-utils'
 
@@ -32,7 +33,7 @@ export class PixUtilsService implements IPixService {
   }): Promise<PixQr> {
     const value = Number(amount)
     if (!Number.isFinite(value) || value <= 0) {
-      throw new Error(`Valor Pix inválido: ${amount}`)
+      throw new PixError(`Valor Pix inválido: ${amount}`)
     }
 
     const merchantName = sanitizeField(
@@ -44,7 +45,7 @@ export class PixUtilsService implements IPixService {
       15
     )
     const pixKey = (process.env.PIX_KEY ?? '').trim()
-    if (!pixKey) throw new Error('PIX_KEY não configurada')
+    if (!pixKey) throw new PixError('PIX_KEY não configurada')
 
     const reserved = 'br.gov.bcb.pix'.length + pixKey.length + 8 // TLV overhead
     const maxInfoLen = Math.max(0, 99 - reserved)
@@ -60,7 +61,7 @@ export class PixUtilsService implements IPixService {
     })
 
     if (hasError(pix)) {
-      throw new Error('Falha ao gerar Pix: ' + JSON.stringify(pix.error))
+      throw new PixError('Falha ao gerar Pix: ' + JSON.stringify(pix.error))
     }
 
     const brCode = pix.toBRCode()

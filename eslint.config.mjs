@@ -14,6 +14,9 @@ const eslintConfig = defineConfig([
     'next-env.d.ts',
   ]),
   {
+    // Pin the React version so eslint-plugin-react skips filesystem-based
+    // detection, which crashes under ESLint 10 (uses removed context.getFilename).
+    settings: { react: { version: '19.2' } },
     rules: {
       'react/no-unescaped-entities': 'off',
       '@typescript-eslint/no-unused-vars': [
@@ -21,6 +24,11 @@ const eslintConfig = defineConfig([
         { argsIgnorePattern: '^_' },
       ],
     },
+  },
+  {
+    // Test files use loosely-typed mocks; `any` is acceptable here.
+    files: ['**/__tests__/**', '**/*.test.{ts,tsx}'],
+    rules: { '@typescript-eslint/no-explicit-any': 'off' },
   },
 ])
 

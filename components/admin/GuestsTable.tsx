@@ -1,95 +1,31 @@
 'use client'
 
+import { GuestFormDialog } from '@/components/admin/GuestFormDialog'
+import { PartyCard } from '@/components/admin/guests/PartyCard'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
+import { Counter } from '@/components/ui/Counter'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useGuestDeletion } from '@/hooks/useGuestDeletion'
 import type { Guest, GuestStatus } from '@/src/entities/models/guest'
+import { buttonPrimary } from '@/src/lib/class-names'
 import {
-  Copy,
-  Link as LinkIcon,
-  Pencil,
-  Search,
-  StickyNote,
-  Trash2,
-  UserPlus,
-  Users,
-} from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { EmptyState } from '../ui/EmptyState'
-import { GuestFormDialog } from './GuestFormDialog'
-import { GuestNotesDialog } from './GuestNotesDialog'
-import { StatusPill } from './StatusPill'
-
-/* ------------------------------------------------------------------ */
-/*  Types & helpers (unchanged)                                       */
-/* ------------------------------------------------------------------ */
-
-type NonEmptyArray<T> = readonly [T, ...T[]]
-type StatusFilter = 'all' | GuestStatus
-type Party = { partyId: string; members: NonEmptyArray<Guest> }
-
-const STATUS_PILL: Record<GuestStatus, 'confirmed' | 'pending' | 'declined'> = {
-  going: 'confirmed',
-  pending: 'pending',
-  not_going: 'declined',
-}
-const STATUS_LABEL: Record<GuestStatus, string> = {
-  going: 'Confirmado',
-  pending: 'Pendente',
-  not_going: 'Não vai',
-}
-
-const fullName = (g: Guest) => `${g.firstName} ${g.lastName}`.trim()
-const inviteUrlFor = (token: string) =>
-  typeof window === 'undefined'
-    ? `/invite?token=${token}`
-    : `${window.location.origin}/invite?token=${token}`
-
-function groupByParty(guests: Guest[]): Party[] {
-  const map = new Map<string, Guest[]>()
-  for (const g of guests) {
-    const list = map.get(g.partyId) ?? []
-    list.push(g)
-    map.set(g.partyId, list)
-  }
-
-  const parties: Party[] = []
-  for (const [partyId, members] of map) {
-    if (members.length === 0) continue
-    const sorted = [...members].sort(
-      (a, b) => a.createdAt.getTime() - b.createdAt.getTime()
-    ) as unknown as NonEmptyArray<Guest>
-    parties.push({ partyId, members: sorted })
-  }
-
-  return parties.sort(
-    (a, b) =>
-      a.members[0].createdAt.getTime() - b.members[0].createdAt.getTime()
-  )
-}
-
-function filterPartyMembers(party: Party, status: StatusFilter): Party | null {
-  if (status === 'all') return party
-  const members = party.members.filter((m) => m.status === status)
-  if (members.length === 0) return null
-  return {
-    ...party,
-    members: members as unknown as NonEmptyArray<Guest>,
-  }
-}
-
-const partyMatchesQuery = (party: Party, q: string) =>
-  !q ||
-  party.members.some((m) => fullName(m).toLowerCase().includes(q.toLowerCase()))
-
-/* ------------------------------------------------------------------ */
-/*  Main component                                                    */
-/* ------------------------------------------------------------------ */
+  filterPartyMembers,
+  fullName,
+  groupByParty,
+  inviteUrlFor,
+  partyMatchesQuery,
+  type Party,
+  type StatusFilter,
+} from '@/src/lib/guests'
+import { Search, UserPlus, Users } from 'lucide-react'
+import { useCallback, useMemo, useState } from 'react'
 
 export function GuestsTable({ guests }: { guests: Guest[] }) {
   const [list, setList] = useState<Guest[]>(guests)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
-  const [copiedToken, setCopiedToken] = useState<string | null>(null)
+  const { copiedValue: copiedToken, copy } = useCopyToClipboard()
 
   const deletion = useGuestDeletion({
     onSuccess: (id) => setList((prev) => prev.filter((g) => g.id !== id)),
@@ -116,24 +52,19 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
     [list]
   )
 
-  const handleSaved = (saved: Guest) =>
+  const handleSaved = useCallback((saved: Guest) => {
     setList((prev) => {
       const exists = prev.some((g) => g.id === saved.id)
       return exists
         ? prev.map((g) => (g.id === saved.id ? saved : g))
         : [saved, ...prev]
     })
+  }, [])
 
-  const handleCopyInvite = async (token: string) => {
-    const url = inviteUrlFor(token)
-    try {
-      await navigator.clipboard.writeText(url)
-      setCopiedToken(token)
-      setTimeout(() => setCopiedToken(null), 1800)
-    } catch {
-      window.prompt('Copie o link do convite:', url)
-    }
-  }
+  const handleCopyInvite = useCallback(
+    (token: string) => copy(inviteUrlFor(token), token),
+    [copy]
+  )
 
   if (!list.length) {
     return (
@@ -174,10 +105,7 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         <GuestFormDialog
           onSaved={handleSaved}
           trigger={
-            <button
-              type="button"
-              className="inline-flex items-center gap-2 rounded-full bg-amber-700 px-5 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-amber-600"
-            >
+            <button type="button" className={buttonPrimary}>
               <UserPlus className="h-4 w-4" />
               Novo convidado
             </button>
@@ -237,370 +165,5 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         onConfirm={deletion.confirm}
       />
     </div>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Party card                                                        */
-/* ------------------------------------------------------------------ */
-
-function PartyCard({
-  party,
-  copiedToken,
-  onCopyInvite,
-  onRequestDelete,
-  onSaved,
-}: {
-  party: Party
-  copiedToken: string | null
-  onCopyInvite: (token: string) => void
-  onRequestDelete: (g: Guest) => void
-  onSaved: (g: Guest) => void
-}) {
-  const [head, ...companions] = party.members
-
-  return (
-    <article className="overflow-hidden rounded-2xl border border-stone-200 bg-white">
-      <header className="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 bg-stone-50/60 px-4 py-3">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-wider text-stone-500">
-          <Users className="h-3.5 w-3.5" />
-          <span>
-            Grupo · {party.members.length}{' '}
-            {party.members.length === 1 ? 'convidado' : 'convidados'}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            onClick={() => onCopyInvite(head.partyInviteToken)}
-            className="inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-medium text-stone-700 ring-1 ring-stone-200 transition hover:bg-stone-50"
-            title="Copiar link do grupo"
-          >
-            {copiedToken === head.partyInviteToken ? (
-              <>
-                <LinkIcon className="h-3.5 w-3.5 text-emerald-600" />
-                Copiado!
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5" />
-                Link do grupo
-              </>
-            )}
-          </button>
-
-          <GuestFormDialog
-            parentPartyId={party.partyId}
-            onSaved={onSaved}
-            trigger={
-              <button
-                type="button"
-                className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-800 ring-1 ring-amber-200 transition hover:bg-amber-100"
-              >
-                <UserPlus className="h-3.5 w-3.5" />
-                Adicionar acompanhante
-              </button>
-            }
-          />
-        </div>
-      </header>
-
-      {/* Desktop table */}
-      <div className="hidden overflow-x-auto md:block">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="text-left text-xs uppercase tracking-wider text-stone-400">
-              <th className="px-4 py-3 font-medium">Convidado</th>
-              <th className="px-4 py-3 font-medium">Status</th>
-              <th className="px-4 py-3 font-medium">Confirmado em</th>
-              <th className="px-4 py-3 font-medium">Observações</th>
-              <th className="px-4 py-3 text-right font-medium">Ações</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-stone-100">
-            <GuestRow
-              guest={head}
-              isHead
-              copiedToken={copiedToken}
-              onCopyInvite={onCopyInvite}
-              onRequestDelete={onRequestDelete}
-              onSaved={onSaved}
-            />
-            {companions.map((g) => (
-              <GuestRow
-                key={g.id}
-                guest={g}
-                copiedToken={copiedToken}
-                onCopyInvite={onCopyInvite}
-                onRequestDelete={onRequestDelete}
-                onSaved={onSaved}
-              />
-            ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile cards */}
-      <div className="space-y-2 p-3 md:hidden">
-        {party.members.map((g) => (
-          <GuestMobileCard
-            key={g.id}
-            guest={g}
-            isHead={g.id === head.id}
-            copiedToken={copiedToken}
-            onCopyInvite={onCopyInvite}
-            onRequestDelete={onRequestDelete}
-            onSaved={onSaved}
-          />
-        ))}
-      </div>
-    </article>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Single guest row (desktop)                                        */
-/* ------------------------------------------------------------------ */
-
-function GuestRow({
-  guest,
-  isHead,
-  copiedToken,
-  onCopyInvite,
-  onRequestDelete,
-  onSaved,
-}: {
-  guest: Guest
-  isHead?: boolean
-  copiedToken: string | null
-  onCopyInvite: (token: string) => void
-  onRequestDelete: (g: Guest) => void
-  onSaved: (g: Guest) => void
-}) {
-  return (
-    <tr className="transition-colors hover:bg-stone-50/60">
-      <td className="px-4 py-3">
-        <div className="flex items-center gap-3">
-          <div className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-amber-100 font-serif text-sm text-amber-800">
-            {guest.firstName.charAt(0).toUpperCase()}
-          </div>
-          <div className="min-w-0">
-            <p className="font-medium text-stone-800">{fullName(guest)}</p>
-            {isHead ? (
-              <p className="text-[11px] uppercase tracking-wider text-amber-700">
-                Titular do convite
-              </p>
-            ) : (
-              <p className="text-[11px] text-stone-400">Acompanhante</p>
-            )}
-          </div>
-        </div>
-      </td>
-
-      <td className="px-4 py-3">
-        <StatusPill status={STATUS_PILL[guest.status]} />
-      </td>
-
-      <td className="px-4 py-3 text-stone-500">
-        {guest.confirmedAt
-          ? guest.confirmedAt.toLocaleDateString('pt-BR')
-          : '—'}
-      </td>
-
-      <td className="px-4 py-3 text-stone-500">
-        <NotesIndicator guest={guest} />
-      </td>
-
-      <td className="px-4 py-3">
-        <div className="flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={() => onCopyInvite(guest.inviteToken)}
-            className="rounded-lg p-2 text-stone-500 transition hover:bg-stone-100"
-            aria-label="Copiar link individual"
-            title="Copiar link individual"
-          >
-            {copiedToken === guest.inviteToken ? (
-              <LinkIcon className="h-4 w-4 text-emerald-600" />
-            ) : (
-              <Copy className="h-4 w-4" />
-            )}
-          </button>
-          <GuestFormDialog
-            guest={guest}
-            onSaved={onSaved}
-            trigger={
-              <button
-                type="button"
-                className="rounded-lg p-2 text-stone-500 hover:bg-stone-100"
-                aria-label="Editar"
-              >
-                <Pencil className="h-4 w-4" />
-              </button>
-            }
-          />
-          <button
-            type="button"
-            onClick={() => onRequestDelete(guest)}
-            className="rounded-lg p-2 text-rose-500 transition hover:bg-rose-50"
-            aria-label="Remover"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
-        </div>
-      </td>
-    </tr>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Single guest card (mobile)                                        */
-/* ------------------------------------------------------------------ */
-
-function GuestMobileCard({
-  guest,
-  isHead,
-  copiedToken,
-  onCopyInvite,
-  onRequestDelete,
-  onSaved,
-}: {
-  guest: Guest
-  isHead: boolean
-  copiedToken: string | null
-  onCopyInvite: (token: string) => void
-  onRequestDelete: (g: Guest) => void
-  onSaved: (g: Guest) => void
-}) {
-  return (
-    <article className="rounded-xl border border-stone-200 bg-white p-4">
-      <div className="flex items-start gap-3">
-        <div className="grid h-10 w-10 flex-shrink-0 place-items-center rounded-full bg-amber-100 font-serif text-sm text-amber-800">
-          {guest.firstName.charAt(0).toUpperCase()}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <p className="font-medium text-stone-800">{fullName(guest)}</p>
-            <StatusPill status={STATUS_PILL[guest.status]} />
-          </div>
-          <p className="mt-0.5 text-xs text-stone-500">
-            {isHead ? 'Titular do convite' : 'Acompanhante'} ·{' '}
-            {STATUS_LABEL[guest.status]}
-          </p>
-        </div>
-      </div>
-
-      <div className="mt-3 flex flex-wrap justify-end gap-2">
-        <NotesIndicator guest={guest} variant="button" />
-
-        <button
-          type="button"
-          onClick={() => onCopyInvite(guest.inviteToken)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"
-        >
-          {copiedToken === guest.inviteToken ? (
-            <>
-              <LinkIcon className="h-3.5 w-3.5 text-emerald-600" /> Copiado!
-            </>
-          ) : (
-            <>
-              <Copy className="h-3.5 w-3.5" /> Link individual
-            </>
-          )}
-        </button>
-
-        <GuestFormDialog
-          guest={guest}
-          onSaved={onSaved}
-          trigger={
-            <button
-              type="button"
-              className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"
-            >
-              <Pencil className="h-3.5 w-3.5" /> Editar
-            </button>
-          }
-        />
-        <button
-          type="button"
-          onClick={() => onRequestDelete(guest)}
-          className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-sm text-rose-700"
-        >
-          <Trash2 className="h-3.5 w-3.5" /> Remover
-        </button>
-      </div>
-    </article>
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Notes indicator (shared by row + mobile card)                     */
-/* ------------------------------------------------------------------ */
-
-function NotesIndicator({
-  guest,
-  variant = 'pill',
-}: {
-  guest: Guest
-  variant?: 'pill' | 'button'
-}) {
-  if (!guest.notes) return variant === 'pill' ? <span>—</span> : null
-
-  const trigger =
-    variant === 'pill' ? (
-      <button
-        type="button"
-        aria-label={`Ver observações de ${fullName(guest)}`}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-800 ring-1 ring-amber-200 transition hover:bg-amber-100"
-      >
-        <StickyNote className="h-3.5 w-3.5" />
-        <span>Observações</span>
-      </button>
-    ) : (
-      <button
-        type="button"
-        aria-label={`Ver observações de ${fullName(guest)}`}
-        className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-3 py-1.5 text-sm text-amber-800 ring-1 ring-amber-200 transition hover:bg-amber-100"
-      >
-        <StickyNote className="h-3.5 w-3.5" /> Observações
-      </button>
-    )
-
-  return (
-    <GuestNotesDialog
-      guestName={fullName(guest)}
-      notes={guest.notes}
-      trigger={trigger}
-    />
-  )
-}
-
-/* ------------------------------------------------------------------ */
-/*  Counter pill                                                      */
-/* ------------------------------------------------------------------ */
-
-function Counter({
-  label,
-  value,
-  tone,
-}: {
-  label: string
-  value: number
-  tone: 'neutral' | 'emerald' | 'amber' | 'rose'
-}) {
-  const tones: Record<typeof tone, string> = {
-    neutral: 'bg-stone-100 text-stone-700 ring-stone-200',
-    emerald: 'bg-emerald-50 text-emerald-700 ring-emerald-200',
-    amber: 'bg-amber-50 text-amber-800 ring-amber-200',
-    rose: 'bg-rose-50 text-rose-700 ring-rose-200',
-  }
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-medium ring-1 ${tones[tone]}`}
-    >
-      {label}
-      <span className="tabular-nums">{value}</span>
-    </span>
   )
 }

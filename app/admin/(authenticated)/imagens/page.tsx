@@ -1,16 +1,12 @@
 import { listSiteImagesAction } from '@/app/admin/_actions/site-images.actions'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { SiteImagesGrid } from '@/components/admin/site-images/SiteImagesGrid'
-import { redirect } from 'next/navigation'
+import { unwrapForPage } from '@/src/lib/server-action-result'
 
 export const dynamic = 'force-dynamic'
 
 export default async function SiteImagesPage() {
-  const result = await listSiteImagesAction()
-  if (!result.ok) {
-    if (result.error === 'unauthorized') redirect('/admin/login')
-    throw new Error(result.error)
-  }
+  const images = unwrapForPage(await listSiteImagesAction())
 
   return (
     <div className="space-y-6">
@@ -28,7 +24,7 @@ export default async function SiteImagesPage() {
         title="Galeria gerenciada"
         description="Cliquem em uma imagem para substituir ou remover"
       >
-        <SiteImagesGrid stored={result.data} />
+        <SiteImagesGrid stored={images} />
       </SectionCard>
     </div>
   )

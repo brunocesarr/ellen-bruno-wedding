@@ -5,20 +5,15 @@ import { StatusPill } from '@/components/admin/StatusPill'
 import { DonutChart } from '@/components/admin/charts/DonutChart'
 import { ReservationsChart } from '@/components/admin/charts/ReservationsChart'
 import { formatCurrencyBRL, formatRelativeTime } from '@/src/lib/format'
+import { unwrapForPage } from '@/src/lib/server-action-result'
 import { Gift, HeartHandshake, MessageCircleHeart, Wallet } from 'lucide-react'
 import Link from 'next/link'
-import { redirect } from 'next/navigation'
 import { getDashboardStatsAction } from '../_actions/dashboard.actions'
 
 export const dynamic = 'force-dynamic'
 
 export default async function AdminDashboard() {
-  const result = await getDashboardStatsAction()
-  if (!result.ok) {
-    if (result.error === 'unauthorized') redirect('/admin/login')
-    throw new Error(result.error)
-  }
-  const stats = result.data
+  const stats = unwrapForPage(await getDashboardStatsAction())
 
   return (
     <AdminPageTransition>

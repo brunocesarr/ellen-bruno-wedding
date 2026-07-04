@@ -87,11 +87,8 @@ function ScatteredPhoto({
   index: number
   containerRef: React.RefObject<HTMLDivElement | null>
 }) {
-  const pos = POSITIONS[index % POSITIONS.length]
-
-  if (!pos) return null
-
-  // Parallax scroll: each photo moves at slightly different speed
+  // Parallax scroll: each photo moves at slightly different speed.
+  // Hooks must run unconditionally, before any early return.
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start end', 'end start'],
@@ -101,6 +98,9 @@ function ScatteredPhoto({
     [0, 1],
     [50 * (index % 2 === 0 ? 1 : -1), -50 * (index % 2 === 0 ? 1 : -1)]
   )
+
+  const pos = POSITIONS[index % POSITIONS.length]
+  if (!pos) return null
 
   return (
     <motion.div

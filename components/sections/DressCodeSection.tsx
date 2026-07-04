@@ -1,12 +1,7 @@
-'use client'
-
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Reveal } from '@/components/ui/Reveal'
-import { WEDDING_DETAILS } from '@/src/lib/constants'
 
 export function DressCodeSection() {
-  const { dressCode } = WEDDING_DETAILS
-
   return (
     <SectionWrapper id="dress-code" variant="ivory">
       <div className="text-center">

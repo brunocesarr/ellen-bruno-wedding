@@ -2,9 +2,10 @@ import type { IGuestsRepository } from '@/src/application/repositories/guests.re
 import { InvalidInviteTokenError } from '@/src/entities/errors/guests'
 import type { InviteContext } from '@/src/entities/models/guest'
 
-export const getInviteContextUseCase =
-  (deps: { guestsRepo: IGuestsRepository }) =>
-  async (token: string): Promise<InviteContext> => {
+export function getInviteContextUseCase(deps: {
+  guestsRepo: IGuestsRepository
+}) {
+  return async (token: string): Promise<InviteContext> => {
     if (!token) throw new InvalidInviteTokenError()
 
     const guest =
@@ -19,3 +20,4 @@ export const getInviteContextUseCase =
       partyMembers: party.filter((g) => g.id !== guest.id),
     }
   }
+}

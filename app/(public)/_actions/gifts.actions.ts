@@ -1,16 +1,19 @@
 'use server'
 import { reserveGiftController } from '@/src/interface-adapters/controllers/gifts/reserve-gift.controller'
+import { getOptionalString, getString } from '@/src/lib/form-data'
+import { revalidateGroup } from '@/src/lib/revalidate'
 import { revalidatePath } from 'next/cache'
 
 export async function reserveGiftAction(_: unknown, formData: FormData) {
+  const giftId = getString(formData, 'giftId')
   const result = await reserveGiftController({
-    giftId: formData.get('giftId'),
-    name: formData.get('name'),
-    message: formData.get('message') || undefined,
+    giftId,
+    name: getString(formData, 'name'),
+    message: getOptionalString(formData, 'message'),
   })
   if (result.ok) {
-    revalidatePath('/presentes')
-    revalidatePath(`/presentes/${formData.get('giftId')}`)
+    revalidateGroup('gifts')
+    revalidatePath(`/presentes/${giftId}`)
   }
   return result
 }

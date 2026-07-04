@@ -5,6 +5,8 @@ import {
   type GiftFormActionState,
   updateGiftAction,
 } from '@/app/admin/_actions/gifts.actions'
+import { FormField as Field } from '@/components/ui/FormField'
+import { inputField as inputClassName } from '@/src/lib/class-names'
 import type { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import * as Dialog from '@radix-ui/react-dialog'
 import { ImageIcon, Loader2, Upload, X } from 'lucide-react'
@@ -313,23 +315,3 @@ export function GiftFormDialog({ trigger, gift }: Props) {
     </Dialog.Root>
   )
 }
-
-function Field({
-  label,
-  children,
-}: {
-  label: string
-  children: React.ReactNode
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1.5 block text-xs font-medium text-stone-600">
-        {label}
-      </span>
-      {children}
-    </label>
-  )
-}
-
-const inputClassName =
-  'w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition placeholder:text-stone-300 focus:border-amber-600'
