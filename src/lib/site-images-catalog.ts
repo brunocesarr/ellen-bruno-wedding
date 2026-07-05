@@ -50,7 +50,6 @@ export const SITE_IMAGE_CATALOG: SiteImageDef[] = [
     aspect: 'portrait',
   },
 
-  // public/images/gallery/1.jpg ... 7.jpg
   ...Array.from({ length: 4 }, (_, i) => {
     const number = i + 1
     const padded = String(number).padStart(2, '0')
@@ -164,7 +163,6 @@ export const SECTION_LABELS: Record<SiteImageSection, string> = {
 }
 
 export function normalizeSiteImageKey(key: string): string {
-  // Allows both "gallery-1" and "gallery-01"
   const galleryMatch = key.match(/^gallery-(\d+)$/)
 
   if (galleryMatch) {

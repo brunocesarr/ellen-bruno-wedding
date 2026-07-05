@@ -56,7 +56,6 @@ export function GiftPaymentSection({
   return (
     <section className="mx-auto max-w-7xl px-6 py-16">
       <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
-        {/* Pix QR */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -76,7 +75,6 @@ export function GiftPaymentSection({
           <PixQrCode qrImage={qrImage} brCode={brCode} />
         </motion.div>
 
-        {/* Optional reservation form */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

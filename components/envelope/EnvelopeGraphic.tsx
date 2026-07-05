@@ -3,7 +3,6 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { flapVariants } from './envelope.variants'
 
-/** The envelope itself (back, pocket, flap, wax seal) and its open interaction. */
 export function EnvelopeGraphic({
   isClosed,
   isOpening,
@@ -37,7 +36,6 @@ export function EnvelopeGraphic({
       tabIndex={0}
       aria-label={isClosed ? 'Clique para abrir o convite' : 'Convite aberto'}
     >
-      {/* Back */}
       <div
         style={{
           position: 'absolute',
@@ -55,7 +53,6 @@ export function EnvelopeGraphic({
         }}
       />
 
-      {/* Front pocket */}
       <div
         style={{
           position: 'absolute',
@@ -94,7 +91,6 @@ export function EnvelopeGraphic({
         />
       </div>
 
-      {/* Flap */}
       <motion.div
         variants={flapVariants}
         animate={isOpening ? 'opening' : 'closed'}
@@ -132,7 +128,6 @@ export function EnvelopeGraphic({
         />
       </motion.div>
 
-      {/* Seal */}
       <AnimatePresence>
         {!isOpen && (
           <motion.div
@@ -191,7 +186,6 @@ export function EnvelopeGraphic({
         )}
       </AnimatePresence>
 
-      {/* Shadow */}
       <motion.div
         animate={{
           boxShadow: isOpen

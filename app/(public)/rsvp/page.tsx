@@ -25,7 +25,6 @@ export default async function RsvpPage({ searchParams }: Props) {
     <main className="relative overflow-hidden bg-cream">
       <HomeButton href={'/invite/full?token=' + token} />
 
-      {/* soft top gradient */}
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 -z-10 h-72 bg-linear-to-b from-cream-dark to-transparent"

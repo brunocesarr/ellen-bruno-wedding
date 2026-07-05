@@ -30,7 +30,6 @@ export async function proxy(request: NextRequest) {
     }
   )
 
-  // IMPORTANT: getUser() (not getSession) — it actually validates the JWT
   const {
     data: { user },
   } = await supabase.auth.getUser()

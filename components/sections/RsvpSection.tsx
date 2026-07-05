@@ -20,7 +20,6 @@ export function RsvpSection({ token }: Props) {
   return (
     <SectionWrapper id="rsvp" variant="cream" className="pb-28">
       <div className="text-center">
-        {/* Date & Time */}
         <motion.p
           initial={{ opacity: 0, y: 10 }}
           whileInView={{ opacity: 1, y: 0 }}

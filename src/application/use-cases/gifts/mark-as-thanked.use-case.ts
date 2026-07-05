@@ -27,8 +27,6 @@ export function markAsThankedUseCase(d: Deps) {
       return d.pixRepo.update(item.id, { confirmed: true })
     }
 
-    // Validate the synthesized input through the public schema —
-    // ensures admin-driven creates pass the same gates as guest-driven ones.
     const parsed = PixConfirmationInputSchema.parse({
       giftId,
       guestName: gift.reservedByName ?? 'Convidado(a)',

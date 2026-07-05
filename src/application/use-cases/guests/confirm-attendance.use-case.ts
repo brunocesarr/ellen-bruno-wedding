@@ -13,18 +13,14 @@ export function confirmAttendanceUseCase(deps: {
 
     const { inviteToken, attendees } = parsed.data
 
-    // 1) Validate token
     const owner = await deps.guestsRepo.findByInviteToken(inviteToken)
     if (!owner) throw new InvalidInviteTokenError()
 
-    // 2) Make sure the token is allowed to act on every attendee:
-    //    they must belong to the same party_id as the token's owner.
     const party = await deps.guestsRepo.listByPartyId(owner.partyId)
     const partyIds = new Set(party.map((g) => g.id))
     const invalid = attendees.find((a) => !partyIds.has(a.guestId))
     if (invalid) throw new InvalidInviteTokenError()
 
-    // 3) Persist atomically
     return deps.guestsRepo.setStatuses(
       attendees.map((a) => ({ id: a.guestId, status: a.status }))
     )

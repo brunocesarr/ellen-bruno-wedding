@@ -4,7 +4,6 @@ export type NonEmptyArray<T> = readonly [T, ...T[]]
 export type StatusFilter = 'all' | GuestStatus
 export type Party = { partyId: string; members: NonEmptyArray<Guest> }
 
-/** Callbacks threaded from the GuestsTable container down to the row/card views. */
 export type GuestListCallbacks = {
   copiedToken: string | null
   onCopyInvite: (token: string) => void
@@ -34,7 +33,6 @@ export const inviteUrlFor = (token: string) =>
     ? `/invite?token=${token}`
     : `${window.location.origin}/invite?token=${token}`
 
-/** Groups guests by party, sorting members and parties by creation time. */
 export function groupByParty(guests: Guest[]): Party[] {
   const map = new Map<string, Guest[]>()
   for (const g of guests) {
@@ -58,7 +56,6 @@ export function groupByParty(guests: Guest[]): Party[] {
   )
 }
 
-/** Keeps only members matching `status`; returns null when none remain. */
 export function filterPartyMembers(
   party: Party,
   status: StatusFilter

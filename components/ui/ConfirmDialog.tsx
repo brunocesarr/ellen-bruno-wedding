@@ -51,7 +51,7 @@ export function ConfirmDialog({
     <Dialog.Root
       open={open}
       onOpenChange={(next) => {
-        if (pending && !next) return // block close while running
+        if (pending && !next) return
         onOpenChange(next)
       }}
     >

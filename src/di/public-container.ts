@@ -7,13 +7,6 @@ import { createSupabaseAdminClient } from '@/src/infrastructure/supabase/admin'
 import { createSupabasePublicServerClient } from '@/src/infrastructure/supabase/public'
 import { cache } from 'react'
 
-/**
- * Dependency container for unauthenticated public routes. Cached per request.
- *
- * `guestsRepo` deliberately uses the service-role admin client: the public
- * invite flow validates the invite token on the server *before* exposing any
- * guest data, so RLS is bypassed intentionally at this trusted boundary.
- */
 export const getPublicContainer = cache(() => {
   const supabase = createSupabasePublicServerClient()
   const adminClient = createSupabaseAdminClient()

@@ -52,7 +52,6 @@ export function ShareInvitation() {
         await handleDownload()
       }
     } catch {
-      /* user cancelled */
     } finally {
       setLoading(false)
     }
@@ -72,7 +71,6 @@ export function ShareInvitation() {
         />
       </label>
 
-      {/* Live preview (scaled down) */}
       <div className="overflow-hidden rounded-xl border border-stone-200 shadow-sm">
         <div
           style={{
@@ -106,7 +104,6 @@ export function ShareInvitation() {
         </button>
       </div>
 
-      {/* Off-screen full-resolution card used for capture */}
       <div className="pointer-events-none fixed -left-[9999px] top-0">
         <InvitationCard ref={cardRef} guestName={name || undefined} />
       </div>

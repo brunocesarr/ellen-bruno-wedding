@@ -1,5 +1,5 @@
 import { GuestFormDialog } from '@/components/admin/GuestFormDialog'
-import type { Party, GuestListCallbacks } from '@/src/lib/guests'
+import type { GuestListCallbacks, Party } from '@/src/lib/guests'
 import { Copy, Link as LinkIcon, UserPlus, Users } from 'lucide-react'
 import { memo } from 'react'
 import { GuestMobileCard } from './GuestMobileCard'
@@ -63,7 +63,6 @@ function PartyCardBase({
         </div>
       </header>
 
-      {/* Desktop table */}
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
@@ -98,7 +97,6 @@ function PartyCardBase({
         </table>
       </div>
 
-      {/* Mobile cards */}
       <div className="space-y-2 p-3 md:hidden">
         {party.members.map((g) => (
           <GuestMobileCard

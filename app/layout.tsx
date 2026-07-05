@@ -15,21 +15,21 @@ const pinyonScript = Pinyon_Script({
   subsets: ['latin'],
   variable: '--font-script',
   display: 'swap',
-  preload: false, // decorative
+  preload: false,
 })
 const cormorant = Cormorant_Garamond({
   weight: ['400', '700'],
   subsets: ['latin'],
   variable: '--font-display',
   display: 'swap',
-  preload: true, // hero/LCP heading
+  preload: true,
 })
 const montserrat = Montserrat({
   weight: ['300', '400', '500', '600'],
   subsets: ['latin'],
   variable: '--font-body',
   display: 'swap',
-  preload: true, // base body font
+  preload: true,
 })
 const specialElite = Special_Elite({
   weight: '400',
@@ -38,8 +38,6 @@ const specialElite = Special_Elite({
   display: 'swap',
   preload: false,
 })
-
-// Audio toggle is non-critical -> client-only & lazy
 
 const MusicToggleButton = dynamic(() =>
   import('@/components/ui/MusicToggle').then((m) => m.MusicToggle)

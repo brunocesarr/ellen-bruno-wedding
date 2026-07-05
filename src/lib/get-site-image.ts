@@ -50,8 +50,6 @@ export const getSiteImagesMap = cache(async () => {
 
     return map
   } catch (error) {
-    // Do not swallow Next dynamic-rendering internal errors.
-    // If this ever happens again, the import boundary is wrong.
     if (isDynamicServerUsageError(error)) {
       throw error
     }

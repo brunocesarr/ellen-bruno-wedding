@@ -19,10 +19,9 @@ export function MusicToggle({
   const [hasInteracted, setHasInteracted] = useState(false)
   const reduce = useReducedMotion()
 
-  // Restore preference on mount
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY)
-    if (saved === '1') setHasInteracted(true) // user opted in previously, but still wait for click
+    if (saved === '1') setHasInteracted(true)
   }, [])
 
   const fadeTo = useCallback((target: number, onDone?: () => void) => {

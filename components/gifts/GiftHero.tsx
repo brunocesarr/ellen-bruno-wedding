@@ -22,7 +22,6 @@ type Props = {
 export function GiftHero({ couplePhoto, emotionPhoto, foreverPhoto }: Props) {
   return (
     <section className="relative isolate overflow-hidden cream-grain">
-      {/* Animated brush splashes */}
       <motion.div
         initial={{ opacity: 0, scale: 0.5 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -41,7 +40,6 @@ export function GiftHero({ couplePhoto, emotionPhoto, foreverPhoto }: Props) {
       </motion.div>
 
       <div className="mx-auto grid max-w-7xl grid-cols-1 items-center gap-10 px-6 py-20 md:grid-cols-2 md:py-28">
-        {/* Text column with stagger */}
         <motion.div
           variants={staggerContainer}
           initial="initial"
@@ -80,7 +78,6 @@ export function GiftHero({ couplePhoto, emotionPhoto, foreverPhoto }: Props) {
           </motion.div>
         </motion.div>
 
-        {/* Polaroid montage with sequential reveal */}
         <div className="relative h-[420px] md:h-[520px]">
           <AnimatedPolaroid
             src={couplePhoto}

@@ -26,7 +26,7 @@ export function StatCard({
   value,
   hint,
   delta,
-  icon, // 👈 already a ReactNode now
+  icon,
   accent = 'amber',
   index = 0,
 }: Props) {
@@ -48,7 +48,7 @@ export function StatCard({
           <span
             className={`grid h-9 w-9 place-items-center rounded-full ${ACCENT[accent]}`}
           >
-            {icon} {/* 👈 just render the node */}
+            {icon}
           </span>
         )}
       </header>

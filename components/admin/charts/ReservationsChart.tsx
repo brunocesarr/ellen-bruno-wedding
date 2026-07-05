@@ -13,7 +13,7 @@ export function ReservationsChart({ data }: { data: Point[] }) {
     )
 
   const maxCount = Math.max(...data.map((d) => d.count), 1)
-  const width = 100 // % based
+  const width = 100
   const stepX = width / (data.length - 1 || 1)
 
   const points = data.map((d, i) => ({

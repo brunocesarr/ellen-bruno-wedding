@@ -42,7 +42,9 @@ describe('form-data helpers', () => {
   it('getFile returns files with content only', () => {
     const file = new File(['data'], 'a.png', { type: 'image/png' })
     expect(getFile(fd({ image: file }), 'image')).toBe(file)
-    expect(getFile(fd({ image: new File([], 'empty.png') }), 'image')).toBeNull()
+    expect(
+      getFile(fd({ image: new File([], 'empty.png') }), 'image')
+    ).toBeNull()
     expect(getFile(fd({ image: 'not-a-file' }), 'image')).toBeNull()
   })
 })

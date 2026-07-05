@@ -4,7 +4,6 @@ import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { motion } from 'motion/react'
 import { letterContentVariants, letterItemVariants } from './envelope.variants'
 
-/** The letter card that slides up out of the envelope when opened. */
 export function Letter({
   isOpen,
   shouldReduceMotion,
@@ -58,7 +57,6 @@ export function Letter({
           textAlign: 'center',
         }}
       >
-        {/* Ornament */}
         <motion.div
           variants={letterItemVariants}
           style={{
@@ -85,7 +83,6 @@ export function Letter({
           />
         </motion.div>
 
-        {/* Label */}
         <motion.p
           variants={letterItemVariants}
           className="font-body"
@@ -100,7 +97,6 @@ export function Letter({
           Convite de Casamento
         </motion.p>
 
-        {/* Names — large and readable */}
         <motion.h2
           variants={letterItemVariants}
           className="font-script"
@@ -108,7 +104,7 @@ export function Letter({
             marginTop: 'clamp(8px, 2vw, 14px)',
             fontSize: 'clamp(2rem, 7vw, 3rem)',
             lineHeight: 1.15,
-            color: 'var(--color-terracotta, #C17B5A)',
+            color: 'var(--color-terracotta, #b97a57)',
           }}
         >
           {couple.bride}
@@ -124,7 +120,6 @@ export function Letter({
           {couple.groom}
         </motion.h2>
 
-        {/* Invitation text — minimum 14px */}
         <motion.p
           variants={letterItemVariants}
           className="font-body"
@@ -139,7 +134,6 @@ export function Letter({
           Convidam você para celebrar o nosso casamento
         </motion.p>
 
-        {/* Divider */}
         <motion.div
           variants={letterItemVariants}
           style={{
@@ -150,7 +144,6 @@ export function Letter({
           }}
         />
 
-        {/* Date — prominent */}
         <motion.p
           variants={letterItemVariants}
           className="font-display"
@@ -164,7 +157,6 @@ export function Letter({
           {displayDate}
         </motion.p>
 
-        {/* Time */}
         <motion.p
           variants={letterItemVariants}
           className="font-display"
@@ -177,7 +169,6 @@ export function Letter({
           às {time}
         </motion.p>
 
-        {/* Venue */}
         <motion.p
           variants={letterItemVariants}
           className="font-display"
@@ -215,7 +206,6 @@ export function Letter({
           {location.city}
         </motion.p>
 
-        {/* Bottom */}
         <motion.div
           variants={letterItemVariants}
           style={{

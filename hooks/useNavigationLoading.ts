@@ -3,10 +3,6 @@
 import { usePathname, useSearchParams } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
 
-/**
- * Returns `true` for ~250ms after the URL changes, useful for
- * showing a brief loading state on tab/route transitions.
- */
 export function useNavigationLoading(durationMs = 250) {
   const pathname = usePathname()
   const searchParams = useSearchParams()

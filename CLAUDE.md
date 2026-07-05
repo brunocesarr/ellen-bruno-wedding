@@ -18,11 +18,13 @@ pnpm test:ui      # Vitest with browser UI
 ```
 
 Run a single test file:
+
 ```bash
 pnpm test src/application/use-cases/gifts/__tests__/reserve-gift.use-case.test.ts
 ```
 
 Database (requires Supabase CLI):
+
 ```bash
 pnpm db:types       # Regenerate TypeScript types from linked Supabase project
 pnpm db:types:local # Same, but from local Supabase instance
@@ -64,6 +66,7 @@ src/
 ### Shared utilities (`src/lib/`)
 
 Server actions and controllers compose these instead of re-implementing them:
+
 - **`server-action-result.ts`** — the `ActionResult<T>` type + `unwrapForPage()` (redirect-on-unauthorized / throw / return data) used by every admin page.
 - **`revalidate.ts`** — `revalidateGroup('gifts' | 'guests' | 'messages' | 'siteImages' | 'invite')`; the single source of truth for which paths a mutation invalidates. Never hardcode `revalidatePath` lists in actions.
 - **`form-data.ts`** — typed `FormData` extractors (`getString`, `getOptionalString`, `getBoolean`, `getNumber`, `getFile`).
@@ -126,6 +129,7 @@ Tests live next to their subject in `__tests__/` folders. Only use-case layer ha
 ## Supabase
 
 Three client modes, each for a specific context:
+
 - `createSupabaseServerClient()` — SSR/server actions (reads auth cookies)
 - `createSupabaseAdminClient()` — admin operations that bypass RLS
 - `createSupabasePublicClient()` — unauthenticated public reads

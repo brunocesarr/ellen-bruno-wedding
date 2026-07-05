@@ -1,20 +1,19 @@
 'use server'
 
 import { getContainer } from '@/src/di/container'
-import { getFile, getOptionalString } from '@/src/lib/form-data'
-import { revalidateGroup } from '@/src/lib/revalidate'
-import type { ActionResult } from '@/src/lib/server-action-result'
-import { uploadImageIfPresent } from '@/src/lib/storage-upload'
 import { listGiftsController } from '@/src/interface-adapters/controllers/gifts/list-gifts.controller'
 import {
   createGiftController,
   deleteGiftController,
   updateGiftController,
 } from '@/src/interface-adapters/controllers/gifts/manage-gift.controller'
+import { getFile, getOptionalString } from '@/src/lib/form-data'
+import { revalidateGroup } from '@/src/lib/revalidate'
+import type { ActionResult } from '@/src/lib/server-action-result'
+import { uploadImageIfPresent } from '@/src/lib/storage-upload'
 
 type GiftMutationResult = ActionResult<{ id: string; name: string }>
 
-/** `useActionState` seeds this action with `null` before the first submit. */
 export type GiftFormActionState = GiftMutationResult | null
 
 export async function createGiftAction(
@@ -61,8 +60,7 @@ export async function updateGiftAction(
     description: getOptionalString(formData, 'description'),
     price: getOptionalString(formData, 'price'),
     category: getOptionalString(formData, 'category'),
-    // Only send imagePath when a new file was uploaded; otherwise keep the
-    // existing DB value untouched.
+
     ...(upload.imagePath ? { imagePath: upload.imagePath } : {}),
   })
 

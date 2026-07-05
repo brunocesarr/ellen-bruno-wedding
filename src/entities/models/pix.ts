@@ -1,9 +1,8 @@
 import { z } from 'zod'
 
-// ─── Existing ───────────────────────────────────────────────
 export const PixQrSchema = z.object({
-  brCode: z.string(), // Pix copia-e-cola
-  qrImage: z.string(), // base64 PNG
+  brCode: z.string(),
+  qrImage: z.string(),
 })
 export type PixQr = z.infer<typeof PixQrSchema>
 
@@ -14,10 +13,9 @@ export const PixConfirmationInputSchema = z.object({
 })
 export type PixConfirmationInput = z.infer<typeof PixConfirmationInputSchema>
 
-// ─── New: persisted entity ──────────────────────────────────
 export const PixConfirmationSchema = z.object({
   id: z.string().uuid(),
-  giftId: z.string().uuid().nullable(), // matches DB nullable FK
+  giftId: z.string().uuid().nullable(),
   guestName: z.string(),
   amount: z.number(),
   confirmed: z.boolean(),

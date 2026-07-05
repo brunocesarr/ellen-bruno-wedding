@@ -24,7 +24,6 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
     null
   )
 
-  // Close on success
   useEffect(() => {
     if (state?.ok) {
       setOpen(false)
@@ -72,12 +71,10 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
           </header>
 
           <form action={formAction} className="space-y-4 p-6">
-            {/* Hidden context */}
             <input type="hidden" name="key" value={def.key} />
             <input type="hidden" name="section" value={def.section} />
             <input type="hidden" name="isActive" value="true" />
 
-            {/* Preview */}
             <div className="relative aspect-[4/3] overflow-hidden rounded-xl bg-stone-100">
               <SmartImage
                 src={preview ?? stored?.imageUrl ?? def.fallback}
@@ -89,7 +86,6 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
               />
             </div>
 
-            {/* Upload */}
             <label className="flex cursor-pointer flex-col gap-2 rounded-xl border-2 border-dashed border-stone-200 bg-stone-50 p-4 text-center transition hover:border-amber-400 hover:bg-amber-50/40">
               <Upload className="mx-auto h-5 w-5 text-stone-400" />
               <span className="text-sm font-medium text-stone-700">
@@ -108,7 +104,6 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
               />
             </label>
 
-            {/* Alt text */}
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-stone-600">
                 Texto alternativo (acessibilidade)

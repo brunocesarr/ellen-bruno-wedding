@@ -1,4 +1,3 @@
-/** Shape produced by Zod's `flattenError` — carried on validation failures. */
 export type ValidationIssues = {
   formErrors: string[]
   fieldErrors: Record<string, string[]>

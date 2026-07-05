@@ -30,7 +30,7 @@ export class SupabaseRsvpRepository implements IRsvpRepository {
       companions: input.companions,
       dietary_restrictions: input.dietaryRestrictions || null,
       message: input.message || null,
-    } satisfies RsvpInsert // 👈 the magic
+    } satisfies RsvpInsert
 
     const { data, error } = await this.client
       .from('rsvp')

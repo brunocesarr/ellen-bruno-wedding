@@ -31,7 +31,6 @@ export function AdminSidebar() {
 
   return (
     <>
-      {/* Mobile toggle */}
       <button
         onClick={() => setOpen(true)}
         className="fixed left-4 top-4 z-40 flex h-10 w-10 items-center justify-center rounded-full bg-white shadow-md md:hidden"
@@ -40,7 +39,6 @@ export function AdminSidebar() {
         <Menu className="h-5 w-5 text-stone-700" />
       </button>
 
-      {/* Backdrop (mobile) */}
       {open && (
         <button
           onClick={() => setOpen(false)}
@@ -49,7 +47,6 @@ export function AdminSidebar() {
         />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`
         fixed inset-y-0 left-0 z-50 flex w-72 flex-col border-r border-stone-200/60

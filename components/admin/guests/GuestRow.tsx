@@ -1,7 +1,11 @@
 import { GuestFormDialog } from '@/components/admin/GuestFormDialog'
 import { StatusPill } from '@/components/admin/StatusPill'
 import type { Guest } from '@/src/entities/models/guest'
-import { STATUS_PILL, fullName, type GuestListCallbacks } from '@/src/lib/guests'
+import {
+  STATUS_PILL,
+  fullName,
+  type GuestListCallbacks,
+} from '@/src/lib/guests'
 import { Copy, Link as LinkIcon, Pencil, Trash2 } from 'lucide-react'
 import { NotesIndicator } from './NotesIndicator'
 

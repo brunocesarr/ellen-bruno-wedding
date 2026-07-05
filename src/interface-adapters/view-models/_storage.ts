@@ -5,5 +5,6 @@ export function resolveStorageUrl(
   storage: IStorageRepository
 ): string | null {
   if (!path) return null
-  return storage.getPublicUrl(path, { width: 600, quality: 75 })
+
+  return storage.getPublicUrl(path, { width: 1920, quality: 75 })
 }

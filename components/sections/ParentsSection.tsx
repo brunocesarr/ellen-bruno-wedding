@@ -76,7 +76,6 @@ export function ParentsSection() {
                 {family.side}
               </p>
 
-              {/* Names */}
               <div className="mt-5 space-y-1">
                 {family.parents.map((p) => (
                   <p
@@ -88,7 +87,6 @@ export function ParentsSection() {
                 ))}
               </div>
 
-              {/* Decorative divider */}
               <div className="mx-auto mt-6 flex max-w-[120px] items-center gap-2">
                 <span className="h-px flex-1 bg-amber-700/40" />
                 <Heart className="h-3 w-3 fill-amber-600 text-amber-600" />

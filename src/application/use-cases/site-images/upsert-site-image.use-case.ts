@@ -21,7 +21,6 @@ export function upsertSiteImageUseCase(d: Deps) {
     const next = result.data
     const previous = await d.siteImagesRepo.getByKey(next.key)
 
-    // If a NEW image was uploaded, delete the previous storage object (best-effort)
     if (
       previous?.imagePath &&
       next.imagePath &&
@@ -29,9 +28,7 @@ export function upsertSiteImageUseCase(d: Deps) {
     ) {
       try {
         await d.storageRepo.remove(previous.imagePath)
-      } catch {
-        /* best-effort cleanup */
-      }
+      } catch {}
     }
 
     return d.siteImagesRepo.upsert(next)

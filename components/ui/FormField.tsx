@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react'
 
-/** Labelled form field with an optional inline error, shared by admin dialogs. */
 export function FormField({
   label,
   error,

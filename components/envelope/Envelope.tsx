@@ -45,7 +45,6 @@ export function Envelope({ token }: { token: string }) {
           maxWidth: '480px',
         }}
       >
-        {/* Header */}
         <motion.p
           className="font-body"
           animate={{ opacity: isClosed ? 1 : 0.3 }}
@@ -60,12 +59,11 @@ export function Envelope({ token }: { token: string }) {
           Você recebeu um convite
         </motion.p>
 
-        {/* ===== ENVELOPE + LETTER ===== */}
         <div
           style={{
             position: 'relative',
             width: '100%',
-            /* Taller ratio to fit accessible text */
+
             aspectRatio: '4 / 3',
           }}
         >
@@ -78,7 +76,6 @@ export function Envelope({ token }: { token: string }) {
           />
         </div>
 
-        {/* Hint */}
         <AnimatePresence>
           {isClosed && (
             <motion.p
@@ -102,7 +99,6 @@ export function Envelope({ token }: { token: string }) {
           )}
         </AnimatePresence>
 
-        {/* CTA */}
         <AnimatePresence>
           {isOpen && (
             <motion.a
@@ -121,7 +117,7 @@ export function Envelope({ token }: { token: string }) {
                 height: 'clamp(44px, 8vw, 52px)',
                 padding: '0 clamp(20px, 4vw, 28px)',
                 borderRadius: 999,
-                backgroundColor: 'var(--color-terracotta, #C17B5A)',
+                backgroundColor: 'var(--color-terracotta, #b97a57)',
                 color: 'white',
                 fontSize: 'clamp(0.75rem, 2vw, 0.9rem)',
                 fontWeight: 500,
@@ -150,7 +146,6 @@ export function Envelope({ token }: { token: string }) {
           )}
         </AnimatePresence>
 
-        {/* Footer */}
         <p
           className="font-body"
           style={{

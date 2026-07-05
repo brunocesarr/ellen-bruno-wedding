@@ -13,7 +13,7 @@ type Props<TId extends string> = {
   tabs: readonly Tab<TId>[]
   value: TId
   onChange: (id: TId) => void
-  /** Visual style */
+
   variant?: 'pills' | 'underline'
   ariaLabel?: string
 }
@@ -77,7 +77,6 @@ export function AnimatedTabs<TId extends string>({
     )
   }
 
-  // Pills variant
   return (
     <div
       role="tablist"

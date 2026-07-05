@@ -9,21 +9,16 @@ export function FlipCard({ value, label, maxDigits = 2 }: FlipCardProps) {
 
   return (
     <div className="flex flex-col items-center gap-2">
-      {/* Card */}
       <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-lg bg-countdown-card shadow-lg sm:h-24 sm:w-24 md:h-28 md:w-28">
-        {/* Horizontal center line (flip effect) */}
         <div className="absolute inset-x-0 top-1/2 z-10 h-px -translate-y-1/2 bg-countdown-line" />
 
-        {/* Top shadow (subtle depth) */}
         <div className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/[0.03] to-transparent" />
 
-        {/* Number */}
         <span className="relative top-1 z-0 font-typewriter text-4xl text-countdown-text sm:text-2xl md:text-4xl">
           {displayValue}
         </span>
       </div>
 
-      {/* Label */}
       <span className="font-body text-xs tracking-wider text-warm-gray sm:text-sm">
         {label}
       </span>

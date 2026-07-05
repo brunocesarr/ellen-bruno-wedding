@@ -32,7 +32,6 @@ export function TestimonialSection() {
     setIndex((i) => (i - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)
   }, [])
 
-  // Auto-advance every 8 seconds (pause on reduced motion)
   useEffect(() => {
     if (reduce) return
     const t = setInterval(next, 8000)
@@ -49,7 +48,6 @@ export function TestimonialSection() {
       className="relative overflow-hidden bg-gradient-to-b from-[#faf6ef] to-[#f5efe4] py-20 md:py-28"
       aria-labelledby="testimonial-title"
     >
-      {/* Decorative scroll lines (subtle) */}
       <div className="absolute inset-x-0 top-12 h-px bg-amber-700/10 md:top-16" />
       <div className="absolute inset-x-0 bottom-12 h-px bg-amber-700/10 md:bottom-16" />
 
@@ -64,7 +62,6 @@ export function TestimonialSection() {
           </h2>
         </Reveal>
 
-        {/* Carousel */}
         <div className="relative mt-12 md:mt-16">
           <div className="flex items-center justify-center gap-3 md:gap-6">
             {TESTIMONIALS.length > 1 && (
@@ -117,7 +114,6 @@ export function TestimonialSection() {
             )}
           </div>
 
-          {/* Pagination dots */}
           <div className="mt-8 flex justify-center gap-2">
             {TESTIMONIALS.map((_, i) => (
               <button

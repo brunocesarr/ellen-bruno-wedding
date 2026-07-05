@@ -17,11 +17,6 @@ export type GiftDetail = {
   }
 }
 
-/**
- * Assembles everything the public gift-detail page renders: the view model,
- * the Pix QR, and reservation info. Throws `GiftNotFoundError` (the page maps
- * it to `notFound()`); other errors propagate to the error boundary.
- */
 export async function getGiftDetailController(id: string): Promise<GiftDetail> {
   const { giftsRepo, pixService, storageRepo } = await getContainer()
 

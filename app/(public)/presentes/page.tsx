@@ -35,7 +35,6 @@ export default async function GiftsPage({ searchParams }: Props) {
       />
 
       {photos.length >= 3 && photos[0] && photos[1] && photos[2] && (
-        /* Hero with polaroid montage */
         <GiftHero
           couplePhoto={photos[0]?.src ?? photos[0]?.fallback}
           emotionPhoto={photos[1]?.src ?? photos[1]?.fallback}
@@ -43,15 +42,12 @@ export default async function GiftsPage({ searchParams }: Props) {
         />
       )}
 
-      {/* Filterable grid */}
       <Suspense fallback={<GridSkeleton />}>
         <GiftListSection token={token} />
       </Suspense>
 
-      {/* How it works */}
       <HowItWorks />
 
-      {/* Closing message */}
       <section className="mx-auto max-w-2xl px-6 pb-24 text-center">
         <p className="accent">Com todo nosso amor 💕</p>
         <p className="mt-4 text-ink-muted">

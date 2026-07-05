@@ -11,11 +11,6 @@ import { SupabaseAuthService } from '@/src/infrastructure/services/supabase-auth
 import { createSupabaseServerClient } from '@/src/infrastructure/supabase/server'
 import { cache } from 'react'
 
-/**
- * Builds the authenticated dependency container. Wrapped in React `cache()` so
- * the Supabase server client and repositories are instantiated once per request,
- * even when several controllers resolve the container during the same render.
- */
 export const getContainer = cache(async () => {
   const supabase = await createSupabaseServerClient()
   return {

@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const revalidatePath = vi.fn()
-vi.mock('next/cache', () => ({ revalidatePath: (...args: unknown[]) => revalidatePath(...args) }))
+vi.mock('next/cache', () => ({
+  revalidatePath: (...args: unknown[]) => revalidatePath(...args),
+}))
 
 import { revalidateGroup } from '../revalidate'
 

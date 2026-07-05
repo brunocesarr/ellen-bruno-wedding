@@ -78,7 +78,6 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
 
   return (
     <div className="space-y-5">
-      {/* Toolbar */}
       <div className="flex flex-wrap items-center gap-3">
         <div className="relative min-w-[220px] flex-1">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
@@ -113,7 +112,6 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         />
       </div>
 
-      {/* Counters */}
       <div className="flex flex-wrap gap-2 text-xs">
         <Counter label="Total" value={list.length} tone="neutral" />
         <Counter label="Confirmados" value={totals.going} tone="emerald" />
@@ -121,7 +119,6 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         <Counter label="Não vão" value={totals.not_going} tone="rose" />
       </div>
 
-      {/* Parties */}
       {parties.length === 0 ? (
         <EmptyState
           icon={<Search className="h-4 w-4" />}

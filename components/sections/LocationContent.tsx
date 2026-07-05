@@ -78,7 +78,6 @@ export function LocationContent({ venue }: { venue: ResolvedSiteImage }) {
         )}
       </div>
 
-      {/* Venue Image */}
       <motion.div
         className="relative mx-auto mt-12 aspect-[4/3] w-full max-w-md overflow-hidden rounded-t-card shadow-card drop-shadow-lg"
         initial={{ opacity: 0, y: 30, scale: 0.95 }}
@@ -86,7 +85,6 @@ export function LocationContent({ venue }: { venue: ResolvedSiteImage }) {
         viewport={{ once: true, amount: 0.3 }}
         transition={{ duration: 0.8, ease: 'easeOut' }}
       >
-        {/* ✅ bucket URL first, local fallback on error */}
         <SmartImage
           src={venue.src}
           fallback={venue.fallback}

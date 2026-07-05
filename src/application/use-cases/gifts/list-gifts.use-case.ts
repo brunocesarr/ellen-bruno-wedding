@@ -19,7 +19,6 @@ export function listGiftsUseCase(d: Deps) {
       d.pixRepo.list(),
     ])
 
-    // Skip pix entries with no giftId (untied Pix gifts) when deriving per-gift status
     const confirmedByGift = new Set(
       pixList
         .filter((p) => p.confirmed && p.giftId !== null)

@@ -9,7 +9,6 @@ const TONES: Record<CounterTone, string> = {
   rose: 'bg-rose-50 text-rose-700 ring-rose-200',
 }
 
-/** Small labelled count pill (e.g. "Confirmados 12"). */
 export function Counter({
   label,
   value,

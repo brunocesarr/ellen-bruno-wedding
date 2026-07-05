@@ -26,7 +26,6 @@ export function TimelineSection() {
       aria-labelledby="programacao-title"
     >
       <div className="mx-auto max-w-3xl px-6">
-        {/* Header */}
         <motion.header
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -45,7 +44,6 @@ export function TimelineSection() {
           </p>
         </motion.header>
 
-        {/* Timeline */}
         <ol
           className="
           mx-auto grid max-w-xl
@@ -94,7 +92,6 @@ function TimelineRow({
 
   return (
     <>
-      {/* ── Column 1 · Time (right-aligned) ── */}
       <motion.span
         initial={{ opacity: 0, x: reduce ? 0 : -16 }}
         whileInView={{ opacity: 1, x: 0 }}
@@ -109,12 +106,10 @@ function TimelineRow({
         {item.time}
       </motion.span>
 
-      {/* ── Column 2 · Spine + dot (centered, fixed width) ── */}
       <span
         aria-hidden="true"
         className="relative flex h-full min-h-[28px] w-full items-center justify-center"
       >
-        {/* vertical line — trimmed at first/last so it doesn't poke out */}
         <span
           className={`
           absolute left-1/2 w-px -translate-x-1/2 bg-amber-700/40
@@ -122,7 +117,6 @@ function TimelineRow({
           ${isLast ? 'bottom-1/2' : 'bottom-0'}
         `}
         />
-        {/* dot — solid bg matches section bg to mask the line behind it */}
         <motion.span
           initial={{ scale: 0, opacity: 0 }}
           whileInView={{ scale: 1, opacity: 1 }}
@@ -136,7 +130,6 @@ function TimelineRow({
         />
       </span>
 
-      {/* ── Column 3 · Label (left-aligned) ── */}
       <motion.span
         initial={{ opacity: 0, x: reduce ? 0 : 16 }}
         whileInView={{ opacity: 1, x: 0 }}

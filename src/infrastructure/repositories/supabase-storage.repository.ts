@@ -24,10 +24,7 @@ export class SupabaseStorageRepository implements IStorageRepository {
     if (error) throw error
   }
 
-  getPublicUrl(
-    path: string,
-    _options?: { width?: number; quality?: number }
-  ) {
+  getPublicUrl(path: string, _options?: { width?: number; quality?: number }) {
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
     return `${base}/storage/v1/object/public/${BUCKET}/${path}`
   }

@@ -1,6 +1,5 @@
 import type { Database } from '@/types/database.types'
 
-// ---- Tables ----
 export type GiftRow = Database['public']['Tables']['gifts']['Row']
 export type GiftInsert = Database['public']['Tables']['gifts']['Insert']
 export type GiftUpdate = Database['public']['Tables']['gifts']['Update']
@@ -16,7 +15,6 @@ export type PixConfirmationInsert =
 export type PixConfirmationUpdate =
   Database['public']['Tables']['pix_confirmations']['Update']
 
-// ---- RPCs ----
 export type ReserveGiftArgs =
   Database['public']['Functions']['reserve_gift']['Args']
 export type ReserveGiftReturn =

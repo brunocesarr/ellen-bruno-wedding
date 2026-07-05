@@ -50,7 +50,6 @@ export function PhotoGallery({
 
       <SectionHeading eyebrow={eyebrow} title={title} accent={accent} />
 
-      {/* Mobile: simple vertical scroll list */}
       <div className="mx-auto grid max-w-2xl grid-cols-2 gap-6 px-6 md:hidden">
         {photos.slice(0, 6).map((photo, i) => (
           <PolaroidPhoto
@@ -65,7 +64,6 @@ export function PhotoGallery({
         ))}
       </div>
 
-      {/* Desktop: scattered montage */}
       <div
         ref={ref}
         className="relative mx-auto hidden h-[680px] w-full max-w-6xl md:block"
@@ -87,8 +85,6 @@ function ScatteredPhoto({
   index: number
   containerRef: React.RefObject<HTMLDivElement | null>
 }) {
-  // Parallax scroll: each photo moves at slightly different speed.
-  // Hooks must run unconditionally, before any early return.
   const { scrollYProgress } = useScroll({
     target: containerRef,
     offset: ['start end', 'end start'],

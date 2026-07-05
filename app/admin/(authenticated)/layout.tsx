@@ -15,7 +15,7 @@ export default async function AuthenticatedAdminLayout({
   } = await supabase.auth.getUser()
 
   if (!user) {
-    redirect('/admin/login') // safe now: login is OUTSIDE this layout
+    redirect('/admin/login')
   }
 
   return (

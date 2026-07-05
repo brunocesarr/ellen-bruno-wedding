@@ -43,7 +43,6 @@ export function GiftFilterBar({ gifts, token }: Props) {
     { shallow: false, history: 'push' }
   )
 
-  // Apply filters
   let filtered = gifts.filter((g) => {
     if (status === 'available' && g.status === 'reserved') return false
     if (status === 'reserved' && g.status !== 'reserved') return false
@@ -51,14 +50,12 @@ export function GiftFilterBar({ gifts, token }: Props) {
     return true
   })
 
-  // Apply sort
   filtered = [...filtered].sort((a, b) => {
     if (sort === 'price-asc') return a.price - b.price
     if (sort === 'price-desc') return b.price - a.price
     return 0
   })
 
-  // Counts respect category filter (so chips show how many in current category)
   const inCategory =
     category === 'all' ? gifts : gifts.filter((g) => g.category === category)
   const counts = {
@@ -69,7 +66,6 @@ export function GiftFilterBar({ gifts, token }: Props) {
 
   return (
     <div id="lista" className="mx-auto max-w-7xl px-6 py-8">
-      {/* Category chips */}
       <div className="mb-6 flex flex-wrap gap-2">
         {CATEGORY_OPTIONS.map((cat) => (
           <button
@@ -86,7 +82,6 @@ export function GiftFilterBar({ gifts, token }: Props) {
         ))}
       </div>
 
-      {/* Status + sort */}
       <div className="flex flex-col items-start justify-between gap-4 border-b border-ink/10 pb-4 md:flex-row md:items-center">
         <div role="tablist" className="flex flex-wrap gap-2">
           {STATUS_OPTIONS.map((key) => (
@@ -121,7 +116,6 @@ export function GiftFilterBar({ gifts, token }: Props) {
         </label>
       </div>
 
-      {/* Animated grid (re-fades on filter change) */}
       <AnimatePresence mode="wait">
         <motion.div
           key={`${status}-${sort}-${category}`}

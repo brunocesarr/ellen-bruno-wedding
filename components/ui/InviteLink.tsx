@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { EnvelopeIcon } from './EnvelopeIcon' // Extracted SVG
+import { EnvelopeIcon } from './EnvelopeIcon'
 
 export function InviteLink() {
   return (

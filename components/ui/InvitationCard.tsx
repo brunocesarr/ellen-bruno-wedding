@@ -5,7 +5,7 @@ import { forwardRef } from 'react'
 
 type Props = {
   guestName?: string
-  date?: string // e.g. "06 . 12 . 2026"
+  date?: string
   location?: string
   photoUrl?: string
 }
@@ -26,7 +26,6 @@ export const InvitationCard = forwardRef<HTMLDivElement, Props>(
         style={{ width: 1080, height: 1350 }}
         className="relative overflow-hidden bg-gradient-to-br from-[#fdf8f3] via-[#f6ead9] to-[#e8d5b7] font-serif text-stone-800"
       >
-        {/* Floral SVG overlay */}
         <svg
           className="absolute inset-0 h-full w-full opacity-20"
           viewBox="0 0 1080 1350"

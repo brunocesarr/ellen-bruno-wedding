@@ -1,40 +1,30 @@
 @import 'tailwindcss';
 
 :root {
-  --font-display: var(--font-display-loaded), 'Cormorant Garamond', serif;
-  --font-sans: var(--font-sans-loaded), 'Inter', system-ui, sans-serif;
+  --font-display: 'Cormorant Garamond', serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
 }
 
-/* ============================================
- THEME — Ellen & Bruno Wedding
- Terracotta + Dusty Blue + Sage + Cream
- ============================================ */
-
 @theme {
-  /* ---- Primary: Terracotta ---- */
   --color-terracotta: #b97a57;
   --color-terracotta-light: #d4a187;
   --color-terracotta-dark: #9b5e3f;
   --color-terracotta-muted: #b8876f;
 
-  /* ---- Primary: Ocean ---- */
   --color-ocean: #7a9ab8;
   --color-ocean-light: #b6cadd;
   --color-ocean-dark: #5c7b98;
 
-  /* ---- Accent: Dusty Blue ---- */
   --color-dusty-blue: #7a9fb8;
   --color-dusty-blue-dark: #5a86ad;
   --color-dusty-blue-light: #a8c4d6;
   --color-dusty-blue-pale: #d4e4ee;
 
-  /* ---- Nature: Sage Green ---- */
   --color-sage: #7b8e6b;
   --color-sage-light: #a4b395;
   --color-sage-dark: #5e6b52;
   --color-sage-muted: #b0bda4;
 
-  /* ---- Neutrals ---- */
   --color-cream: #f5efe6;
   --color-cream-dark: #ebe3d4;
   --color-cream-50: #faf6ef;
@@ -47,13 +37,11 @@
   --color-blush-rose: #c9a89a;
   --color-warm-gray: #8a7e76;
   --color-charcoal: #3d3632;
-  --color-warm-gray-strong: #5f564f; /* ~6.3:1 on cream */
+  --color-warm-gray-strong: #5f564f;
 
-  /* ---- Nature: Ink Green ---- */
   --color-ink: #3f3a36;
   --color-ink-muted: #857f78;
 
-  /* ---- Dress Code Colors ---- */
   --color-dress-terracotta: #c17b5a;
   --color-dress-terracotta-light: #d4977a;
   --color-dress-dusty-blue: #7a9fb8;
@@ -61,12 +49,10 @@
   --color-dress-sage: #7a8a6b;
   --color-dress-cream: #ede7dd;
 
-  /* Countdown specific */
   --color-countdown-card: #2e2b28;
   --color-countdown-line: rgba(255, 255, 255, 0.15);
   --color-countdown-text: #f5f0e8;
 
-  /* ---- Envelope Colors ---- */
   --color-envelope-body: #c4875e;
   --color-envelope-dark: #a66b45;
   --color-envelope-flap: #b87a52;
@@ -78,18 +64,15 @@
   --color-wax-seal: #8b3a3a;
   --color-wax-seal-light: #a84848;
 
-  /* ---- Typography ---- */
   --font-script: 'Pinyon Script', cursive;
   --font-display: 'Cormorant Garamond', ui-serif, Georgia, serif;
   --font-body: 'Montserrat', sans-serif;
   --font-typewriter: 'Special Elite', monospace;
   --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
-  --font-inter: var(--font-body); /* alias removed font to the body font */
+  --font-inter: var(--font-body);
 
-  /* ── Custom letter-spacing token ─────────────────────────── */
   --tracking-widest-2: 0.32em;
 
-  /* ---- Font Sizes ---- */
   --text-hero: 4.5rem;
   --text-hero-lg: 6rem;
   --text-monogram: 3.5rem;
@@ -97,25 +80,20 @@
   --text-timeline: 2.75rem;
   --text-subtitle: 1.125rem;
 
-  /* ---- Spacing ---- */
   --spacing-section: 5rem;
 
-  /* ---- Border Radius ---- */
   --radius-card: 0.75rem;
   --radius-button: 2rem;
   --radius-monogram: 50%;
 
-  /* ---- Shadows ---- */
   --shadow-soft: 0 4px 20px rgba(193, 123, 90, 0.08);
   --shadow-card: 0 8px 32px rgba(61, 54, 50, 0.06);
 
-  /* ---- Animations ---- */
   --animate-fade-in: fade-in 0.8s ease-out forwards;
   --animate-slide-up: slide-up 0.6s ease-out forwards;
   --animate-float: float 4s ease-in-out infinite;
   --animate-rotate-slow: rotate-slow 20s linear infinite;
 
-  /* ---- Envelope Animations ---- */
   --animate-flap-open: flap-open 0.6s ease-in-out forwards;
   --animate-letter-slide: letter-slide 0.8s cubic-bezier(0.23, 1, 0.32, 1) 0.5s
     forwards;
@@ -123,10 +101,6 @@
   --animate-seal-break: seal-break 0.3s ease-in forwards;
   --animate-bounce-hint: bounce-hint 2s ease-in-out infinite;
 }
-
-/* ============================================
- KEYFRAMES
- ============================================ */
 
 @keyframes fade-in {
   from {
@@ -158,7 +132,6 @@
   }
 }
 
-/* Flip Clock Animations */
 @keyframes flip-top {
   0% {
     transform: rotateX(0deg);
@@ -206,10 +179,6 @@
   }
 }
 
-/* ============================================
- REDUCED MOTION — Accessibility
- ============================================ */
-
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -219,10 +188,6 @@
     transition-duration: 0.01ms !important;
   }
 }
-
-/* ============================================
- BASE STYLES
- ============================================ */
 
 @layer base {
   html {
@@ -238,8 +203,8 @@
     color: var(--color-ink);
     background-color: var(--color-ivory);
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    background-size: 120px 120px; /* ✅ tile (was: cover) */
-    background-repeat: repeat; /* ✅ (was: no-repeat) */
+    background-size: 120px 120px;
+    background-repeat: repeat;
     background-position: center;
   }
 
@@ -249,15 +214,10 @@
   }
 }
 
-/* ───────────────────────────────────────────────────────────────
- Custom utilities — v4 uses @utility (not @layer components)
- ─────────────────────────────────────────────────────────────── */
-
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }
 
-/* Section title (echoes the "DRESS CODE" headline) */
 @utility heading-display {
   font-family: var(--font-display);
   font-weight: 300;
@@ -289,7 +249,6 @@
   }
 }
 
-/* Underline-style form input (like the SO♥RO reference) */
 @utility field-input {
   width: 100%;
   border: 0;
@@ -311,7 +270,6 @@
   }
 }
 
-/* Buttons */
 @utility btn-primary {
   display: inline-flex;
   align-items: center;
@@ -369,10 +327,6 @@
   background: linear-gradient(180deg, #faf6ef 0%, #f5efe4 100%);
 }
 
-/* ============================================
- CUSTOM UTILITIES
- ============================================ */
-
 @utility text-balance {
   text-wrap: balance;
 }
@@ -418,10 +372,6 @@
     100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)
   );
 }
-
-/* ───────────────────────────────────────────────────────────────
- Polaroid + decorative utilities (added on top of existing tokens)
- ─────────────────────────────────────────────────────────────── */
 
 @utility polaroid {
   background: white;
@@ -479,7 +429,6 @@
   }
 }
 
-/* Decorative grain texture (subtle) */
 @utility cream-grain {
   background-color: var(--color-cream);
   background-image: radial-gradient(

@@ -55,14 +55,9 @@ export async function listMessages(): Promise<GuestMessage[]> {
     }))
 }
 
-/**
- * "Mark as thanked" — since there's no `status` column, we model the
- * "thanked" state by ensuring a confirmed pix_confirmation exists for this gift.
- */
 export async function markAsThanked(giftId: string) {
   const supabase = await createSupabaseServerClient()
 
-  // Try to find existing pix row for this gift
   const { data: existing } = await supabase
     .from('pix_confirmations')
     .select('id')
@@ -77,7 +72,6 @@ export async function markAsThanked(giftId: string) {
       .eq('id', existing.id)
     if (error) throw error
   } else {
-    // Create a synthetic confirmed entry (amount can be backfilled later)
     const { data: gift } = await supabase
       .from('gifts')
       .select('price, reserved_by_name')

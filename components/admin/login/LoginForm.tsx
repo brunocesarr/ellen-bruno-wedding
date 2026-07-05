@@ -42,12 +42,10 @@ export function LoginForm() {
     })
 
     if (error) {
-      // Don't expose whether email or password was wrong (security best practice)
       setServerError('Email ou senha inválidos')
       return
     }
 
-    // Hard refresh so middleware picks up the new session cookie
     router.replace(next)
     router.refresh()
   }
@@ -70,7 +68,6 @@ export function LoginForm() {
       </header>
 
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4" noValidate>
-        {/* Email */}
         <label className="block">
           <span className="mb-1.5 block text-xs font-medium text-stone-600">
             Email
@@ -103,7 +100,6 @@ export function LoginForm() {
           )}
         </label>
 
-        {/* Password */}
         <label className="block">
           <span className="mb-1.5 block text-xs font-medium text-stone-600">
             Senha

@@ -26,14 +26,6 @@ export type UploadResult =
   | { ok: true; imagePath?: string; cleanup?: () => Promise<void> }
   | { ok: false; error: string }
 
-/**
- * Validates and uploads an optional image to storage under `<pathPrefix>/<uuid>.<ext>`.
- *
- * - No file / empty file → `{ ok: true, imagePath: undefined }` (caller keeps existing image).
- * - Invalid type or oversized → `{ ok: false, error }`.
- * - Success → `{ ok: true, imagePath, cleanup }`; call `cleanup()` to remove the
- *   uploaded object if the surrounding mutation later fails.
- */
 export async function uploadImageIfPresent(
   storageRepo: IStorageRepository,
   file: File | null,
@@ -42,10 +34,16 @@ export async function uploadImageIfPresent(
   if (!file || file.size === 0) return { ok: true, imagePath: undefined }
 
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
-    return { ok: false, error: 'Formato de imagem inválido. Use JPG, PNG ou WEBP.' }
+    return {
+      ok: false,
+      error: 'Formato de imagem inválido. Use JPG, PNG ou WEBP.',
+    }
   }
   if (file.size > MAX_IMAGE_SIZE) {
-    return { ok: false, error: 'Imagem muito grande. Envie uma imagem de até 5MB.' }
+    return {
+      ok: false,
+      error: 'Imagem muito grande. Envie uma imagem de até 5MB.',
+    }
   }
 
   const path = `${pathPrefix}/${randomUUID()}.${resolveExtension(file)}`
@@ -58,9 +56,7 @@ export async function uploadImageIfPresent(
     cleanup: async () => {
       try {
         await storageRepo.remove(uploaded.path)
-      } catch {
-        // best-effort cleanup
-      }
+      } catch {}
     },
   }
 }

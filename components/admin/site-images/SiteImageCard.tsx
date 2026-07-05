@@ -48,12 +48,11 @@ export function SiteImageCard({ def, stored, index }: Props) {
       transition={{ duration: 0.4, delay: (index % 8) * 0.04 }}
       className="group flex flex-col overflow-hidden rounded-2xl border border-stone-200/70 bg-white shadow-sm transition hover:shadow-md"
     >
-      {/* Preview */}
       <div className={`relative ${aspectClass} bg-stone-100`}>
         {previewSrc ? (
           <SmartImage
             src={previewSrc}
-            fallback={def.fallback} // 👈 always have the local fallback ready
+            fallback={def.fallback}
             alt={stored?.alt ?? def.label}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
@@ -65,7 +64,6 @@ export function SiteImageCard({ def, stored, index }: Props) {
           </div>
         )}
 
-        {/* Source badge */}
         <span
           className={`absolute left-3 top-3 inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-medium uppercase tracking-wider ring-1 backdrop-blur ${
             isUsingDb
@@ -83,7 +81,6 @@ export function SiteImageCard({ def, stored, index }: Props) {
         </span>
       </div>
 
-      {/* Body */}
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
           <p className="font-medium text-stone-900">{def.label}</p>

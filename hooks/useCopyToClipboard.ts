@@ -2,11 +2,6 @@
 
 import { useState } from 'react'
 
-/**
- * Copy-to-clipboard with a transient "copied" flag keyed by the copied value,
- * so callers can highlight exactly which item was copied. Falls back to
- * `window.prompt` when the Clipboard API is unavailable.
- */
 export function useCopyToClipboard(durationMs = 2000) {
   const [copiedValue, setCopiedValue] = useState<string | null>(null)
 

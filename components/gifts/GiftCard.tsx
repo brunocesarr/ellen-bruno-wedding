@@ -69,7 +69,6 @@ export function GiftCard({ gift, token }: Props) {
             {gift.status === 'reserved' ? '🔒 Reservado' : '✨ Disponível'}
           </span>
 
-          {/* Loading overlay */}
           <AnimatePresence>
             {(isPending || pressed) && (
               <motion.div

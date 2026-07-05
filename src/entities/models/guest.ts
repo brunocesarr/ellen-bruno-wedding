@@ -19,10 +19,9 @@ export const GuestSchema = z.object({
 })
 export type Guest = z.infer<typeof GuestSchema>
 
-/** What is sent back to the public invite page after validating the token. */
 export const InviteContextSchema = z.object({
   guest: GuestSchema,
-  partyMembers: z.array(GuestSchema), // does NOT include `guest`
+  partyMembers: z.array(GuestSchema),
 })
 export type InviteContext = z.infer<typeof InviteContextSchema>
 
@@ -31,7 +30,7 @@ export const CreateGuestInputSchema = z.object({
   lastName: z.string().min(1, 'Informe o sobrenome').max(80),
   status: GuestStatusSchema.default('pending'),
   notes: z.string().max(500).optional(),
-  /** When set, this guest is added to an existing party (associated guests). */
+
   partyId: z.string().uuid().optional(),
 })
 export type CreateGuestInput = z.infer<typeof CreateGuestInputSchema>
@@ -41,10 +40,9 @@ export const UpdateGuestInputSchema = CreateGuestInputSchema.partial().extend({
 })
 export type UpdateGuestInput = z.infer<typeof UpdateGuestInputSchema>
 
-/** Used by the public token flow when confirming. */
 export const ConfirmAttendanceInputSchema = z.object({
   inviteToken: z.string().uuid('Convite inválido'),
-  /** The owner of the token + any companions they want to confirm. */
+
   attendees: z
     .array(
       z.object({

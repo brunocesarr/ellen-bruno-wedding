@@ -47,7 +47,7 @@ export class PixUtilsService implements IPixService {
     const pixKey = (process.env.PIX_KEY ?? '').trim()
     if (!pixKey) throw new PixError('PIX_KEY não configurada')
 
-    const reserved = 'br.gov.bcb.pix'.length + pixKey.length + 8 // TLV overhead
+    const reserved = 'br.gov.bcb.pix'.length + pixKey.length + 8
     const maxInfoLen = Math.max(0, 99 - reserved)
     const infoAdicional = sanitizeField(description, Math.min(maxInfoLen, 40))
 

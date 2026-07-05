@@ -23,7 +23,7 @@ export default function LoginPage() {
 
   const [serverError, setServerError] = useState<string | null>(null)
   const [showPassword, setShowPassword] = useState(false)
-  const [authenticated, setAuthenticated] = useState(false) // 👈 new
+  const [authenticated, setAuthenticated] = useState(false)
 
   const {
     register,
@@ -48,10 +48,8 @@ export default function LoginPage() {
       return
     }
 
-    // 🎉 Show romantic loader during the redirect
     setAuthenticated(true)
 
-    // Small delay so the user sees the loader (instead of a jarring flash)
     setTimeout(() => {
       router.replace(next)
       router.refresh()
@@ -92,7 +90,6 @@ export default function LoginPage() {
           className="space-y-4"
           noValidate
         >
-          {/* Email field */}
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-stone-600">
               Email
@@ -120,7 +117,6 @@ export default function LoginPage() {
             )}
           </label>
 
-          {/* Password field */}
           <label className="block">
             <span className="mb-1.5 block text-xs font-medium text-stone-600">
               Senha

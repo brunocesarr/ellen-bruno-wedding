@@ -46,9 +46,6 @@ export function updateGiftUseCase(d: Deps) {
 
     const updated = await d.giftsRepo.update(result.data)
 
-    /**
-     * If a new image was uploaded, remove old image from storage.
-     */
     if (
       previous?.imagePath &&
       result.data.imagePath &&
@@ -56,9 +53,7 @@ export function updateGiftUseCase(d: Deps) {
     ) {
       try {
         await d.storageRepo.remove(previous.imagePath)
-      } catch {
-        // best-effort cleanup
-      }
+      } catch {}
     }
 
     return updated
@@ -76,9 +71,7 @@ export function deleteGiftUseCase(d: Deps) {
     if (gift?.imagePath) {
       try {
         await d.storageRepo.remove(gift.imagePath)
-      } catch {
-        // best-effort
-      }
+      } catch {}
     }
 
     return d.giftsRepo.delete(id)

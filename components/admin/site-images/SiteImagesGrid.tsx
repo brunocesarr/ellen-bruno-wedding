@@ -20,7 +20,6 @@ export function SiteImagesGrid({ stored }: Props) {
     [stored]
   )
 
-  // Group catalog by section
   const sections = useMemo(() => {
     const map = new Map<SiteImageSection, SiteImageDef[]>()
     for (const item of SITE_IMAGE_CATALOG) {

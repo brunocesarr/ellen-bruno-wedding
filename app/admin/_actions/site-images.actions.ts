@@ -2,18 +2,13 @@
 
 import { getContainer } from '@/src/di/container'
 import {
-  getBoolean,
-  getFile,
-  getNumber,
-  getString,
-} from '@/src/lib/form-data'
-import { revalidateGroup } from '@/src/lib/revalidate'
-import { uploadImageIfPresent } from '@/src/lib/storage-upload'
-import {
   deleteSiteImageController,
   listSiteImagesAdminController,
   upsertSiteImageController,
 } from '@/src/interface-adapters/controllers/site-images/manage-site-image.controller'
+import { getBoolean, getFile, getNumber, getString } from '@/src/lib/form-data'
+import { revalidateGroup } from '@/src/lib/revalidate'
+import { uploadImageIfPresent } from '@/src/lib/storage-upload'
 
 export async function listSiteImagesAction() {
   return listSiteImagesAdminController()
@@ -35,7 +30,7 @@ export async function upsertSiteImageAction(_: unknown, formData: FormData) {
     alt: getString(formData, 'alt'),
     displayOrder: getNumber(formData, 'displayOrder') ?? 0,
     isActive: getBoolean(formData, 'isActive'),
-    imagePath: upload.imagePath, // undefined → keeps existing image
+    imagePath: upload.imagePath,
   })
 
   if (!result.ok) await upload.cleanup?.()

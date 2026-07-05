@@ -6,7 +6,7 @@ import { motion, useReducedMotion } from 'motion/react'
 type Props = {
   message?: string
   submessage?: string
-  /** Use 'fullscreen' for page transitions, 'inline' for in-form spinners */
+
   variant?: 'fullscreen' | 'inline'
 }
 
@@ -34,7 +34,7 @@ export function RomanticLoader({
         className="h-12 w-12 fill-amber-700 text-amber-700 drop-shadow-[0_4px_12px_rgba(168,118,62,0.35)]"
         strokeWidth={1.5}
       />
-      {/* Soft pulse halo */}
+
       {!reduce && (
         <motion.span
           className="absolute inset-0 rounded-full bg-amber-400/30 blur-xl"
@@ -45,7 +45,6 @@ export function RomanticLoader({
     </motion.div>
   )
 
-  // Floating petals — only on fullscreen + when motion isn't reduced
   const Petals =
     variant === 'fullscreen' && !reduce ? (
       <div
@@ -133,7 +132,6 @@ export function RomanticLoader({
           )}
         </div>
 
-        {/* Three-dot loader */}
         <div className="flex items-center gap-1.5">
           {[0, 1, 2].map((i) => (
             <motion.span

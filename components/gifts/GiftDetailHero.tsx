@@ -32,7 +32,6 @@ export function GiftDetailHero({ gift, token }: Props) {
         </Link>
 
         <div className="mt-8 grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
-          {/* ── Image (large, polaroid-style) ───────────── */}
           <motion.div
             initial={{ opacity: 0, scale: 0.9, rotate: -2 }}
             animate={{ opacity: 1, scale: 1, rotate: 0 }}
@@ -57,14 +56,12 @@ export function GiftDetailHero({ gift, token }: Props) {
               )}
             </div>
 
-            {/* Decorative dot */}
             <span
               aria-hidden
               className="absolute -right-3 -top-3 size-6 rounded-full bg-terracotta-light/50"
             />
           </motion.div>
 
-          {/* ── Info column ─────────────────────────────── */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}

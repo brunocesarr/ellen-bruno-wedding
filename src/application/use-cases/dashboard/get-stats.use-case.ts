@@ -26,9 +26,8 @@ export function getDashboardStatsUseCase(d: Deps) {
       d.pixRepo.list(),
     ])
 
-    // Confirmed pix amount per gift (excluding "free" pix where giftId is null)
     const confirmedByGift = new Map<string, number>()
-    let untiedConfirmedAmount = 0 // 👈 Pix gifts not linked to any item
+    let untiedConfirmedAmount = 0
 
     for (const p of pixList) {
       if (!p.confirmed) continue
@@ -55,7 +54,7 @@ export function getDashboardStatsUseCase(d: Deps) {
       reserved: 0,
       thanked: 0,
     }
-    let totalReceived = untiedConfirmedAmount // 👈 include untied Pix
+    let totalReceived = untiedConfirmedAmount
     let totalGiftValue = 0
 
     for (const g of gifts) {
@@ -65,7 +64,6 @@ export function getDashboardStatsUseCase(d: Deps) {
       if (s === 'thanked') totalReceived += confirmedByGift.get(g.id) ?? 0
     }
 
-    // 30-day timeline based on reservedAt
     const today = new Date()
     const days = Array.from({ length: 30 }, (_, i) => {
       const d2 = new Date(today)

@@ -38,7 +38,6 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[220px]">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
@@ -64,7 +63,6 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
         </select>
       </div>
 
-      {/* Desktop table */}
       <div className="hidden overflow-x-auto md:block">
         <table className="w-full text-sm">
           <thead>
@@ -148,7 +146,6 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
         </table>
       </div>
 
-      {/* Mobile cards */}
       <div className="space-y-3 md:hidden">
         {filtered.map((g) => (
           <article

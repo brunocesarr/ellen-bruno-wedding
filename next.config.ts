@@ -17,7 +17,6 @@ const nextConfig: NextConfig = {
       'react-hook-form',
     ],
     serverActions: { bodySizeLimit: '5mb' },
-    // optimizeCss: true, // requires `beasties` -> run: pnpm add -D beasties (or keep disabled)
   },
 
   images: {

@@ -38,7 +38,6 @@ export function HeroContent({ background }: { background: ResolvedSiteImage }) {
         className="absolute inset-0 z-0"
         style={parallaxOn ? { y: backgroundY } : undefined}
       >
-        {/* ✅ bucket URL first, local fallback on error */}
         <SmartImage
           src={background.src}
           fallback={background.fallback}
