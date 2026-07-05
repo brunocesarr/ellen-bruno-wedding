@@ -1,0 +1,291 @@
+'use client'
+
+import type { ResolvedJourneyBook, ResolvedJourneyPage } from '@/src/lib/journey-catalog'
+import { cn } from '@/src/lib/utils'
+import { motion, useReducedMotion } from 'motion/react'
+import { useCallback, useEffect, useState } from 'react'
+import { JourneyPageContent } from './JourneyPageContent'
+
+type Leaf =
+  | { kind: 'cover' }
+  | { kind: 'page'; page: ResolvedJourneyPage }
+  | { kind: 'end' }
+
+type Props = {
+  book: ResolvedJourneyBook
+  coupleInitials?: string
+  /** When provided, renders a "back to the shelf" control. */
+  onClose?: () => void
+}
+
+const TURN = { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const }
+
+export function JourneyBook({ book, coupleInitials = 'E&B', onClose }: Props) {
+  const reduce = useReducedMotion()
+
+  const leaves: Leaf[] = [
+    { kind: 'cover' },
+    ...book.pages.map((page) => ({ kind: 'page' as const, page })),
+    { kind: 'end' },
+  ]
+  const total = leaves.length
+
+  // `turned` = how many leaves have been flipped to the left. The readable leaf is
+  // leaves[turned]. 0 = closed on the cover; total - 1 = the end page.
+  const [turned, setTurned] = useState(0)
+  const [animating, setAnimating] = useState<number | null>(null)
+
+  const goNext = useCallback(() => {
+    setTurned((t) => {
+      if (t >= total - 1) return t
+      setAnimating(t)
+      return t + 1
+    })
+  }, [total])
+
+  const goPrev = useCallback(() => {
+    setTurned((t) => {
+      if (t <= 0) return t
+      setAnimating(t - 1)
+      return t - 1
+    })
+  }, [])
+
+  useEffect(() => {
+    if (reduce) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowRight') goNext()
+      else if (e.key === 'ArrowLeft') goPrev()
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [goNext, goPrev, reduce])
+
+  // Reduced motion: a plain vertical read, no 3D.
+  if (reduce) {
+    return (
+      <div className="mx-auto max-w-2xl space-y-8">
+        {onClose ? <BackToShelf onClose={onClose} /> : null}
+        <CoverPanel book={book} coupleInitials={coupleInitials} static />
+        {book.pages.map((page) => (
+          <div
+            key={page.id}
+            className="paper-texture rounded-sm bg-paper p-6 shadow-[0_8px_32px_rgba(61,54,50,0.1)] md:p-8"
+          >
+            <JourneyPageContent page={page} />
+          </div>
+        ))}
+        <EndPanel coupleInitials={coupleInitials} />
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex flex-col items-center gap-6">
+      {onClose ? <BackToShelf onClose={onClose} /> : null}
+      {/* Stage — establishes the 3D perspective. */}
+      <div
+        className="w-full select-none [perspective:2200px]"
+        style={{ perspectiveOrigin: '50% 40%' }}
+      >
+        <div
+          className="relative mx-auto h-[68vh] max-h-[600px] min-h-[440px] w-[min(92vw,22rem)] [transform-style:preserve-3d] md:w-[min(94vw,52rem)]"
+          role="group"
+          aria-roledescription="livro"
+          aria-label={book.title}
+        >
+          {/* Static left inside-cover (visible on the open, desktop spread). */}
+          <div className="absolute inset-y-0 left-0 hidden w-1/2 rounded-l-md bg-cream-100 shadow-inner md:block" />
+
+          {/* Click zones for prev / next. */}
+          <button
+            type="button"
+            aria-label="Página anterior"
+            onClick={goPrev}
+            disabled={turned <= 0}
+            className="absolute inset-y-0 left-0 z-[60] w-1/2 cursor-w-resize disabled:cursor-default"
+          />
+          <button
+            type="button"
+            aria-label="Próxima página"
+            onClick={goNext}
+            disabled={turned >= total - 1}
+            className="absolute inset-y-0 right-0 z-[60] w-1/2 cursor-e-resize disabled:cursor-default"
+          />
+
+          {leaves.map((leaf, i) => {
+            const isTurned = i < turned
+            const z = animating === i ? total + 5 : isTurned ? i : total - i
+
+            return (
+              <motion.div
+                key={i}
+                className="absolute inset-y-0 right-0 w-full origin-left [transform-style:preserve-3d] md:w-1/2"
+                style={{ zIndex: z }}
+                initial={false}
+                animate={{ rotateY: isTurned ? -180 : 0 }}
+                transition={TURN}
+                onAnimationComplete={() =>
+                  setAnimating((a) => (a === i ? null : a))
+                }
+              >
+                {/* Front face — the readable page. */}
+                <div className="absolute inset-0 overflow-hidden rounded-r-md [backface-visibility:hidden] md:rounded-l-none">
+                  <LeafFace leaf={leaf} book={book} coupleInitials={coupleInitials} />
+                </div>
+                {/* Back face — blank paper backing seen once turned. */}
+                <div className="absolute inset-0 overflow-hidden rounded-l-md bg-paper [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                  <div className="paper-texture h-full w-full opacity-70" />
+                </div>
+              </motion.div>
+            )
+          })}
+
+          {/* Spine shadow down the centre of the open book. */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-y-0 left-1/2 z-[70] hidden w-8 -translate-x-1/2 md:block"
+            style={{
+              background:
+                'linear-gradient(90deg, transparent, rgba(61,54,50,0.14), transparent)',
+            }}
+          />
+        </div>
+      </div>
+
+      <Controls turned={turned} total={total} onPrev={goPrev} onNext={goNext} />
+    </div>
+  )
+}
+
+function LeafFace({
+  leaf,
+  book,
+  coupleInitials,
+}: {
+  leaf: Leaf
+  book: ResolvedJourneyBook
+  coupleInitials: string
+}) {
+  if (leaf.kind === 'cover') {
+    return <CoverPanel book={book} coupleInitials={coupleInitials} />
+  }
+  if (leaf.kind === 'end') {
+    return <EndPanel coupleInitials={coupleInitials} />
+  }
+  return (
+    <div className="paper-texture h-full w-full bg-paper">
+      <div className="h-full overflow-y-auto p-6 md:p-8">
+        <JourneyPageContent page={leaf.page} compact />
+      </div>
+    </div>
+  )
+}
+
+function CoverPanel({
+  book,
+  coupleInitials,
+  static: isStatic,
+}: {
+  book: ResolvedJourneyBook
+  coupleInitials: string
+  static?: boolean
+}) {
+  return (
+    <div
+      className={cn(
+        'flex h-full flex-col items-center justify-center bg-terracotta px-8 text-center text-cream',
+        isStatic ? 'rounded-sm py-16' : 'rounded-r-md md:rounded-l-none'
+      )}
+      style={{
+        backgroundImage:
+          'linear-gradient(135deg, rgba(255,255,255,0.06), rgba(0,0,0,0.12))',
+      }}
+    >
+      <span className="monogram-ring grid h-14 w-14 place-items-center rounded-full border-cream/70 font-display text-lg tracking-wide text-cream">
+        {coupleInitials}
+      </span>
+      <p className="mt-6 text-xs uppercase tracking-[0.32em] text-cream/80">
+        {book.chapter}
+      </p>
+      <h1 className="mt-3 font-script text-4xl leading-tight md:text-5xl">
+        {book.title}
+      </h1>
+      {book.dateLabel ? (
+        <p className="mt-2 font-display text-lg italic text-cream/90">
+          {book.dateLabel}
+        </p>
+      ) : null}
+      <span className="mt-6 block h-px w-20 bg-cream/50" />
+      <p className="mt-6 text-xs uppercase tracking-[0.28em] text-cream/70">
+        Vire a página →
+      </p>
+    </div>
+  )
+}
+
+function EndPanel({ coupleInitials }: { coupleInitials: string }) {
+  return (
+    <div className="paper-texture flex h-full flex-col items-center justify-center rounded-r-md bg-paper px-8 text-center md:rounded-l-none">
+      <span className="monogram-ring grid h-14 w-14 place-items-center rounded-full font-display text-lg text-terracotta">
+        {coupleInitials}
+      </span>
+      <h2 className="mt-6 font-script text-4xl text-terracotta-dark md:text-5xl">
+        continua…
+      </h2>
+      <p className="mt-4 max-w-xs font-display text-lg italic text-ink/80">
+        Escolha outro livro na estante para seguir a nossa história.
+      </p>
+    </div>
+  )
+}
+
+function BackToShelf({ onClose }: { onClose: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClose}
+      className="inline-flex items-center gap-2 self-start rounded-full border border-terracotta/30 bg-cream/70 px-4 py-2 text-xs uppercase tracking-[0.2em] text-terracotta-dark backdrop-blur transition hover:bg-terracotta hover:text-cream"
+    >
+      ← Voltar à estante
+    </button>
+  )
+}
+
+function Controls({
+  turned,
+  total,
+  onPrev,
+  onNext,
+}: {
+  turned: number
+  total: number
+  onPrev: () => void
+  onNext: () => void
+}) {
+  return (
+    <div className="flex items-center gap-5">
+      <button
+        type="button"
+        onClick={onPrev}
+        disabled={turned <= 0}
+        aria-label="Página anterior"
+        className="grid h-11 w-11 place-items-center rounded-full border border-terracotta/40 bg-cream/70 text-terracotta backdrop-blur transition hover:bg-terracotta hover:text-cream disabled:pointer-events-none disabled:opacity-30"
+      >
+        ←
+      </button>
+      <span className="min-w-[4rem] rounded-full bg-cream/70 px-3 py-1 text-center text-sm tabular-nums text-ink-muted backdrop-blur">
+        {turned + 1} / {total}
+      </span>
+      <button
+        type="button"
+        onClick={onNext}
+        disabled={turned >= total - 1}
+        aria-label="Próxima página"
+        className="grid h-11 w-11 place-items-center rounded-full border border-terracotta/40 bg-cream/70 text-terracotta backdrop-blur transition hover:bg-terracotta hover:text-cream disabled:pointer-events-none disabled:opacity-30"
+      >
+        →
+      </button>
+    </div>
+  )
+}

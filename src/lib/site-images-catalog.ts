@@ -6,6 +6,7 @@ export type SiteImageSection =
   | 'couple'
   | 'decorative'
   | 'venue'
+  | 'journey'
 
 export type SiteImageDef = {
   key: string
@@ -150,6 +151,49 @@ export const SITE_IMAGE_CATALOG: SiteImageDef[] = [
     fallback: '/images/texture-paper.jpg',
     aspect: 'landscape',
   },
+
+  {
+    key: 'journey-first-kiss',
+    section: 'journey',
+    label: 'Jornada — O primeiro beijo',
+    fallback: '/images/couple-main.jpg',
+    aspect: 'landscape',
+  },
+  {
+    key: 'journey-trip-1',
+    section: 'journey',
+    label: 'Jornada — Viagem 1',
+    fallback: '/images/polaroids/eb-1.jpg',
+    aspect: 'square',
+  },
+  {
+    key: 'journey-trip-2',
+    section: 'journey',
+    label: 'Jornada — Viagem 2',
+    fallback: '/images/polaroids/eb-2.jpg',
+    aspect: 'square',
+  },
+  {
+    key: 'journey-trip-3',
+    section: 'journey',
+    label: 'Jornada — Viagem 3',
+    fallback: '/images/polaroids/eb-3.jpg',
+    aspect: 'square',
+  },
+  {
+    key: 'journey-proposal',
+    section: 'journey',
+    label: 'Jornada — O pedido (balão)',
+    fallback: '/images/couple-emotion.jpg',
+    aspect: 'landscape',
+  },
+  {
+    key: 'journey-big-day',
+    section: 'journey',
+    label: 'Jornada — O grande dia',
+    fallback: '/images/couple-forever.jpg',
+    aspect: 'landscape',
+  },
 ]
 
 export const SECTION_LABELS: Record<SiteImageSection, string> = {
@@ -160,6 +204,7 @@ export const SECTION_LABELS: Record<SiteImageSection, string> = {
   couple: 'Casal',
   venue: 'Local',
   decorative: 'Decorativos',
+  journey: 'Nossa Jornada',
 }
 
 export function normalizeSiteImageKey(key: string): string {
