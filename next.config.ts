@@ -29,6 +29,11 @@ const nextConfig: NextConfig = {
   },
 
   async headers() {
+    // Only in production. In dev, Turbopack rebuilds chunks on every edit while
+    // keeping stable filenames; an `immutable` header makes the browser serve
+    // the stale chunk, causing "module factory is not available" errors.
+    if (process.env.NODE_ENV !== 'production') return []
+
     return [
       {
         source: '/_next/static/:path*',

@@ -16,33 +16,41 @@ export function Letter({
   return (
     <motion.div
       animate={{
-        y: isOpen ? '-50%' : '0%',
-        zIndex: isOpen ? 50 : 1,
         boxShadow: isOpen
-          ? '0 10px 40px rgba(0,0,0,0.1)'
+          ? '0 18px 50px rgba(120,70,30,0.16)'
           : '0 1px 3px rgba(0,0,0,0.02)',
       }}
       transition={{
-        y: {
-          duration: shouldReduceMotion ? 0 : 0.8,
-          ease: [0.33, 1, 0.68, 1],
-          delay: 0.15,
+        boxShadow: {
+          duration: shouldReduceMotion ? 0 : 0.4,
+          delay: shouldReduceMotion ? 0 : 0.4,
         },
-        zIndex: { duration: 0 },
-        boxShadow: { duration: 0.4, delay: 0.3 },
       }}
       style={{
         position: 'absolute',
-        left: '5%',
-        right: '5%',
-        top: '4%',
-        bottom: '4%',
-        borderRadius: 'clamp(4px, 1vw, 8px)',
+        inset: 0,
+        zIndex: 1,
+        borderRadius: 'clamp(6px, 1.5vw, 12px)',
         backgroundColor: '#FFFDF8',
         overflow: 'hidden',
         border: '1px solid rgba(0,0,0,0.04)',
       }}
     >
+      {/* Spine shadow along the hinge, echoing the book's inner gutter */}
+      <span
+        aria-hidden
+        style={{
+          position: 'absolute',
+          insetBlock: 0,
+          left: 0,
+          width: '18%',
+          borderRadius: 'inherit',
+          background:
+            'linear-gradient(90deg, rgba(120,70,30,0.14) 0%, rgba(120,70,30,0) 100%)',
+          pointerEvents: 'none',
+          zIndex: 2,
+        }}
+      />
       <motion.div
         variants={letterContentVariants}
         initial="hidden"

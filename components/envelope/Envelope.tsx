@@ -6,20 +6,17 @@ import { EnvelopeGraphic } from './EnvelopeGraphic'
 import { Letter } from './Letter'
 import { ctaVariants } from './envelope.variants'
 
-type State = 'closed' | 'opening' | 'open'
+type State = 'closed' | 'open'
 
 export function Envelope({ token }: { token: string }) {
   const [state, setState] = useState<State>('closed')
   const shouldReduceMotion = useReducedMotion()
 
   const handleOpen = useCallback(() => {
-    if (state !== 'closed') return
-    setState('opening')
-    setTimeout(() => setState('open'), shouldReduceMotion ? 0 : 650)
-  }, [state, shouldReduceMotion])
+    setState((prev) => (prev === 'closed' ? 'open' : prev))
+  }, [])
 
   const isClosed = state === 'closed'
-  const isOpening = state === 'opening' || state === 'open'
   const isOpen = state === 'open'
 
   return (
@@ -42,7 +39,7 @@ export function Envelope({ token }: { token: string }) {
           alignItems: 'center',
           gap: 'clamp(0.75rem, 2vw, 1.25rem)',
           width: '100%',
-          maxWidth: '480px',
+          maxWidth: '340px',
         }}
       >
         <motion.p
@@ -63,16 +60,17 @@ export function Envelope({ token }: { token: string }) {
           style={{
             position: 'relative',
             width: '100%',
-
-            aspectRatio: '4 / 3',
+            aspectRatio: '5 / 7',
+            perspective: '1600px',
+            transformStyle: 'preserve-3d',
           }}
         >
           <Letter isOpen={isOpen} shouldReduceMotion={shouldReduceMotion} />
           <EnvelopeGraphic
             isClosed={isClosed}
-            isOpening={isOpening}
             isOpen={isOpen}
             onOpen={handleOpen}
+            shouldReduceMotion={shouldReduceMotion}
           />
         </div>
 

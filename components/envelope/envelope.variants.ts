@@ -1,22 +1,19 @@
 import type { Variants } from 'motion/react'
 
-export const flapVariants: Variants = {
-  closed: { rotateX: 0, zIndex: 30 },
-  opening: {
-    rotateX: -180,
-    zIndex: 5,
-    transition: {
-      rotateX: { duration: 0.6, ease: [0.4, 0, 0.2, 1] },
-      zIndex: { delay: 0.3, duration: 0 },
-    },
-  },
+// The cover swings open on a left-edge hinge — the "book of congratulations"
+// flip mechanic (rotateY around transform-origin: left, in a perspective scene).
+// `z` keeps the cover a hair in front of the letter while closed so the two
+// coplanar faces don't z-fight inside the shared preserve-3d scene.
+export const coverVariants: Variants = {
+  closed: { rotateY: 0, z: 1 },
+  open: { rotateY: -125, z: 1 },
 }
 
 export const letterContentVariants: Variants = {
   hidden: { opacity: 0 },
   visible: {
     opacity: 1,
-    transition: { staggerChildren: 0.06, delayChildren: 0.7 },
+    transition: { staggerChildren: 0.06, delayChildren: 0.75 },
   },
 }
 
@@ -30,6 +27,6 @@ export const ctaVariants: Variants = {
   visible: {
     opacity: 1,
     y: 0,
-    transition: { duration: 0.5, delay: 1.4, ease: 'easeOut' },
+    transition: { duration: 0.5, delay: 1.5, ease: 'easeOut' },
   },
 }
