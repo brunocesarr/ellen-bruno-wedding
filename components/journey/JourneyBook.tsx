@@ -5,7 +5,7 @@ import type {
   ResolvedJourneyPage,
 } from '@/src/lib/journey-catalog'
 import { cn } from '@/src/lib/utils'
-import { motion, useReducedMotion } from 'motion/react'
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useState } from 'react'
 import { JourneyPageContent } from './JourneyPageContent'
 
@@ -26,6 +26,17 @@ type Props = {
 }
 
 const TURN = { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const }
+const SLIDE = { duration: 0.55, ease: [0.22, 1, 0.36, 1] as const }
+
+// Mobile page-turn: a single leaf rotates on its left edge. Because only one leaf is
+// mounted at a time (AnimatePresence mode="wait"), there's no second face to bleed
+// through — so we get the book-flip feel without the iOS backface-visibility glitch.
+// At ±90° the page is edge-on (effectively invisible); opacity smooths the hand-off.
+const pageFlipVariants = {
+  enter: (dir: number) => ({ rotateY: dir >= 0 ? 90 : -90, opacity: 0 }),
+  center: { rotateY: 0, opacity: 1 },
+  exit: (dir: number) => ({ rotateY: dir >= 0 ? -90 : 90, opacity: 0 }),
+}
 
 export function JourneyBook({
   book,
@@ -35,6 +46,16 @@ export function JourneyBook({
   nextBookTitle,
 }: Props) {
   const reduce = useReducedMotion()
+
+  // The 3D flip is desktop-only; on narrow/mobile screens we use a single-leaf flip.
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 767px)')
+    const update = () => setIsMobile(mq.matches)
+    update()
+    mq.addEventListener('change', update)
+    return () => mq.removeEventListener('change', update)
+  }, [])
 
   const leaves: Leaf[] = [
     { kind: 'cover' },
@@ -47,8 +68,11 @@ export function JourneyBook({
   // leaves[turned]. 0 = closed on the cover; total - 1 = the end page.
   const [turned, setTurned] = useState(0)
   const [animating, setAnimating] = useState<number | null>(null)
+  // Direction of the last navigation, for the mobile flip (1 = forward, -1 = back).
+  const [dir, setDir] = useState(1)
 
   const goNext = useCallback(() => {
+    setDir(1)
     setTurned((t) => {
       if (t >= total - 1) return t
       setAnimating(t)
@@ -57,6 +81,7 @@ export function JourneyBook({
   }, [total])
 
   const goPrev = useCallback(() => {
+    setDir(-1)
     setTurned((t) => {
       if (t <= 0) return t
       setAnimating(t - 1)
@@ -65,8 +90,7 @@ export function JourneyBook({
   }, [])
 
   // On the very last leaf (the end panel), "next" should jump straight to the next
-  // book instead of doing nothing — so the click zone and the bottom arrow work too,
-  // not just the explicit "Próximo capítulo" button.
+  // book instead of doing nothing.
   const handleNext = useCallback(() => {
     if (turned >= total - 1) {
       onNextBook?.()
@@ -111,6 +135,69 @@ export function JourneyBook({
     )
   }
 
+  // Mobile: single-leaf page flip. Only one page is mounted at a time, so no backface
+  // bleed / image persistence — but we still get a real page-turn effect.
+  // if (isMobile) {
+  //   const leaf = leaves[turned]
+  //   if (!leaf) return null
+  //   return (
+  //     <div className="flex flex-col items-center gap-6">
+  //       {onClose ? <BackToShelf onClose={onClose} /> : null}
+  //       <div
+  //         className="relative mx-auto h-[68vh] max-h-[600px] min-h-[440px] w-[min(92vw,22rem)] select-none [perspective:1600px]"
+  //         style={{ perspectiveOrigin: '50% 45%' }}
+  //       >
+  //         {/* Click zones for prev / next. */}
+  //         <button
+  //           type="button"
+  //           aria-label="Página anterior"
+  //           onClick={goPrev}
+  //           disabled={turned <= 0}
+  //           className="absolute inset-y-0 left-0 z-[60] w-1/2 disabled:cursor-default"
+  //         />
+  //         <button
+  //           type="button"
+  //           aria-label="Próxima página"
+  //           onClick={handleNext}
+  //           disabled={nextDisabled}
+  //           className="absolute inset-y-0 right-0 z-[60] w-1/2 disabled:cursor-default"
+  //         />
+
+  //         <AnimatePresence mode="wait" custom={dir} initial={false}>
+  //           <motion.div
+  //             key={turned}
+  //             className="absolute inset-0 origin-left overflow-hidden rounded-md bg-paper shadow-[0_8px_32px_rgba(61,54,50,0.18)] [transform-style:preserve-3d]"
+  //             custom={dir}
+  //             variants={pageFlipVariants}
+  //             initial="enter"
+  //             animate="center"
+  //             exit="exit"
+  //             transition={SLIDE}
+  //             style={{ willChange: 'transform' }}
+  //           >
+  //             <LeafFace
+  //               leaf={leaf}
+  //               book={book}
+  //               coupleInitials={coupleInitials}
+  //               onClose={onClose}
+  //               onNextBook={onNextBook}
+  //               nextBookTitle={nextBookTitle}
+  //             />
+  //           </motion.div>
+  //         </AnimatePresence>
+  //       </div>
+
+  //       <Controls
+  //         turned={turned}
+  //         total={total}
+  //         onPrev={goPrev}
+  //         onNext={handleNext}
+  //         nextDisabled={nextDisabled}
+  //       />
+  //     </div>
+  //   )
+  // }
+
   return (
     <div className="flex flex-col items-center gap-6">
       {onClose ? <BackToShelf onClose={onClose} /> : null}
@@ -126,7 +213,9 @@ export function JourneyBook({
           aria-label={book.title}
         >
           {/* Static left inside-cover (visible on the open, desktop spread). */}
-          <div className="absolute inset-y-0 left-0 hidden w-1/2 rounded-l-md bg-cream-100 shadow-inner md:block" />
+          {turned > 0 && (
+            <div className="absolute inset-y-0 left-0 hidden w-1/2 rounded-l-md bg-cream-100 shadow-inner md:block" />
+          )}
 
           {/* Click zones for prev / next. */}
           <button
@@ -151,8 +240,10 @@ export function JourneyBook({
             return (
               <motion.div
                 key={i}
-                className="absolute inset-y-0 right-0 w-full origin-left [transform-style:preserve-3d] md:w-1/2"
-                style={{ zIndex: z }}
+                className={
+                  'absolute inset-y-0 right-0 w-full origin-left [transform-style:preserve-3d] md:w-1/2'
+                }
+                style={{ zIndex: z, willChange: 'transform' }}
                 initial={false}
                 animate={{ rotateY: isTurned ? -180 : 0 }}
                 transition={TURN}
@@ -161,7 +252,14 @@ export function JourneyBook({
                 }
               >
                 {/* Front face — the readable page. */}
-                <div className="absolute inset-0 overflow-hidden rounded-r-md [backface-visibility:hidden] md:rounded-l-none">
+                <div
+                  className="absolute inset-0 overflow-hidden rounded-r-md [backface-visibility:hidden] md:rounded-l-none"
+                  style={{
+                    WebkitBackfaceVisibility: 'hidden',
+                    backfaceVisibility: 'hidden',
+                    transform: 'translateZ(1px)',
+                  }}
+                >
                   <LeafFace
                     leaf={leaf}
                     book={book}
@@ -172,7 +270,14 @@ export function JourneyBook({
                   />
                 </div>
                 {/* Back face — blank paper backing seen once turned. */}
-                <div className="absolute inset-0 overflow-hidden rounded-l-md bg-paper [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                <div
+                  className="absolute inset-0 overflow-hidden rounded-l-md bg-paper [backface-visibility:hidden] [transform:rotateY(180deg)]"
+                  style={{
+                    WebkitBackfaceVisibility: 'hidden',
+                    backfaceVisibility: 'hidden',
+                    transform: 'rotateY(180deg) translateZ(1px)',
+                  }}
+                >
                   <div className="paper-texture h-full w-full opacity-70" />
                 </div>
               </motion.div>
@@ -312,12 +417,30 @@ function EndPanel({
           >
             Próximo capítulo{nextBookTitle ? `: ${nextBookTitle}` : ''}
           </button>
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-3 font-display text-sm uppercase tracking-wide text-ink/60 underline-offset-4 transition hover:text-ink hover:underline"
+            >
+              Voltar à estante
+            </button>
+          ) : null}
         </>
       ) : (
         <>
           <p className="mt-4 max-w-xs font-display text-lg italic text-ink/80">
             Essa foi a nossa última página… por agora.
           </p>
+          {onClose ? (
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-6 rounded-full bg-terracotta px-6 py-3 font-display text-sm uppercase tracking-wide text-cream transition hover:bg-terracotta-dark"
+            >
+              Voltar à estante
+            </button>
+          ) : null}
         </>
       )}
     </div>
