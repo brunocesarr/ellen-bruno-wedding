@@ -47,7 +47,10 @@ export function JourneyLibrary({
   const reduce = useReducedMotion()
   const [openId, setOpenId] = useState<string | null>(null)
 
-  const openBook = books.find((b) => b.id === openId) ?? null
+  const openIndex = books.findIndex((b) => b.id === openId)
+  const openBook = openIndex >= 0 ? books[openIndex] : null
+  const nextBook =
+    openIndex >= 0 && openIndex < books.length - 1 ? books[openIndex + 1] : null
 
   // Interleave the openable step-books with decorative fillers for a library feel.
   const shelf = useMemo<ShelfItem[]>(() => {
@@ -82,15 +85,25 @@ export function JourneyLibrary({
             <motion.div
               key={`reading-${openBook.id}`}
               className="[transform-style:preserve-3d]"
-              initial={reduce ? { opacity: 0 } : { opacity: 0, rotateY: -55, scale: 0.85 }}
+              initial={
+                reduce
+                  ? { opacity: 0 }
+                  : { opacity: 0, rotateY: -55, scale: 0.85 }
+              }
               animate={{ opacity: 1, rotateY: 0, scale: 1 }}
-              exit={reduce ? { opacity: 0 } : { opacity: 0, rotateY: -35, scale: 0.9 }}
+              exit={
+                reduce
+                  ? { opacity: 0 }
+                  : { opacity: 0, rotateY: -35, scale: 0.9 }
+              }
               transition={{ duration: 0.75, ease: EASE }}
             >
               <JourneyBook
                 book={openBook}
                 coupleInitials={coupleInitials}
                 onClose={() => setOpenId(null)}
+                onNextBook={nextBook ? () => setOpenId(nextBook.id) : undefined}
+                nextBookTitle={nextBook?.title}
               />
             </motion.div>
           ) : (
@@ -98,7 +111,11 @@ export function JourneyLibrary({
               key="shelf"
               initial={reduce ? { opacity: 0 } : { opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={reduce ? { opacity: 0 } : { opacity: 0, rotateX: 22, y: 40, scale: 0.92 }}
+              exit={
+                reduce
+                  ? { opacity: 0 }
+                  : { opacity: 0, rotateX: 22, y: 40, scale: 0.92 }
+              }
               transition={{ duration: 0.6, ease: EASE }}
               style={{ transformOrigin: 'center bottom' }}
             >
@@ -108,8 +125,9 @@ export function JourneyLibrary({
                   A biblioteca da nossa jornada
                 </h1>
                 <p className="mx-auto mt-3 max-w-md text-sm text-cream/85 [text-shadow:0_1px_8px_rgba(0,0,0,0.35)]">
-                  {guestFirstName ? `${guestFirstName}, cada ` : 'Cada '}livro é um
-                  capítulo da nossa história. Retire um da estante para folhear.
+                  {guestFirstName ? `${guestFirstName}, cada ` : 'Cada '}livro é
+                  um capítulo da nossa história. Retire um da estante para
+                  folhear.
                 </p>
               </header>
 

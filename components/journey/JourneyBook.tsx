@@ -1,6 +1,9 @@
 'use client'
 
-import type { ResolvedJourneyBook, ResolvedJourneyPage } from '@/src/lib/journey-catalog'
+import type {
+  ResolvedJourneyBook,
+  ResolvedJourneyPage,
+} from '@/src/lib/journey-catalog'
 import { cn } from '@/src/lib/utils'
 import { motion, useReducedMotion } from 'motion/react'
 import { useCallback, useEffect, useState } from 'react'
@@ -16,11 +19,21 @@ type Props = {
   coupleInitials?: string
   /** When provided, renders a "back to the shelf" control. */
   onClose?: () => void
+  /** When provided, the end panel offers a direct jump to the next book. */
+  onNextBook?: () => void
+  /** Title of the next book, shown on the "next chapter" button. */
+  nextBookTitle?: string
 }
 
 const TURN = { duration: 0.9, ease: [0.22, 1, 0.36, 1] as const }
 
-export function JourneyBook({ book, coupleInitials = 'E&B', onClose }: Props) {
+export function JourneyBook({
+  book,
+  coupleInitials = 'E&B',
+  onClose,
+  onNextBook,
+  nextBookTitle,
+}: Props) {
   const reduce = useReducedMotion()
 
   const leaves: Leaf[] = [
@@ -51,15 +64,28 @@ export function JourneyBook({ book, coupleInitials = 'E&B', onClose }: Props) {
     })
   }, [])
 
+  // On the very last leaf (the end panel), "next" should jump straight to the next
+  // book instead of doing nothing — so the click zone and the bottom arrow work too,
+  // not just the explicit "Próximo capítulo" button.
+  const handleNext = useCallback(() => {
+    if (turned >= total - 1) {
+      onNextBook?.()
+      return
+    }
+    goNext()
+  }, [turned, total, goNext, onNextBook])
+
+  const nextDisabled = turned >= total - 1 && !onNextBook
+
   useEffect(() => {
     if (reduce) return
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowRight') goNext()
+      if (e.key === 'ArrowRight') handleNext()
       else if (e.key === 'ArrowLeft') goPrev()
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [goNext, goPrev, reduce])
+  }, [handleNext, goPrev, reduce])
 
   // Reduced motion: a plain vertical read, no 3D.
   if (reduce) {
@@ -75,7 +101,12 @@ export function JourneyBook({ book, coupleInitials = 'E&B', onClose }: Props) {
             <JourneyPageContent page={page} />
           </div>
         ))}
-        <EndPanel coupleInitials={coupleInitials} />
+        <EndPanel
+          coupleInitials={coupleInitials}
+          onClose={onClose}
+          onNextBook={onNextBook}
+          nextBookTitle={nextBookTitle}
+        />
       </div>
     )
   }
@@ -108,8 +139,8 @@ export function JourneyBook({ book, coupleInitials = 'E&B', onClose }: Props) {
           <button
             type="button"
             aria-label="Próxima página"
-            onClick={goNext}
-            disabled={turned >= total - 1}
+            onClick={handleNext}
+            disabled={nextDisabled}
             className="absolute inset-y-0 right-0 z-[60] w-1/2 cursor-e-resize disabled:cursor-default"
           />
 
@@ -131,7 +162,14 @@ export function JourneyBook({ book, coupleInitials = 'E&B', onClose }: Props) {
               >
                 {/* Front face — the readable page. */}
                 <div className="absolute inset-0 overflow-hidden rounded-r-md [backface-visibility:hidden] md:rounded-l-none">
-                  <LeafFace leaf={leaf} book={book} coupleInitials={coupleInitials} />
+                  <LeafFace
+                    leaf={leaf}
+                    book={book}
+                    coupleInitials={coupleInitials}
+                    onClose={onClose}
+                    onNextBook={onNextBook}
+                    nextBookTitle={nextBookTitle}
+                  />
                 </div>
                 {/* Back face — blank paper backing seen once turned. */}
                 <div className="absolute inset-0 overflow-hidden rounded-l-md bg-paper [backface-visibility:hidden] [transform:rotateY(180deg)]">
@@ -153,7 +191,13 @@ export function JourneyBook({ book, coupleInitials = 'E&B', onClose }: Props) {
         </div>
       </div>
 
-      <Controls turned={turned} total={total} onPrev={goPrev} onNext={goNext} />
+      <Controls
+        turned={turned}
+        total={total}
+        onPrev={goPrev}
+        onNext={handleNext}
+        nextDisabled={nextDisabled}
+      />
     </div>
   )
 }
@@ -162,16 +206,29 @@ function LeafFace({
   leaf,
   book,
   coupleInitials,
+  onClose,
+  onNextBook,
+  nextBookTitle,
 }: {
   leaf: Leaf
   book: ResolvedJourneyBook
   coupleInitials: string
+  onClose?: () => void
+  onNextBook?: () => void
+  nextBookTitle?: string
 }) {
   if (leaf.kind === 'cover') {
     return <CoverPanel book={book} coupleInitials={coupleInitials} />
   }
   if (leaf.kind === 'end') {
-    return <EndPanel coupleInitials={coupleInitials} />
+    return (
+      <EndPanel
+        coupleInitials={coupleInitials}
+        onClose={onClose}
+        onNextBook={onNextBook}
+        nextBookTitle={nextBookTitle}
+      />
+    )
   }
   return (
     <div className="paper-texture h-full w-full bg-paper">
@@ -224,7 +281,17 @@ function CoverPanel({
   )
 }
 
-function EndPanel({ coupleInitials }: { coupleInitials: string }) {
+function EndPanel({
+  coupleInitials,
+  onClose,
+  onNextBook,
+  nextBookTitle,
+}: {
+  coupleInitials: string
+  onClose?: () => void
+  onNextBook?: () => void
+  nextBookTitle?: string
+}) {
   return (
     <div className="paper-texture flex h-full flex-col items-center justify-center rounded-r-md bg-paper px-8 text-center md:rounded-l-none">
       <span className="monogram-ring grid h-14 w-14 place-items-center rounded-full font-display text-lg text-terracotta">
@@ -233,9 +300,26 @@ function EndPanel({ coupleInitials }: { coupleInitials: string }) {
       <h2 className="mt-6 font-script text-4xl text-terracotta-dark md:text-5xl">
         continua…
       </h2>
-      <p className="mt-4 max-w-xs font-display text-lg italic text-ink/80">
-        Escolha outro livro na estante para seguir a nossa história.
-      </p>
+      {onNextBook ? (
+        <>
+          <p className="mt-4 max-w-xs font-display text-lg italic text-ink/80">
+            O próximo capítulo da nossa história te espera.
+          </p>
+          <button
+            type="button"
+            onClick={onNextBook}
+            className="mt-6 rounded-full bg-terracotta px-6 py-3 font-display text-sm uppercase tracking-wide text-cream transition hover:bg-terracotta-dark"
+          >
+            Próximo capítulo{nextBookTitle ? `: ${nextBookTitle}` : ''}
+          </button>
+        </>
+      ) : (
+        <>
+          <p className="mt-4 max-w-xs font-display text-lg italic text-ink/80">
+            Essa foi a nossa última página… por agora.
+          </p>
+        </>
+      )}
     </div>
   )
 }
@@ -257,11 +341,13 @@ function Controls({
   total,
   onPrev,
   onNext,
+  nextDisabled,
 }: {
   turned: number
   total: number
   onPrev: () => void
   onNext: () => void
+  nextDisabled: boolean
 }) {
   return (
     <div className="flex items-center gap-5">
@@ -280,7 +366,7 @@ function Controls({
       <button
         type="button"
         onClick={onNext}
-        disabled={turned >= total - 1}
+        disabled={nextDisabled}
         aria-label="Próxima página"
         className="grid h-11 w-11 place-items-center rounded-full border border-terracotta/40 bg-cream/70 text-terracotta backdrop-blur transition hover:bg-terracotta hover:text-cream disabled:pointer-events-none disabled:opacity-30"
       >

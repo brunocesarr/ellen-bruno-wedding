@@ -101,11 +101,19 @@ export function EnvelopeGraphic({
           }}
         >
           <span
-            style={{ width: 'clamp(18px, 5vw, 30px)', height: 1, background: 'currentColor' }}
+            style={{
+              width: 'clamp(18px, 5vw, 30px)',
+              height: 1,
+              background: 'currentColor',
+            }}
           />
           <span style={{ fontSize: 'clamp(11px, 2.4vw, 15px)' }}>✿</span>
           <span
-            style={{ width: 'clamp(18px, 5vw, 30px)', height: 1, background: 'currentColor' }}
+            style={{
+              width: 'clamp(18px, 5vw, 30px)',
+              height: 1,
+              background: 'currentColor',
+            }}
           />
         </span>
 
@@ -119,7 +127,11 @@ export function EnvelopeGraphic({
           }}
         >
           {couple.bride}
-          <span style={{ margin: '0 0.12em', fontSize: '0.42em', opacity: 0.6 }}>&</span>
+          <span
+            style={{ margin: '0 0.12em', fontSize: '0.42em', opacity: 0.6 }}
+          >
+            &
+          </span>
           {couple.groom}
         </h2>
 
