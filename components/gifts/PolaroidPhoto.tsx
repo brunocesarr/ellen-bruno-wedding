@@ -1,9 +1,14 @@
+'use client'
+
+import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import Image from 'next/image'
-import { type CSSProperties } from 'react'
+import { useEffect, useRef, useState, type CSSProperties } from 'react'
 
 type Props = {
   src: string
   alt: string
+  /** Shown if `src` fails to load. */
+  fallback?: string
   caption?: string
   tilt?: 'left' | 'right'
   width?: number
@@ -16,6 +21,7 @@ type Props = {
 export function PolaroidPhoto({
   src,
   alt,
+  fallback,
   caption,
   tilt = 'left',
   width = 200,
@@ -24,8 +30,26 @@ export function PolaroidPhoto({
   style,
   priority,
 }: Props) {
+  const reduce = useReducedMotion()
   const tiltClass =
     tilt === 'left' ? 'polaroid-tilt-left' : 'polaroid-tilt-right'
+
+  const [currentSrc, setCurrentSrc] = useState(src)
+  const [isLoading, setIsLoading] = useState(true)
+  const [errored, setErrored] = useState(false)
+  const imgRef = useRef<HTMLImageElement | null>(null)
+
+  useEffect(() => {
+    setCurrentSrc(src)
+    setIsLoading(true)
+    setErrored(false)
+  }, [src])
+
+  useEffect(() => {
+    if (imgRef.current?.complete) {
+      setIsLoading(false)
+    }
+  }, [currentSrc])
 
   return (
     <figure className={`polaroid ${tiltClass} ${className}`} style={style}>
@@ -33,15 +57,58 @@ export function PolaroidPhoto({
         className="relative overflow-hidden bg-cream-dark"
         style={{ width, height }}
       >
-        <Image
-          src={src}
-          alt={alt}
-          loading="eager"
-          fill
-          sizes={`${width}px`}
-          className="object-cover"
-          priority={priority}
-        />
+        {/* Skeleton placeholder — crossfades out once the image is ready. */}
+        <AnimatePresence>
+          {isLoading ? (
+            <motion.div
+              key="skeleton"
+              aria-hidden
+              className="absolute inset-0 bg-stone-200"
+              initial={{ opacity: reduce ? 1 : 0.6 }}
+              animate={reduce ? { opacity: 1 } : { opacity: [0.6, 1, 0.6] }}
+              exit={{ opacity: 0 }}
+              transition={
+                reduce
+                  ? { duration: 0 }
+                  : {
+                      opacity: {
+                        duration: 1.4,
+                        repeat: Infinity,
+                        ease: 'easeInOut',
+                      },
+                    }
+              }
+            />
+          ) : null}
+        </AnimatePresence>
+
+        <motion.div
+          className="absolute inset-0"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: isLoading ? 0 : 1 }}
+          transition={{ duration: reduce ? 0 : 0.5, ease: 'easeOut' }}
+        >
+          <Image
+            ref={imgRef}
+            src={currentSrc}
+            alt={alt}
+            loading={priority ? undefined : 'lazy'}
+            fill
+            sizes={`${width}px`}
+            className="object-cover"
+            priority={priority}
+            onLoad={() => setIsLoading(false)}
+            onError={() => {
+              if (!errored && fallback && currentSrc !== fallback) {
+                setErrored(true)
+                setCurrentSrc(fallback)
+                setIsLoading(true)
+                return
+              }
+              setIsLoading(false)
+            }}
+          />
+        </motion.div>
       </div>
       {caption && (
         <figcaption className="absolute inset-x-0 bottom-2 text-center font-display italic text-ink-muted">
