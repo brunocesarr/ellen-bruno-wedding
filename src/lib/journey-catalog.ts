@@ -64,7 +64,7 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'comeco-de-tudo',
     chapter: 'Capítulo 1',
-    title: 'O começo de tudo',
+    title: 'O começo',
     dateLabel: '24 de Abril, 2016',
     spineColor: 'terracotta',
     pages: [
@@ -79,8 +79,8 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'primeiro-natal-juntos',
     chapter: 'Capítulo 2',
-    title: 'Primeiro Natal Juntos',
-    dateLabel: '25 de Dezembro, 2016',
+    title: 'Primeiro Natal',
+    dateLabel: 'Dezembro, 2016',
     spineColor: 'sage',
     pages: [
       {
@@ -93,8 +93,8 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'primeira-pascoa-juntos',
     chapter: 'Capítulo 3',
-    title: 'Primeira Páscoa Juntos',
-    dateLabel: '16 de Abril, 2017',
+    title: 'Primeira Páscoa',
+    dateLabel: 'Abril, 2017',
     spineColor: 'ocean',
     pages: [
       {
@@ -125,8 +125,8 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'primeiro-festival-sertanejo-juntos',
     chapter: 'Capítulo 5',
-    title: 'Primeiro Festival Sertanejo Juntos',
-    dateLabel: '07 de Maio, 2022',
+    title: 'Festival Sertanejo',
+    dateLabel: 'Maio, 2022',
     spineColor: 'cream',
     pages: [
       {
@@ -140,7 +140,7 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'primeira-viagem-juntos',
     chapter: 'Capítulo 6',
-    title: 'Primeira Viagem Juntos',
+    title: 'Primeira Viagem',
     dateLabel: '10 de Julho, 2022',
     spineColor: 'terracotta',
     pages: [
@@ -164,8 +164,8 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'primeiro-trotao-juntos',
     chapter: 'Capítulo 7',
-    title: 'Primeiro Trotão Juntos',
-    dateLabel: '05 de Novembro, 2022',
+    title: 'Trotão',
+    dateLabel: 'Novembro, 2022',
     spineColor: 'sage',
     pages: [
       {
@@ -179,8 +179,8 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'carnaval-juntos',
     chapter: 'Capítulo 8',
-    title: 'Carnaval juntos',
-    dateLabel: '18 de Fevereiro, 2023',
+    title: 'Carnaval',
+    dateLabel: 'Fevereiro, 2023',
     spineColor: 'ocean',
     pages: [
       {
@@ -194,7 +194,7 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
   {
     id: 'torre-eiffel',
     chapter: 'Capítulo 9',
-    title: 'Visitando a Torre Eiffel',
+    title: 'Visitando a Torre Uaiffel',
     dateLabel: '04 de Junho, 2023',
     spineColor: 'blush',
     pages: [
@@ -230,7 +230,7 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
     id: 'ano-novo-ouro-preto',
     chapter: 'Capítulo 11',
     title: 'Ano Novo em Ouro Preto',
-    dateLabel: '31 de Dezembro, 2023',
+    dateLabel: 'Dezembro, 2023',
     spineColor: 'terracotta',
     pages: [
       {
@@ -260,7 +260,7 @@ export const JOURNEY_BOOKS: JourneyBookDef[] = [
       {
         id: 'voo-de-balao-e-o-sim-2',
         layout: 'polaroids',
-        body: 'Com o coração batendo mais forte que o vento, veio a pergunta — e a resposta mais fácil e mais feliz que já dei: sim, para sempre.',
+        body: 'Com o coração batendo mais forte que o vento, veio a pergunta — e a resposta veio: sim, para sempre.',
         photos: [
           { key: 'journey-proposal', tilt: 'left' },
           { key: 'journey-balao-2', tilt: 'right' },
