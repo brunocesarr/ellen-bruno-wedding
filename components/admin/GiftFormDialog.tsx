@@ -12,7 +12,14 @@ import { inputField as inputClassName } from '@/src/lib/class-names'
 import * as Dialog from '@radix-ui/react-dialog'
 import { ImageIcon, Loader2, Upload, X } from 'lucide-react'
 import { useRouter } from 'next/navigation'
-import { useActionState, useEffect, useMemo, useRef, useState } from 'react'
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react'
 
 const CATEGORIES = [
   { value: 'home', label: 'Casa' },
@@ -38,28 +45,58 @@ export function GiftFormDialog({ trigger, gift }: Props) {
   const [previewUrl, setPreviewUrl] = useState<string | null>()
   const [selectedFileName, setSelectedFileName] = useState<string | null>()
 
-  const action = isEdit ? updateGiftAction : createGiftAction
+  const currentImageUrl = gift?.imageUrl ?? null
+
+  const clearSelectedFile = useCallback(() => {
+    setPreviewUrl((currentPreviewUrl) => {
+      if (currentPreviewUrl?.startsWith('blob:')) {
+        URL.revokeObjectURL(currentPreviewUrl)
+      }
+
+      return null
+    })
+
+    setSelectedFileName(null)
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ''
+    }
+  }, [])
+
+  const resetForm = useCallback(() => {
+    clearSelectedFile()
+    formRef.current?.reset()
+  }, [clearSelectedFile])
+
+  const submitAction = useCallback(
+    async (
+      previousState: GiftFormActionState,
+      formData: FormData
+    ): Promise<GiftFormActionState> => {
+      const result = isEdit
+        ? await updateGiftAction(previousState, formData)
+        : await createGiftAction(previousState, formData)
+
+      if (result?.ok) {
+        resetForm()
+        setOpen(false)
+        router.refresh()
+      }
+
+      return result
+    },
+    [isEdit, resetForm, router]
+  )
 
   const [state, formAction, isPending] = useActionState<
     GiftFormActionState,
     FormData
-  >(action, null)
+  >(submitAction, null)
 
-  const currentImageUrl = gift?.imageUrl ?? null
-
-  const previewSrc = useMemo(() => {
-    return previewUrl || currentImageUrl || null
-  }, [previewUrl, currentImageUrl])
-
-  useEffect(() => {
-    if (!state?.ok) return
-
-    setOpen(false)
-    setSelectedFileName(null)
-    setPreviewUrl(null)
-    formRef.current?.reset()
-    router.refresh()
-  }, [state, router])
+  const previewSrc = useMemo(
+    () => previewUrl || currentImageUrl || null,
+    [previewUrl, currentImageUrl]
+  )
 
   useEffect(() => {
     return () => {
@@ -70,11 +107,10 @@ export function GiftFormDialog({ trigger, gift }: Props) {
   }, [previewUrl])
 
   function handleFileChange(event: React.ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0]
+    const file = event.currentTarget.files?.[0]
 
     if (!file) {
-      setSelectedFileName(null)
-      setPreviewUrl(null)
+      clearSelectedFile()
       return
     }
 
@@ -86,16 +122,13 @@ export function GiftFormDialog({ trigger, gift }: Props) {
     setPreviewUrl(URL.createObjectURL(file))
   }
 
-  function clearSelectedFile() {
-    if (previewUrl?.startsWith('blob:')) {
-      URL.revokeObjectURL(previewUrl)
-    }
+  function handleOpenChange(nextOpen: boolean) {
+    if (isPending) return
 
-    setPreviewUrl(null)
-    setSelectedFileName(null)
+    setOpen(nextOpen)
 
-    if (fileInputRef.current) {
-      fileInputRef.current.value = ''
+    if (!nextOpen) {
+      clearSelectedFile()
     }
   }
 
@@ -103,13 +136,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
     <DialogShell
       trigger={trigger}
       open={open}
-      onOpenChange={(nextOpen) => {
-        setOpen(nextOpen)
-
-        if (!nextOpen) {
-          clearSelectedFile()
-        }
-      }}
+      onOpenChange={handleOpenChange}
       contentClassName="max-h-[92vh] w-[92vw] max-w-2xl"
     >
       <header className="flex items-start justify-between border-b border-stone-100 px-5 py-4 md:px-6">
@@ -117,6 +144,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
           <Dialog.Title className="font-serif text-xl text-stone-900">
             {isEdit ? 'Editar presente' : 'Novo presente'}
           </Dialog.Title>
+
           <Dialog.Description className="mt-1 text-xs text-stone-500">
             {isEdit
               ? 'Atualize os dados e, se desejar, substitua a imagem.'
@@ -125,7 +153,8 @@ export function GiftFormDialog({ trigger, gift }: Props) {
         </div>
 
         <Dialog.Close
-          className="rounded-full p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700"
+          disabled={isPending}
+          className="rounded-full p-1 text-stone-400 transition hover:bg-stone-100 hover:text-stone-700 disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Fechar"
         >
           <X className="h-5 w-5" />
@@ -171,17 +200,23 @@ export function GiftFormDialog({ trigger, gift }: Props) {
             </div>
 
             <label
-              className="
-                  flex cursor-pointer flex-col items-center justify-center gap-2
-                  rounded-xl border-2 border-dashed border-stone-200
-                  bg-stone-50 px-4 py-5 text-center
-                  transition hover:border-amber-400 hover:bg-amber-50/50
-                "
+              className={`
+                flex flex-col items-center justify-center gap-2 rounded-xl
+                border-2 border-dashed border-stone-200 bg-stone-50
+                px-4 py-5 text-center transition
+                ${
+                  isPending
+                    ? 'cursor-not-allowed opacity-60'
+                    : 'cursor-pointer hover:border-amber-400 hover:bg-amber-50/50'
+                }
+              `}
             >
               <Upload className="h-5 w-5 text-stone-400" />
+
               <span className="text-sm font-medium text-stone-700">
                 {isEdit ? 'Substituir imagem' : 'Enviar imagem'}
               </span>
+
               <span className="text-xs text-stone-400">
                 JPG, PNG ou WEBP até 5MB
               </span>
@@ -192,6 +227,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                 name="image"
                 accept="image/jpeg,image/png,image/webp"
                 onChange={handleFileChange}
+                disabled={isPending}
                 className="sr-only"
               />
             </label>
@@ -199,10 +235,12 @@ export function GiftFormDialog({ trigger, gift }: Props) {
             {selectedFileName && (
               <div className="flex items-center justify-between gap-2 rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-800">
                 <span className="truncate">{selectedFileName}</span>
+
                 <button
                   type="button"
                   onClick={clearSelectedFile}
-                  className="font-medium hover:underline"
+                  disabled={isPending}
+                  className="font-medium hover:underline disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   remover
                 </button>
@@ -217,6 +255,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                 required
                 defaultValue={gift?.name ?? ''}
                 placeholder="Ex: Jogo de panelas"
+                disabled={isPending}
                 className={inputClassName}
               />
             </Field>
@@ -227,6 +266,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                 rows={3}
                 defaultValue={gift?.description ?? ''}
                 placeholder="Conte um pouco sobre este presente..."
+                disabled={isPending}
                 className={inputClassName}
               />
             </Field>
@@ -236,6 +276,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                 <select
                   name="category"
                   defaultValue={gift?.category ?? 'other'}
+                  disabled={isPending}
                   className={inputClassName}
                 >
                   {CATEGORIES.map((category) => (
@@ -255,6 +296,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                   required
                   defaultValue={gift?.price ?? ''}
                   placeholder="250,00"
+                  disabled={isPending}
                   className={inputClassName}
                 />
               </Field>
@@ -270,7 +312,10 @@ export function GiftFormDialog({ trigger, gift }: Props) {
             )}
 
             <footer className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-              <Dialog.Close className="rounded-full px-5 py-2.5 text-sm text-stone-600 transition hover:bg-stone-100">
+              <Dialog.Close
+                disabled={isPending}
+                className="rounded-full px-5 py-2.5 text-sm text-stone-600 transition hover:bg-stone-100 disabled:cursor-not-allowed disabled:opacity-50"
+              >
                 Cancelar
               </Dialog.Close>
 
@@ -278,13 +323,14 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                 type="submit"
                 disabled={isPending}
                 className="
-                    inline-flex items-center justify-center gap-2 rounded-full
-                    bg-amber-700 px-6 py-2.5 text-sm font-medium text-white
-                    shadow-sm transition hover:bg-amber-600
-                    disabled:cursor-not-allowed disabled:opacity-60
-                  "
+                  inline-flex items-center justify-center gap-2 rounded-full
+                  bg-amber-700 px-6 py-2.5 text-sm font-medium text-white
+                  shadow-sm transition hover:bg-amber-600
+                  disabled:cursor-not-allowed disabled:opacity-60
+                "
               >
                 {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+
                 {isPending
                   ? isEdit
                     ? 'Salvando...'

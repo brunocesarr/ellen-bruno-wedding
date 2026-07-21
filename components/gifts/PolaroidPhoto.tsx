@@ -2,12 +2,11 @@
 
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import Image from 'next/image'
-import { useEffect, useRef, useState, type CSSProperties } from 'react'
+import { useState, type CSSProperties } from 'react'
 
 type Props = {
   src: string
   alt: string
-  /** Shown if `src` fails to load. */
   fallback?: string
   caption?: string
   tilt?: 'left' | 'right'
@@ -18,7 +17,16 @@ type Props = {
   priority?: boolean
 }
 
-export function PolaroidPhoto({
+export function PolaroidPhoto(props: Props) {
+  return (
+    <PolaroidPhotoContent
+      key={`${props.src}:${props.fallback ?? ''}`}
+      {...props}
+    />
+  )
+}
+
+function PolaroidPhotoContent({
   src,
   alt,
   fallback,
@@ -31,25 +39,13 @@ export function PolaroidPhoto({
   priority,
 }: Props) {
   const reduce = useReducedMotion()
+
   const tiltClass =
     tilt === 'left' ? 'polaroid-tilt-left' : 'polaroid-tilt-right'
 
   const [currentSrc, setCurrentSrc] = useState(src)
   const [isLoading, setIsLoading] = useState(true)
   const [errored, setErrored] = useState(false)
-  const imgRef = useRef<HTMLImageElement | null>(null)
-
-  useEffect(() => {
-    setCurrentSrc(src)
-    setIsLoading(true)
-    setErrored(false)
-  }, [src])
-
-  useEffect(() => {
-    if (imgRef.current?.complete) {
-      setIsLoading(false)
-    }
-  }, [currentSrc])
 
   return (
     <figure className={`polaroid ${tiltClass} ${className}`} style={style}>
@@ -57,7 +53,6 @@ export function PolaroidPhoto({
         className="relative overflow-hidden bg-cream-dark"
         style={{ width, height }}
       >
-        {/* Skeleton placeholder — crossfades out once the image is ready. */}
         <AnimatePresence>
           {isLoading ? (
             <motion.div
@@ -89,10 +84,9 @@ export function PolaroidPhoto({
           transition={{ duration: reduce ? 0 : 0.5, ease: 'easeOut' }}
         >
           <Image
-            ref={imgRef}
             src={currentSrc}
             alt={alt}
-            loading={priority ? undefined : 'lazy'}
+            loading={priority ? 'eager' : 'lazy'}
             fill
             sizes={`${width}px`}
             className="object-cover"
@@ -105,11 +99,13 @@ export function PolaroidPhoto({
                 setIsLoading(true)
                 return
               }
+
               setIsLoading(false)
             }}
           />
         </motion.div>
       </div>
+
       {caption && (
         <figcaption className="absolute inset-x-0 bottom-2 text-center font-display italic text-ink-muted">
           {caption}

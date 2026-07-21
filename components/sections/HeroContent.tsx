@@ -4,26 +4,48 @@ import { SmartImage } from '@/components/ui/SmartImage'
 import { WEDDING_DETAILS } from '@/src/lib/constants'
 import type { ResolvedSiteImage } from '@/src/lib/get-site-image'
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useSyncExternalStore } from 'react'
+
+const DESKTOP_MEDIA_QUERY = '(min-width: 768px)'
+
+function subscribeToDesktopMediaQuery(callback: () => void) {
+  const mediaQuery = window.matchMedia(DESKTOP_MEDIA_QUERY)
+
+  mediaQuery.addEventListener('change', callback)
+
+  return () => {
+    mediaQuery.removeEventListener('change', callback)
+  }
+}
+
+function getDesktopSnapshot() {
+  return window.matchMedia(DESKTOP_MEDIA_QUERY).matches
+}
+
+function getDesktopServerSnapshot() {
+  return false
+}
+
+function useDesktopMediaQuery() {
+  return useSyncExternalStore(
+    subscribeToDesktopMediaQuery,
+    getDesktopSnapshot,
+    getDesktopServerSnapshot
+  )
+}
 
 export function HeroContent({ background }: { background: ResolvedSiteImage }) {
   const { couple, displayDate } = WEDDING_DETAILS
   const ref = useRef<HTMLElement | null>(null)
   const reduce = useReducedMotion()
-
-  const [parallaxOn, setParallaxOn] = useState(false)
-  useEffect(() => {
-    const mq = window.matchMedia('(min-width: 768px)')
-    setParallaxOn(mq.matches && !reduce)
-    const onChange = () => setParallaxOn(mq.matches && !reduce)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [reduce])
+  const isDesktop = useDesktopMediaQuery()
+  const parallaxOn = isDesktop && !reduce
 
   const { scrollYProgress } = useScroll({
     target: ref,
     offset: ['start start', 'end start'],
   })
+
   const backgroundY = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
   const textY = useTransform(scrollYProgress, [0, 1], ['0%', '50%'])
   const opacity = useTransform(scrollYProgress, [0, 0.8], [1, 0])
@@ -48,6 +70,7 @@ export function HeroContent({ background }: { background: ResolvedSiteImage }) {
           sizes="100vw"
           quality={80}
         />
+
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal/25 via-charcoal/5 to-charcoal/35" />
       </motion.div>
 
@@ -77,12 +100,14 @@ export function HeroContent({ background }: { background: ResolvedSiteImage }) {
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.6, ease: 'easeOut' }}
-          className="font-script text-hero leading-[1.1] drop-shadow-md md:text-hero-lg"
+          className="font-script text-hero leading- drop-shadow-md md:text-hero-lg"
         >
           <span className="block">{couple.bride}</span>
+
           <span className="mx-2 inline-block text-[0.6em] text-terracotta-light">
             .
           </span>
+
           <span className="block">{couple.groom}</span>
         </motion.h1>
       </motion.div>

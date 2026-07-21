@@ -6,15 +6,30 @@ import { useEffect, useState } from 'react'
 
 export function RouteLoader() {
   const pathname = usePathname()
-  const [visible, setVisible] = useState(false)
+
+  return <RouteLoaderIndicator key={pathname} />
+}
+
+function RouteLoaderIndicator() {
+  const [visible, setVisible] = useState(true)
 
   useEffect(() => {
-    setVisible(true)
-    const id = requestAnimationFrame(() =>
-      setTimeout(() => setVisible(false), 250)
-    )
-    return () => cancelAnimationFrame(id)
-  }, [pathname])
+    let timeoutId: ReturnType<typeof setTimeout> | undefined
+
+    const animationFrameId = requestAnimationFrame(() => {
+      timeoutId = setTimeout(() => {
+        setVisible(false)
+      }, 250)
+    })
+
+    return () => {
+      cancelAnimationFrame(animationFrameId)
+
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [])
 
   return (
     <AnimatePresence>

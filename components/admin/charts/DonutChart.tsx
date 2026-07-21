@@ -2,13 +2,31 @@
 
 import { motion } from 'motion/react'
 
-type Slice = { label: string; value: number; color: string }
+type Slice = {
+  label: string
+  value: number
+  color: string
+}
 
 export function DonutChart({ data }: { data: Slice[] }) {
-  const total = data.reduce((s, d) => s + d.value, 0) || 1
-  let acc = 0
+  const total = data.reduce((sum, slice) => sum + slice.value, 0) || 1
   const radius = 42
-  const circ = 2 * Math.PI * radius
+  const circumference = 2 * Math.PI * radius
+
+  const segments = data.map((slice, index) => {
+    const previousValue = data
+      .slice(0, index)
+      .reduce((sum, previousSlice) => sum + previousSlice.value, 0)
+
+    const length = (slice.value / total) * circumference
+    const previousLength = (previousValue / total) * circumference
+
+    return {
+      ...slice,
+      length,
+      offset: circumference - previousLength,
+    }
+  })
 
   return (
     <div className="flex flex-col items-center gap-5 md:flex-row md:gap-7">
@@ -22,29 +40,26 @@ export function DonutChart({ data }: { data: Slice[] }) {
             stroke="#f5efe4"
             strokeWidth="14"
           />
-          {data.map((slice, i) => {
-            const len = (slice.value / total) * circ
-            const offset = circ - acc
-            acc += len
-            return (
-              <motion.circle
-                key={slice.label}
-                cx="50"
-                cy="50"
-                r={radius}
-                fill="none"
-                stroke={slice.color}
-                strokeWidth="14"
-                strokeDasharray={`${len} ${circ}`}
-                strokeDashoffset={offset}
-                strokeLinecap="round"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.5, delay: i * 0.15 }}
-              />
-            )
-          })}
+
+          {segments.map((segment, index) => (
+            <motion.circle
+              key={segment.label}
+              cx="50"
+              cy="50"
+              r={radius}
+              fill="none"
+              stroke={segment.color}
+              strokeWidth="14"
+              strokeDasharray={`${segment.length} ${circumference}`}
+              strokeDashoffset={segment.offset}
+              strokeLinecap="round"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: index * 0.15 }}
+            />
+          ))}
         </svg>
+
         <div className="pointer-events-none absolute inset-0 grid place-items-center">
           <div className="text-center">
             <p className="font-serif text-2xl font-semibold text-stone-900">
@@ -68,6 +83,7 @@ export function DonutChart({ data }: { data: Slice[] }) {
               />
               {slice.label}
             </span>
+
             <span className="font-medium tabular-nums text-stone-900">
               {slice.value}
             </span>

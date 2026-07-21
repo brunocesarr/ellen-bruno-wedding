@@ -7,20 +7,25 @@ import type { SiteImageDef } from '@/src/lib/site-images-catalog'
 import * as Dialog from '@radix-ui/react-dialog'
 import imageCompression from 'browser-image-compression'
 import { Loader2, Upload, X } from 'lucide-react'
+import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 import {
   startTransition,
   useActionState,
+  useCallback,
   useEffect,
   useRef,
   useState,
 } from 'react'
-import type { ChangeEvent, FormEvent, ReactNode } from 'react'
 
 type Props = {
   def: SiteImageDef
   stored: SiteImageViewModel | null
   trigger: ReactNode
 }
+
+type UpsertSiteImageState = Awaited<
+  ReturnType<typeof upsertSiteImageAction>
+> | null
 
 const ALLOWED_IMAGE_TYPES = [
   'image/jpeg',
@@ -37,25 +42,43 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
   const [isCompressing, setIsCompressing] = useState(false)
   const [compressionError, setCompressionError] = useState<string | null>()
 
-  const fileRef = useRef<HTMLInputElement>(null)
+  const fileRef = useRef<HTMLInputElement | null>(null)
 
-  const [state, formAction, isPending] = useActionState(
-    upsertSiteImageAction,
-    null,
-  )
-
-  useEffect(() => {
-    if (!state?.ok) return
-
-    setOpen(false)
+  const clearSelectedImage = useCallback(() => {
     setPreview(null)
     setCompressionError(null)
 
     if (fileRef.current) {
       fileRef.current.value = ''
     }
-  }, [state])
+  }, [])
 
+  const wrappedUpsertAction = useCallback(
+    async (
+      previousState: UpsertSiteImageState,
+      formData: FormData
+    ): Promise<UpsertSiteImageState> => {
+      const result = await upsertSiteImageAction(previousState, formData)
+
+      if (result.ok) {
+        clearSelectedImage()
+        setOpen(false)
+      }
+
+      return result
+    },
+    [clearSelectedImage]
+  )
+
+  const [state, formAction, isPending] = useActionState<
+    UpsertSiteImageState,
+    FormData
+  >(wrappedUpsertAction, null)
+
+  /*
+   * Blob URLs are external browser resources, so cleaning them up in an
+   * effect is appropriate. This effect does not synchronously update state.
+   */
   useEffect(() => {
     return () => {
       if (preview?.startsWith('blob:')) {
@@ -65,17 +88,14 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
   }, [preview])
 
   function handleOpenChange(nextOpen: boolean) {
-    if (isPending || isCompressing) return
+    if (isPending || isCompressing) {
+      return
+    }
 
     setOpen(nextOpen)
 
     if (!nextOpen) {
-      setPreview(null)
-      setCompressionError(null)
-
-      if (fileRef.current) {
-        fileRef.current.value = ''
-      }
+      clearSelectedImage()
     }
   }
 
@@ -100,7 +120,7 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
       event.currentTarget.value = ''
       setPreview(null)
       setCompressionError(
-        'A imagem original é muito grande. Escolha uma imagem de até 20 MB.',
+        'A imagem original é muito grande. Escolha uma imagem de até 20 MB.'
       )
       return
     }
@@ -111,7 +131,9 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
-    if (isPending || isCompressing) return
+    if (isPending || isCompressing) {
+      return
+    }
 
     setCompressionError(null)
 
@@ -126,7 +148,7 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
 
       if (image.size > MAX_ORIGINAL_FILE_SIZE) {
         setCompressionError(
-          'A imagem original é muito grande. Escolha uma imagem de até 20 MB.',
+          'A imagem original é muito grande. Escolha uma imagem de até 20 MB.'
         )
         return
       }
@@ -145,21 +167,17 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
         const baseName =
           image.name.replace(/\.[^/.]+$/, '').trim() || 'wedding-image'
 
-        const compressedFile = new File(
-          [compressedBlob],
-          `${baseName}.webp`,
-          {
-            type: 'image/webp',
-            lastModified: Date.now(),
-          },
-        )
+        const compressedFile = new File([compressedBlob], `${baseName}.webp`, {
+          type: 'image/webp',
+          lastModified: Date.now(),
+        })
 
         formData.set('image', compressedFile)
       } catch (error) {
         console.error('Failed to compress image:', error)
 
         setCompressionError(
-          'Não foi possível comprimir a imagem. Tente outra imagem.',
+          'Não foi possível comprimir a imagem. Tente outra imagem.'
         )
 
         return
@@ -323,9 +341,7 @@ export function SiteImageUploadDialog({ def, stored, trigger }: Props) {
                   disabled:opacity-60
                 "
               >
-                {isProcessing && (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                )}
+                {isProcessing && <Loader2 className="h-4 w-4 animate-spin" />}
 
                 {isCompressing
                   ? 'Comprimindo...'
