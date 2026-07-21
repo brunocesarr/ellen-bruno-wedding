@@ -8,13 +8,14 @@ import { GallerySection } from '@/components/sections/GallerySection'
 import { GiftsTeaserSection } from '@/components/sections/GiftsTeaserSection'
 import { HeroSection } from '@/components/sections/HeroSection'
 import { InvitationSection } from '@/components/sections/InvitationSection'
+import { JourneyTeaserSection } from '@/components/sections/JourneyTeaserSection'
 import { LocationSection } from '@/components/sections/LocationSection'
 import { MonogramSection } from '@/components/sections/MonogramSection'
 import { ParentsSection } from '@/components/sections/ParentsSection'
 import { RsvpSection } from '@/components/sections/RsvpSection'
 import { TestimonialSection } from '@/components/sections/TestimonialSection'
 import { TimelineSection } from '@/components/sections/TimelineSection'
-import { Metadata } from 'next'
+import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 
 export const revalidate = 60
@@ -24,14 +25,24 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-type Props = { searchParams: Promise<{ token?: string }> }
+type Props = {
+  searchParams: Promise<{
+    token?: string
+  }>
+}
 
 export default async function FullInvitePage({ searchParams }: Props) {
   const { token } = await searchParams
-  if (!token) redirect('/')
 
-  const res = await getInviteContextAction(token)
-  if (!res.ok) redirect('/')
+  if (!token) {
+    redirect('/')
+  }
+
+  const result = await getInviteContextAction(token)
+
+  if (!result.ok) {
+    redirect('/')
+  }
 
   return (
     <InvitationPageShell>
@@ -41,6 +52,7 @@ export default async function FullInvitePage({ searchParams }: Props) {
       <AboutSection />
       <TestimonialSection />
       <GallerySection />
+      <JourneyTeaserSection token={token} />
       <ParentsSection />
       <InvitationSection />
       <LocationSection />
