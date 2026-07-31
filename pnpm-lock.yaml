@@ -77,6 +77,9 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@netlify/plugin-nextjs':
+        specifier: ^5.15.13
+        version: 5.15.13
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
@@ -788,6 +791,13 @@ packages:
     resolution:
       {
         integrity: sha512-FP+xCoZMkMOUsKa4UdG/oiK/2md1/TxuXvqqieaMVMgDbFFMaHI8h0oHCViUY73kPbKV6HyzayaSXGYXKpBSoQ==,
+      }
+    engines: { node: '>=18.0.0' }
+
+  '@netlify/plugin-nextjs@5.15.13':
+    resolution:
+      {
+        integrity: sha512-gBmWtgG13ZW4ytNMCvacfwZemtdtV/Ekc+6RBYvI5fndjmDvKxgFHylsw7oli+PHMGAtNqaJrN8QccGnDReu6A==,
       }
     engines: { node: '>=18.0.0' }
 
@@ -5602,6 +5612,8 @@ snapshots:
   '@netlify/functions@5.3.0':
     dependencies:
       '@netlify/types': 2.8.0
+
+  '@netlify/plugin-nextjs@5.15.13': {}
 
   '@netlify/types@2.8.0': {}
 

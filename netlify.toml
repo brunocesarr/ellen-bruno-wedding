@@ -1,6 +1,7 @@
 [build]
 command = "pnpm build"
 publish = ".next"
+ignore = "git diff --quiet HEAD^ HEAD -- ':(exclude)*.md' ':(exclude)AGENTS.md' ':(exclude)CLAUDE.md' ':(exclude).vscode'"
 
 [build.environment]
 NODE_VERSION = "22"

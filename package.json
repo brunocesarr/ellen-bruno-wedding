@@ -2,6 +2,7 @@
   "name": "ellen-bruno-wedding",
   "version": "1.0.0",
   "private": true,
+  "packageManager": "pnpm@10.15.0",
   "engines": {
     "node": ">=22.0.0"
   },
@@ -14,6 +15,7 @@
     "format": "prettier --check --ignore-path .gitignore .",
     "format:fix": "prettier --write --ignore-path .gitignore .",
     "test": "vitest",
+    "test:ci": "vitest run",
     "test:ui": "vitest --ui",
     "db:types": "supabase gen types typescript --linked --schema public > types/database.types.ts",
     "db:types:local": "supabase gen types typescript --local --schema public > types/database.types.ts",
@@ -45,6 +47,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.15.13",
     "@tailwindcss/postcss": "^4.3.3",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.0.1",

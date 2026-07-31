@@ -3,41 +3,44 @@ import { createClient } from '@supabase/supabase-js'
 
 export default async () => {
   const url = process.env.SUPABASE_URL
-  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
+  const secretKey = process.env.SUPABASE_SECRET_KEY
 
-  if (!url || !serviceKey) {
-    console.error('[keep-alive] Missing Supabase env vars')
+  if (!url || !secretKey) {
+    console.error('[keep-alive] Missing env vars')
     return new Response('Missing configuration', { status: 500 })
   }
 
-  const supabase = createClient(url, serviceKey, {
+  const supabase = createClient(url, secretKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
 
-  // 1. WRITE — guarantees a real Postgres transaction
-  const { error: insertError } = await supabase
+  // Upsert a single fixed row — table never grows
+  const { error } = await supabase
     .from('keep_alive')
-    .insert({ source: 'netlify-scheduled-function' })
+    .upsert(
+      { id: 1, pinged_at: new Date().toISOString(), source: 'netlify' },
+      { onConflict: 'id' }
+    )
 
-  if (insertError) {
-    console.error('[keep-alive] Insert failed:', insertError.message)
-    return new Response('Insert failed', { status: 500 })
+  if (error) {
+    console.error('[keep-alive] FAILED:', error.message)
+    // Optional: notify yourself
+    if (process.env.ALERT_WEBHOOK_URL) {
+      await fetch(process.env.ALERT_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content: `🚨 Supabase keep-alive failed: ${error.message}`,
+        }),
+      }).catch(() => {})
+    }
+    return new Response('Failed', { status: 500 })
   }
 
-  // 2. READ — a second uncacheable query for good measure
-  const { count, error: readError } = await supabase
-    .from('keep_alive')
-    .select('*', { count: 'exact', head: true })
-
-  if (readError) {
-    console.error('[keep-alive] Read failed:', readError.message)
-    return new Response('Read failed', { status: 500 })
-  }
-
-  console.log(`[keep-alive] OK — ${count} rows, ${new Date().toISOString()}`)
+  console.log(`[keep-alive] OK ${new Date().toISOString()}`)
   return new Response('OK', { status: 200 })
 }
 
 export const config: Config = {
-  schedule: '0 6 */2 * *', // 06:00 UTC, every 2 days
+  schedule: '0 6 * * *', // daily, 06:00 UTC — no month-boundary gap
 }
