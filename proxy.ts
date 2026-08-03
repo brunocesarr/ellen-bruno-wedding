@@ -45,7 +45,13 @@ export async function proxy(request: NextRequest) {
 
 export const config = {
   matcher: [
-    '/admin/:path*',
-    '/((?!_next/static|_next/image|favicon.ico|api/keep-alive|.*\\..*).*)',
+    /*
+     * Match all paths EXCEPT:
+     * - api routes
+     * - _next/static  (JS/CSS chunks)  ← the cause of the SyntaxError
+     * - _next/image   (image optimiser)
+     * - metadata routes and static files by extension
+     */
+    '/((?!api|_next/static|_next/image|favicon.ico|opengraph-image|twitter-image|sitemap.xml|robots.txt|.*\\.(?:png|jpg|jpeg|gif|svg|webp|ico|ttf|otf|woff|woff2)$).*)',
   ],
 }

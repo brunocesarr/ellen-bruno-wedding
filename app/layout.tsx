@@ -44,7 +44,10 @@ const MusicToggleButton = dynamic(() =>
 )
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://ellen-bruno-wedding.netlify.app'),
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_SITE_URL ??
+      'https://ellen-bruno-wedding.netlify.app'
+  ),
   title: 'Ellen & Bruno — Wedding Day | 2026',
   description:
     'Queridos amigos e familiares! Convidamos vocês, com alegria, para celebrar o dia do nosso casamento conosco.',
@@ -52,7 +55,7 @@ export const metadata: Metadata = {
     title: 'Ellen & Bruno — Wedding Day | 2026',
     description:
       'Queridos amigos e familiares! Convidamos vocês, com alegria, para celebrar o dia do nosso casamento conosco.',
-    url: 'https://ellen-bruno-wedding.netlify.app',
+    url: '/',
     type: 'website',
     locale: 'pt_BR',
     images: ['/monogram-eb.png', '/api/invitation'],
