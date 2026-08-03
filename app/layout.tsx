@@ -47,11 +47,11 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://ellen-bruno-wedding.netlify.app'),
   title: 'Ellen & Bruno — Wedding Day | 2026',
   description:
-    'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
+    'Queridos amigos e familiares! Convidamos vocês, com alegria, para celebrar o dia do nosso casamento conosco.',
   openGraph: {
     title: 'Ellen & Bruno — Wedding Day | 2026',
     description:
-      'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
+      'Queridos amigos e familiares! Convidamos vocês, com alegria, para celebrar o dia do nosso casamento conosco.',
     url: 'https://ellen-bruno-wedding.netlify.app',
     type: 'website',
     locale: 'pt_BR',
@@ -61,7 +61,7 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
     title: 'Ellen & Bruno — Wedding Day | 2026',
     description:
-      'Dear friends and family! We joyfully invite you to celebrate our wedding day with us.',
+      'Queridos amigos e familiares! Convidamos vocês, com alegria, para celebrar o dia do nosso casamento conosco.',
     images: ['/monogram-eb.png'],
   },
 }

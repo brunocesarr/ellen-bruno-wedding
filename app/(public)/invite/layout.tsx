@@ -7,6 +7,14 @@ export const metadata: Metadata = {
   openGraph: {
     title: '💌 Você recebeu um convite!',
     description: 'Ellen & Bruno convidam você para um dia especial.',
+    images: [
+      {
+        url: '/monogram-eb.png',
+        width: 1200,
+        height: 630,
+        alt: 'Ellen & Bruno',
+      },
+    ],
   },
 }
 
