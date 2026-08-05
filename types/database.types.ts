@@ -201,6 +201,53 @@ export type Database = {
           },
         ]
       }
+      rsvp_requests: {
+        Row: {
+          attending: boolean
+          created_at: string
+          decided_at: string | null
+          email: string
+          full_name: string
+          guest_id: string | null
+          id: string
+          message: string | null
+          status: Database['public']['Enums']['rsvp_request_status']
+          updated_at: string
+        }
+        Insert: {
+          attending: boolean
+          created_at?: string
+          decided_at?: string | null
+          email: string
+          full_name: string
+          guest_id?: string | null
+          id?: string
+          message?: string | null
+          status?: Database['public']['Enums']['rsvp_request_status']
+          updated_at?: string
+        }
+        Update: {
+          attending?: boolean
+          created_at?: string
+          decided_at?: string | null
+          email?: string
+          full_name?: string
+          guest_id?: string | null
+          id?: string
+          message?: string | null
+          status?: Database['public']['Enums']['rsvp_request_status']
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'rsvp_requests_guest_id_fkey'
+            columns: ['guest_id']
+            isOneToOne: false
+            referencedRelation: 'guests'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       site_images: {
         Row: {
           alt: string | null
@@ -242,6 +289,27 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      approve_rsvp_request: {
+        Args: { p_request_id: string }
+        Returns: {
+          attending: boolean
+          created_at: string
+          decided_at: string | null
+          email: string
+          full_name: string
+          guest_id: string | null
+          id: string
+          message: string | null
+          status: Database['public']['Enums']['rsvp_request_status']
+          updated_at: string
+        }
+        SetofOptions: {
+          from: '*'
+          to: 'rsvp_requests'
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       reserve_gift: {
         Args: { p_gift_id: string; p_message?: string; p_name: string }
         Returns: {
@@ -291,6 +359,7 @@ export type Database = {
     Enums: {
       gift_category: 'home' | 'kitchen' | 'travel' | 'experience' | 'other'
       guest_status: 'going' | 'pending' | 'not_going'
+      rsvp_request_status: 'pending' | 'approved' | 'rejected'
     }
     CompositeTypes: {
       [_ in never]: never
@@ -417,6 +486,7 @@ export const Constants = {
     Enums: {
       gift_category: ['home', 'kitchen', 'travel', 'experience', 'other'],
       guest_status: ['going', 'pending', 'not_going'],
+      rsvp_request_status: ['pending', 'approved', 'rejected'],
     },
   },
 } as const

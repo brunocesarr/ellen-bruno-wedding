@@ -1,6 +1,7 @@
 import 'server-only'
 
 import { SupabaseGuestsRepository } from '@/src/infrastructure/repositories/supabase-guests.repository'
+import { SupabaseRsvpRequestsRepository } from '@/src/infrastructure/repositories/supabase-rsvp-requests.repository'
 import { SupabaseSiteImagesRepository } from '@/src/infrastructure/repositories/supabase-site-images.repository'
 import { SupabaseStorageRepository } from '@/src/infrastructure/repositories/supabase-storage.repository'
 import { createSupabaseAdminClient } from '@/src/infrastructure/supabase/admin'
@@ -15,6 +16,7 @@ export const getPublicContainer = cache(() => {
     siteImagesRepo: new SupabaseSiteImagesRepository(supabase),
     storageRepo: new SupabaseStorageRepository(supabase),
     guestsRepo: new SupabaseGuestsRepository(adminClient),
+    rsvpRequestsRepo: new SupabaseRsvpRequestsRepository(adminClient),
   }
 })
 

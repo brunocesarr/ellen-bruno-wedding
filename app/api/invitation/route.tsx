@@ -1,8 +1,6 @@
 import { WEDDING_DETAILS } from '@/src/lib/constants'
 import { ImageResponse } from 'next/og'
 
-export const runtime = 'edge'
-
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
   const name = searchParams.get('name')?.slice(0, 40)
@@ -46,7 +44,6 @@ export async function GET(request: Request) {
         {WEDDING_DETAILS.displayDate}
       </p>
       <p style={{ fontSize: 28, color: '#7a6648', marginTop: 12 }}>
-        {}
         {WEDDING_DETAILS.location.city}
       </p>
     </div>,

@@ -29,3 +29,11 @@ export type SiteImageUpdate =
 export type GuestRow = Database['public']['Tables']['guests']['Row']
 export type GuestInsert = Database['public']['Tables']['guests']['Insert']
 export type GuestUpdate = Database['public']['Tables']['guests']['Update']
+
+// --- RSVP requests (public, pending-approval flow) -------------------------
+export type RsvpRequestRow =
+  Database['public']['Tables']['rsvp_requests']['Row']
+export type RsvpRequestInsert =
+  Database['public']['Tables']['rsvp_requests']['Insert']
+export type RsvpRequestUpdate =
+  Database['public']['Tables']['rsvp_requests']['Update']

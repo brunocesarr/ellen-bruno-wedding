@@ -9,6 +9,7 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     '.next/**',
+    '.netlify/**',
     'out/**',
     'build/**',
     'next-env.d.ts',
@@ -18,6 +19,7 @@ const eslintConfig = defineConfig([
 
     settings: { react: { version: '19.2' } },
     rules: {
+      '@typescript-eslint/no-explicit-any': 'off',
       'react/no-unescaped-entities': 'off',
       '@typescript-eslint/no-unused-vars': [
         'warn',

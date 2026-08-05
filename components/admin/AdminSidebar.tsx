@@ -5,6 +5,7 @@ import {
   ChartBar,
   Gift,
   ImageIcon,
+  Inbox,
   LayoutDashboard,
   Menu,
   MessageCircleHeart,
@@ -19,13 +20,24 @@ import { useState } from 'react'
 const NAV = [
   { href: '/admin', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/admin/convidados', label: 'Convidados', icon: Users },
+  {
+    href: '/admin/solicitacoes',
+    label: 'Solicitações',
+    icon: Inbox,
+    badge: 'pendingRsvpRequests' as const,
+  },
   { href: '/admin/presentes', label: 'Presentes', icon: Gift },
   { href: '/admin/mensagens', label: 'Mensagens', icon: MessageCircleHeart },
   { href: '/admin/resumo', label: 'Resumo', icon: ChartBar },
   { href: '/admin/imagens', label: 'Imagens', icon: ImageIcon },
 ]
 
-export function AdminSidebar() {
+type Props = {
+  /** Pending RSVP requests awaiting a decision. */
+  pendingRsvpRequests?: number
+}
+
+export function AdminSidebar({ pendingRsvpRequests = 0 }: Props) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
 
@@ -37,6 +49,9 @@ export function AdminSidebar() {
         aria-label="Abrir menu"
       >
         <Menu className="h-5 w-5 text-stone-700" />
+        {pendingRsvpRequests > 0 && (
+          <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-amber-600 ring-2 ring-white" />
+        )}
       </button>
 
       {open && (
@@ -81,6 +96,9 @@ export function AdminSidebar() {
               pathname === item.href ||
               (item.href !== '/admin' && pathname.startsWith(item.href))
             const Icon = item.icon
+            const badgeCount =
+              item.badge === 'pendingRsvpRequests' ? pendingRsvpRequests : 0
+
             return (
               <Link
                 key={item.href}
@@ -105,6 +123,18 @@ export function AdminSidebar() {
                 )}
                 <Icon className="h-4 w-4" />
                 <span className="font-medium">{item.label}</span>
+
+                {badgeCount > 0 && (
+                  <span
+                    aria-label={`${badgeCount} solicitação(ões) aguardando resposta`}
+                    className={`
+                      ml-auto min-w-5 rounded-full px-1.5 py-0.5 text-center text-[11px] font-semibold leading-none
+                      ${active ? 'bg-white/25 text-white' : 'bg-amber-100 text-amber-800'}
+                    `}
+                  >
+                    {badgeCount > 99 ? '99+' : badgeCount}
+                  </span>
+                )}
               </Link>
             )
           })}

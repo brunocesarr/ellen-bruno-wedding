@@ -13,6 +13,12 @@ const GROUPS = {
     '/admin',
     '/admin/resumo',
   ],
+  rsvpRequests: [
+    ['/admin', 'layout'] as const,
+    '/admin/solicitacoes',
+    '/admin/convidados',
+    '/admin/resumo',
+  ],
 } as const satisfies Record<string, readonly PathSpec[]>
 
 export type RevalidationGroup = keyof typeof GROUPS

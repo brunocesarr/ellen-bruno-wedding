@@ -28,6 +28,9 @@ const nextConfig: NextConfig = {
     qualities: [70, 75, 80, 85],
   },
 
+  // Keep nodemailer out of the bundle; require it from node_modules at runtime.
+  serverExternalPackages: ['nodemailer'],
+
   async headers() {
     // Only in production. In dev, Turbopack rebuilds chunks on every edit while
     // keeping stable filenames; an `immutable` header makes the browser serve
