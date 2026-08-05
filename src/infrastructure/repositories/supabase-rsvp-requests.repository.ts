@@ -29,6 +29,9 @@ const mapRow = (r: RsvpRequestRow): RsvpRequest => ({
   status: r.status as RsvpRequestStatus,
   guestId: r.guest_id,
   decidedAt: r.decided_at ? new Date(r.decided_at) : null,
+  notifiedAt: r.notified_at ? new Date(r.notified_at) : null,
+  notifyAttempts: r.notify_attempts,
+  notifyError: r.notify_error,
   createdAt: new Date(r.created_at),
   updatedAt: new Date(r.updated_at),
 })
@@ -50,8 +53,7 @@ export class SupabaseRsvpRequestsRepository implements IRsvpRequestsRepository {
       .select('*')
       .single()
 
-    // Race-safe backstop for the partial unique index
-    // rsvp_requests_pending_email_idx.
+    // Race-safe backstop for rsvp_requests_pending_email_idx.
     if (error?.code === PG_UNIQUE_VIOLATION) {
       throw new DuplicateRsvpRequestError()
     }
@@ -102,6 +104,16 @@ export class SupabaseRsvpRequestsRepository implements IRsvpRequestsRepository {
     return count ?? 0
   }
 
+  async countUnnotified(): Promise<number> {
+    const { count, error } = await this.client
+      .from('rsvp_requests')
+      .select('id', { count: 'exact', head: true })
+      .neq('status', 'pending')
+      .is('notified_at', null)
+    if (error) throw new Error(error.message)
+    return count ?? 0
+  }
+
   async approve(id: string): Promise<RsvpRequest> {
     const { data, error } = await this.client.rpc('approve_rsvp_request', {
       p_request_id: id,
@@ -128,15 +140,36 @@ export class SupabaseRsvpRequestsRepository implements IRsvpRequestsRepository {
       .maybeSingle()
 
     if (error) throw new Error(error.message)
-    // Zero rows matched => someone decided it between our read and our write.
+    // Zero rows matched => decided between our read and our write.
     if (!data) throw new RsvpRequestAlreadyDecidedError()
     return mapRow(data)
   }
 
+  async recordNotification(
+    id: string,
+    ok: boolean,
+    error?: string | null
+  ): Promise<RsvpRequest> {
+    const { data, error: rpcError } = await this.client.rpc(
+      'record_rsvp_notification',
+      {
+        p_request_id: id,
+        p_ok: ok,
+        p_error: error ?? undefined,
+      }
+    )
+
+    if (rpcError) {
+      if (rpcError.message.includes('RSVP_REQUEST_NOT_FOUND'))
+        throw new RsvpRequestNotFoundError()
+      throw new Error(rpcError.message)
+    }
+
+    return mapRow(data as RsvpRequestRow)
+  }
+
   async deletePending(id: string): Promise<void> {
-    // The .eq('status','pending') guard makes this race-safe: if the request
-    // was decided between the use-case read and this write, zero rows match
-    // and we surface the conflict instead of silently no-op'ing.
+    // The .eq('status','pending') guard makes this race-safe.
     const { data, error } = await this.client
       .from('rsvp_requests')
       .delete()

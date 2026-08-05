@@ -101,6 +101,42 @@ export type Database = {
         }
         Relationships: []
       }
+      invite_links: {
+        Row: {
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          last_visited_at: string | null
+          revoked_at: string | null
+          token: string
+          updated_at: string
+          visit_count: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_visited_at?: string | null
+          revoked_at?: string | null
+          token?: string
+          updated_at?: string
+          visit_count?: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_visited_at?: string | null
+          revoked_at?: string | null
+          token?: string
+          updated_at?: string
+          visit_count?: number
+        }
+        Relationships: []
+      }
       keep_alive: {
         Row: {
           id: number
@@ -211,6 +247,9 @@ export type Database = {
           guest_id: string | null
           id: string
           message: string | null
+          notified_at: string | null
+          notify_attempts: number
+          notify_error: string | null
           status: Database['public']['Enums']['rsvp_request_status']
           updated_at: string
         }
@@ -223,6 +262,9 @@ export type Database = {
           guest_id?: string | null
           id?: string
           message?: string | null
+          notified_at?: string | null
+          notify_attempts?: number
+          notify_error?: string | null
           status?: Database['public']['Enums']['rsvp_request_status']
           updated_at?: string
         }
@@ -235,6 +277,9 @@ export type Database = {
           guest_id?: string | null
           id?: string
           message?: string | null
+          notified_at?: string | null
+          notify_attempts?: number
+          notify_error?: string | null
           status?: Database['public']['Enums']['rsvp_request_status']
           updated_at?: string
         }
@@ -300,6 +345,33 @@ export type Database = {
           guest_id: string | null
           id: string
           message: string | null
+          notified_at: string | null
+          notify_attempts: number
+          notify_error: string | null
+          status: Database['public']['Enums']['rsvp_request_status']
+          updated_at: string
+        }
+        SetofOptions: {
+          from: '*'
+          to: 'rsvp_requests'
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      record_rsvp_notification: {
+        Args: { p_error?: string; p_ok: boolean; p_request_id: string }
+        Returns: {
+          attending: boolean
+          created_at: string
+          decided_at: string | null
+          email: string
+          full_name: string
+          guest_id: string | null
+          id: string
+          message: string | null
+          notified_at: string | null
+          notify_attempts: number
+          notify_error: string | null
           status: Database['public']['Enums']['rsvp_request_status']
           updated_at: string
         }
@@ -355,6 +427,7 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      touch_invite_link: { Args: { p_token: string }; Returns: undefined }
     }
     Enums: {
       gift_category: 'home' | 'kitchen' | 'travel' | 'experience' | 'other'

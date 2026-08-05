@@ -2,6 +2,7 @@ import 'server-only'
 
 import { SupabaseGiftsRepository } from '@/src/infrastructure/repositories/supabase-gifts.repository'
 import { SupabaseGuestsRepository } from '@/src/infrastructure/repositories/supabase-guests.repository'
+import { SupabaseInviteLinksRepository } from '@/src/infrastructure/repositories/supabase-invite-links.repository'
 import { SupabasePixConfirmationsRepository } from '@/src/infrastructure/repositories/supabase-pix-confirmations.repository'
 import { SupabaseRsvpRequestsRepository } from '@/src/infrastructure/repositories/supabase-rsvp-requests.repository'
 import { SupabaseRsvpRepository } from '@/src/infrastructure/repositories/supabase-rsvp.repository'
@@ -25,6 +26,7 @@ export const getContainer = cache(async () => {
     pixService: new PixUtilsService(),
     guestsRepo: new SupabaseGuestsRepository(supabase),
     rsvpRequestsRepo: new SupabaseRsvpRequestsRepository(supabase),
+    inviteLinksRepo: new SupabaseInviteLinksRepository(supabase),
     emailService: createEmailService(),
   }
 })

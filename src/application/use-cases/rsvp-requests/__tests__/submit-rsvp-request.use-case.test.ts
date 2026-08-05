@@ -23,6 +23,9 @@ const asRequest = (input: CreateRsvpRequestInput): RsvpRequest => ({
   status: 'pending',
   guestId: null,
   decidedAt: null,
+  notifiedAt: null,
+  notifyAttempts: 0,
+  notifyError: null,
   createdAt: new Date('2026-08-01T10:00:00Z'),
   updatedAt: new Date('2026-08-01T10:00:00Z'),
 })
@@ -34,8 +37,10 @@ function makeRepo(): RepoMock {
     findById: vi.fn(),
     findPendingByEmail: vi.fn(),
     countPending: vi.fn(),
+    countUnnotified: vi.fn(),
     approve: vi.fn(),
     reject: vi.fn(),
+    recordNotification: vi.fn(),
     deletePending: vi.fn(),
   }
 
@@ -64,6 +69,18 @@ describe('submitRsvpRequestUseCase', () => {
 
     expect(repo.create).toHaveBeenCalledOnce()
     expect(result).toMatchObject({ fullName: 'Maria Souza' })
+  })
+
+  it('starts life unnotified', async () => {
+    const repo = makeRepo()
+
+    const result = await submitRsvpRequestUseCase({
+      rsvpRequestsRepo: repo,
+    })(validInput)
+
+    expect(result.status).toBe('pending')
+    expect(result.notifiedAt).toBeNull()
+    expect(result.notifyAttempts).toBe(0)
   })
 
   it('rejects a single-word name (guests.last_name is NOT NULL)', async () => {

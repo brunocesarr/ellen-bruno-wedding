@@ -1,15 +1,16 @@
-import type { IRsvpRequestsRepository } from '@/src/application/repositories/rsvp-requests.repository.interface'
+import type { IInviteLinksRepository } from '@/src/application/repositories/invite-links.repository.interface'
 import type { IAuthService } from '@/src/application/services/auth.service.interface'
 import { UnauthenticatedError } from '@/src/entities/errors/auth'
 
-export function countPendingRsvpRequestsUseCase(deps: {
+export function revokeInviteLinksUseCase(deps: {
   authService: IAuthService
-  rsvpRequestsRepo: IRsvpRequestsRepository
+  inviteLinksRepo: IInviteLinksRepository
 }) {
   return async () => {
     const user = await deps.authService.getCurrentUser()
     if (!user) throw new UnauthenticatedError()
 
-    return deps.rsvpRequestsRepo.countPending()
+    const revoked = await deps.inviteLinksRepo.revokeAllActive()
+    return { revoked }
   }
 }

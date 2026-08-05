@@ -24,6 +24,9 @@ const pendingRequest: RsvpRequest = {
   status: 'pending',
   guestId: null,
   decidedAt: null,
+  notifiedAt: null,
+  notifyAttempts: 0,
+  notifyError: null,
   createdAt: new Date('2026-08-01T10:00:00Z'),
   updatedAt: new Date('2026-08-01T10:00:00Z'),
 }
@@ -40,8 +43,10 @@ function makeDeps() {
     findById: vi.fn(),
     findPendingByEmail: vi.fn(),
     countPending: vi.fn(),
+    countUnnotified: vi.fn(),
     approve: vi.fn(),
     reject: vi.fn(),
+    recordNotification: vi.fn(),
     deletePending: vi.fn(),
   }
 
@@ -105,6 +110,9 @@ describe('deleteRsvpRequestUseCase', () => {
     deps.rsvpRequestsRepo.findById.mockResolvedValue({
       ...pendingRequest,
       status: 'approved',
+      decidedAt: new Date('2026-08-02T10:00:00Z'),
+      notifiedAt: new Date('2026-08-02T10:00:05Z'),
+      notifyAttempts: 1,
     })
 
     await expect(
@@ -119,10 +127,33 @@ describe('deleteRsvpRequestUseCase', () => {
     deps.rsvpRequestsRepo.findById.mockResolvedValue({
       ...pendingRequest,
       status: 'rejected',
+      decidedAt: new Date('2026-08-02T10:00:00Z'),
+      notifiedAt: new Date('2026-08-02T10:00:05Z'),
+      notifyAttempts: 1,
     })
 
     await expect(
       deleteRsvpRequestUseCase(deps)({ id: ID })
     ).rejects.toBeInstanceOf(RsvpRequestAlreadyDecidedError)
+  })
+
+  // A decided-but-unnotified row is still an audit record: it proves a decision
+  // was made, even though the guest hasn't been told yet.
+  it('refuses to delete a decided request whose e-mail failed', async () => {
+    const deps = makeDeps()
+    deps.rsvpRequestsRepo.findById.mockResolvedValue({
+      ...pendingRequest,
+      status: 'approved',
+      decidedAt: new Date('2026-08-02T10:00:00Z'),
+      notifiedAt: null,
+      notifyAttempts: 2,
+      notifyError: 'smtp down',
+    })
+
+    await expect(
+      deleteRsvpRequestUseCase(deps)({ id: ID })
+    ).rejects.toBeInstanceOf(RsvpRequestAlreadyDecidedError)
+
+    expect(deps.rsvpRequestsRepo.deletePending).not.toHaveBeenCalled()
   })
 })

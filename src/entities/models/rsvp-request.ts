@@ -17,6 +17,10 @@ export const RsvpRequestSchema = z.object({
   status: RsvpRequestStatusSchema,
   guestId: z.string().uuid().nullable(),
   decidedAt: z.date().nullable(),
+  /** Set once the decision e-mail was delivered. NULL on a decided row = retry. */
+  notifiedAt: z.date().nullable(),
+  notifyAttempts: z.number().int().min(0),
+  notifyError: z.string().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
 })
@@ -57,3 +61,25 @@ export const DecideRsvpRequestInputSchema = z.object({
 export type DecideRsvpRequestInput = z.infer<
   typeof DecideRsvpRequestInputSchema
 >
+
+export const ResendRsvpNotificationInputSchema = z.object({
+  id: z.string().uuid('Solicitação inválida'),
+})
+export type ResendRsvpNotificationInput = z.infer<
+  typeof ResendRsvpNotificationInputSchema
+>
+
+/**
+ * A decision always commits. `emailSent: false` means the guest has NOT been
+ * told and the admin should retry — it is a warning, never a failure.
+ */
+export type RsvpDecisionResult = {
+  request: RsvpRequest
+  emailSent: boolean
+  emailError?: string
+}
+
+export type RsvpRequestAlerts = {
+  pending: number
+  unnotified: number
+}

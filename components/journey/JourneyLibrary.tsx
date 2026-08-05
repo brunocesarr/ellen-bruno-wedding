@@ -8,6 +8,7 @@ import {
 import { cn } from '@/src/lib/utils'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { HomeButton } from '../public/HomeButton'
 import { JourneyBook } from './JourneyBook'
 
 type ShelfItem =
@@ -18,6 +19,7 @@ type Props = {
   books: ResolvedJourneyBook[]
   coupleInitials?: string
   guestFirstName?: string | null
+  backHref: string
 }
 
 type SpineColor = ShelfDecorBook['color']
@@ -43,6 +45,7 @@ export function JourneyLibrary({
   books,
   coupleInitials = 'E&B',
   guestFirstName,
+  backHref,
 }: Props) {
   const reduce = useReducedMotion()
   const [openId, setOpenId] = useState<string | null>(null)
@@ -77,6 +80,8 @@ export function JourneyLibrary({
 
   return (
     <div className="relative min-h-screen-safe overflow-hidden">
+      {!openBook && <HomeButton href={backHref} />}
+
       <LibraryBackdrop />
 
       <div className="relative z-10 mx-auto w-full max-w-5xl px-4 py-8 md:py-12">

@@ -3,16 +3,25 @@
 import {
   decideRsvpRequestAction,
   deleteRsvpRequestAction,
+  resendRsvpDecisionEmailAction,
 } from '@/app/admin/_actions/rsvp-requests.actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import type { RsvpRequest } from '@/src/entities/models/rsvp-request'
-import { Check, Mail, Trash2, X } from 'lucide-react'
+import {
+  AlertTriangle,
+  Check,
+  Mail,
+  MailWarning,
+  Send,
+  Trash2,
+  X,
+} from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 
 type Props = { requests: RsvpRequest[] }
 
-type DialogKind = 'approved' | 'rejected' | 'delete'
+type DialogKind = 'approved' | 'rejected' | 'delete' | 'resend'
 type DialogState = { kind: DialogKind; request: RsvpRequest } | null
 
 const STATUS_STYLES: Record<RsvpRequest['status'], string> = {
@@ -35,11 +44,15 @@ const fmt = (d: Date) =>
     minute: '2-digit',
   }).format(d)
 
+const needsNotification = (r: RsvpRequest) =>
+  r.status !== 'pending' && r.notifiedAt === null
+
 export function RsvpRequestsTable({ requests }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
   const [dialog, setDialog] = useState<DialogState>(null)
   const [error, setError] = useState<string | null>(null)
+  const [warning, setWarning] = useState<string | null>(null)
 
   const openDialog = (kind: DialogKind, request: RsvpRequest) => {
     setError(null)
@@ -55,17 +68,37 @@ export function RsvpRequestsTable({ requests }: Props) {
     if (!dialog) return
     const { kind, request } = dialog
     setError(null)
+    setWarning(null)
 
     startTransition(async () => {
-      const res =
-        kind === 'delete'
-          ? await deleteRsvpRequestAction({ id: request.id })
-          : await decideRsvpRequestAction({ id: request.id, decision: kind })
+      if (kind === 'delete') {
+        const res = await deleteRsvpRequestAction({ id: request.id })
+        if (!res.ok) return setError(res.error)
+        closeDialog()
+        return router.refresh()
+      }
 
-      if (!res.ok) {
-        // Keep the dialog open so the admin can read the reason and retry.
-        setError(res.error)
-        return
+      if (kind === 'resend') {
+        const res = await resendRsvpDecisionEmailAction({ id: request.id })
+        if (!res.ok) return setError(res.error)
+        closeDialog()
+        return router.refresh()
+      }
+
+      const res = await decideRsvpRequestAction({
+        id: request.id,
+        decision: kind,
+      })
+      if (!res.ok) return setError(res.error)
+
+      // The decision is committed either way. A failed e-mail is a warning
+      // shown above the table, with a "Reenviar aviso" button on the row.
+      if (!res.data.emailSent) {
+        setWarning(
+          `A decisão sobre ${request.fullName} foi salva, mas o e-mail não foi enviado` +
+            `${res.data.emailError ? ` (${res.data.emailError})` : ''}. ` +
+            'Use "Reenviar aviso" na linha correspondente.'
+        )
       }
 
       closeDialog()
@@ -82,8 +115,8 @@ export function RsvpRequestsTable({ requests }: Props) {
       return {
         title: 'Aprovar solicitação?',
         tone: 'primary' as const,
-        confirmLabel: 'Aprovar e enviar e-mail',
-        pendingLabel: 'Enviando e-mail…',
+        confirmLabel: 'Aprovar',
+        pendingLabel: 'Aprovando...',
         description: (
           <>
             <strong className="text-stone-800">{name}</strong> será adicionada à
@@ -94,9 +127,9 @@ export function RsvpRequestsTable({ requests }: Props) {
             .
             <br />
             <br />
-            Enviaremos primeiro um e-mail para{' '}
-            <strong className="text-stone-800">{request.email}</strong>. A
-            aprovação só será aplicada se o e-mail for entregue.
+            Em seguida enviaremos um aviso para{' '}
+            <strong className="text-stone-800">{request.email}</strong>. Se o
+            e-mail falhar, a aprovação é mantida e você poderá reenviar o aviso.
           </>
         ),
       }
@@ -106,17 +139,44 @@ export function RsvpRequestsTable({ requests }: Props) {
       return {
         title: 'Recusar solicitação?',
         tone: 'danger' as const,
-        confirmLabel: 'Recusar e enviar e-mail',
-        pendingLabel: 'Enviando e-mail…',
+        confirmLabel: 'Recusar',
+        pendingLabel: 'Recusando...',
         description: (
           <>
             <strong className="text-stone-800">{name}</strong> não será
             adicionada à lista de convidados.
             <br />
             <br />
-            Enviaremos um e-mail gentil para{' '}
-            <strong className="text-stone-800">{request.email}</strong>. A
-            recusa só será aplicada se o e-mail for entregue.
+            Em seguida enviaremos um e-mail gentil para{' '}
+            <strong className="text-stone-800">{request.email}</strong>. Se o
+            envio falhar, a recusa é mantida e você poderá reenviar o aviso.
+          </>
+        ),
+      }
+    }
+
+    if (kind === 'resend') {
+      return {
+        title: 'Reenviar aviso?',
+        tone: 'primary' as const,
+        confirmLabel: 'Reenviar agora',
+        pendingLabel: 'Enviando...',
+        description: (
+          <>
+            Vamos tentar enviar novamente o aviso de{' '}
+            <strong className="text-stone-800">
+              {request.status === 'approved' ? 'aprovação' : 'recusa'}
+            </strong>{' '}
+            para <strong className="text-stone-800">{request.email}</strong>.
+            {request.notifyError && (
+              <>
+                <br />
+                <br />
+                <span className="text-stone-500">
+                  Última falha: {request.notifyError}
+                </span>
+              </>
+            )}
           </>
         ),
       }
@@ -126,7 +186,7 @@ export function RsvpRequestsTable({ requests }: Props) {
       title: 'Excluir solicitação?',
       tone: 'danger' as const,
       confirmLabel: 'Excluir',
-      pendingLabel: 'Excluindo…',
+      pendingLabel: 'Excluindo...',
       description: (
         <>
           A solicitação de <strong className="text-stone-800">{name}</strong>{' '}
@@ -145,9 +205,19 @@ export function RsvpRequestsTable({ requests }: Props) {
   return (
     <>
       <div className="space-y-4">
+        {warning && (
+          <div
+            role="status"
+            className="flex items-start gap-2 rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800"
+          >
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+            <p>{warning}</p>
+          </div>
+        )}
+
         {requests.length === 0 ? (
           <p className="py-10 text-center text-sm text-stone-500">
-            Nenhuma solicitação por aqui ainda 🤍
+            Nenhuma solicitação por aqui ainda.
           </p>
         ) : (
           <div className="overflow-x-auto">
@@ -160,6 +230,7 @@ export function RsvpRequestsTable({ requests }: Props) {
                   <th className="py-3 pr-4 font-medium">Mensagem</th>
                   <th className="py-3 pr-4 font-medium">Recebida</th>
                   <th className="py-3 pr-4 font-medium">Status</th>
+                  <th className="py-3 pr-4 font-medium">Aviso</th>
                   <th className="py-3 text-right font-medium">Ações</th>
                 </tr>
               </thead>
@@ -202,6 +273,28 @@ export function RsvpRequestsTable({ requests }: Props) {
                         {STATUS_LABELS[r.status]}
                       </span>
                     </td>
+                    <td className="py-4 pr-4">
+                      {r.status === 'pending' ? (
+                        <span className="text-stone-300">—</span>
+                      ) : r.notifiedAt ? (
+                        <span
+                          title={`Enviado em ${fmt(r.notifiedAt)}`}
+                          className="inline-flex items-center gap-1 text-xs text-emerald-700"
+                        >
+                          <Check className="h-3.5 w-3.5" />
+                          Avisado
+                        </span>
+                      ) : (
+                        <span
+                          title={r.notifyError ?? 'Aviso não enviado'}
+                          className="inline-flex items-center gap-1 text-xs font-medium text-rose-600"
+                        >
+                          <MailWarning className="h-3.5 w-3.5" />
+                          Falhou
+                          {r.notifyAttempts > 1 && ` (${r.notifyAttempts}x)`}
+                        </span>
+                      )}
+                    </td>
                     <td className="py-4 text-right">
                       {r.status === 'pending' ? (
                         <div className="flex items-center justify-end gap-2">
@@ -231,6 +324,15 @@ export function RsvpRequestsTable({ requests }: Props) {
                             <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
+                      ) : needsNotification(r) ? (
+                        <button
+                          type="button"
+                          onClick={() => openDialog('resend', r)}
+                          className="inline-flex items-center gap-1.5 rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-800"
+                        >
+                          <Send className="h-3.5 w-3.5" />
+                          Reenviar aviso
+                        </button>
                       ) : (
                         <span className="text-xs text-stone-400">
                           {r.decidedAt ? fmt(r.decidedAt) : '—'}

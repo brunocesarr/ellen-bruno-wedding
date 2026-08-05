@@ -17,6 +17,8 @@ type Props = {
 export function RsvpSection({ token }: Props) {
   const { displayDate, time } = WEDDING_DETAILS
 
+  const href = token ? `/rsvp?token=${encodeURIComponent(token)}` : '/rsvp'
+
   return (
     <SectionWrapper id="rsvp" variant="cream" className="pb-28">
       <div className="text-center">
@@ -54,13 +56,13 @@ export function RsvpSection({ token }: Props) {
 
         <motion.a
           variants={formItemVariants}
-          href={`/rsvp?token=${token}`}
+          href={href}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
           className="inline-block"
         >
           <Button
-            type="submit"
+            type="button"
             variant="primary"
             size="lg"
             className="min-w-fit min-h-4 mt-6 hover:cursor-pointer"

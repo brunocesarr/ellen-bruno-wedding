@@ -1,4 +1,4 @@
-import { countPendingRsvpRequestsAction } from '@/app/admin/_actions/rsvp-requests.actions'
+import { countRsvpRequestAlertsAction } from '@/app/admin/_actions/rsvp-requests.actions'
 import { AdminSidebar } from '@/components/admin/AdminSidebar'
 import { AdminTopbar } from '@/components/admin/AdminTopbar'
 import { NavigationProgressBar } from '@/components/admin/NavigationProgressBar'
@@ -20,8 +20,11 @@ export default async function AuthenticatedAdminLayout({
   }
 
   // Badge only — degrade to 0 rather than breaking the whole admin shell.
-  const pendingRes = await countPendingRsvpRequestsAction()
-  const pendingRsvpRequests = pendingRes.ok ? pendingRes.data : 0
+  // A decided-but-unnotified request is just as actionable as an undecided one.
+  const alerts = await countRsvpRequestAlertsAction()
+  const pendingRsvpRequests = alerts.ok
+    ? alerts.data.pending + alerts.data.unnotified
+    : 0
 
   return (
     <div className="admin-shell min-h-screen text-stone-800">
