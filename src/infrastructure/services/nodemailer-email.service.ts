@@ -4,6 +4,7 @@ import type {
   EmailMessage,
   IEmailService,
 } from '@/src/application/services/email.service.interface'
+import { randomUUID } from 'node:crypto'
 import nodemailer, { type Transporter } from 'nodemailer'
 import type SMTPTransport from 'nodemailer/lib/smtp-transport'
 
@@ -13,6 +14,12 @@ type GmailOAuthConfig = {
   clientSecret: string
   refreshToken: string
   from: string
+  replyTo: string
+}
+
+function extractAddress(value: string): string {
+  const match = value.match(/<([^>]+)>/)
+  return (match?.[1] ?? value).trim().toLowerCase()
 }
 
 function readGmailConfig(): GmailOAuthConfig | null {
@@ -23,11 +30,19 @@ function readGmailConfig(): GmailOAuthConfig | null {
 
   if (!user || !clientId || !clientSecret || !refreshToken) return null
 
-  // Gmail rewrites a From that doesn't match the authenticated mailbox, so
-  // default to the account address unless an alias is explicitly configured.
   const from = process.env.EMAIL_FROM ?? `Ellen & Bruno <${user}>`
 
-  return { user, clientId, clientSecret, refreshToken, from }
+  if (extractAddress(from) !== user.trim().toLowerCase()) {
+    console.warn(
+      `[createEmailService] EMAIL_FROM (${extractAddress(from)}) does not match ` +
+        `GMAIL_USER (${user}). This breaks DMARC alignment and will hurt ` +
+        'deliverability. Use GMAIL_USER or a verified Gmail alias.'
+    )
+  }
+
+  const replyTo = process.env.EMAIL_REPLY_TO ?? user
+
+  return { user, clientId, clientSecret, refreshToken, from, replyTo }
 }
 
 /**
@@ -37,10 +52,6 @@ function readGmailConfig(): GmailOAuthConfig | null {
  * would rebuild the transporter every request, and with OAuth2 that means
  * re-fetching an access token from Google on every single send — an extra
  * HTTP round trip before the SMTP handshake even starts.
- *
- * Nodemailer caches the access token on the transporter and refreshes it
- * only when it expires (~1h), so hoisting this to module scope lets warm
- * Lambda invocations reuse it.
  */
 let cachedTransporter: Transporter<SMTPTransport.SentMessageInfo> | null = null
 
@@ -62,13 +73,12 @@ function getTransporter(
       refreshToken: config.refreshToken,
     },
 
-    // The send happens inside a Server Action and Netlify's synchronous
-    // budget is ~10s. OAuth2 adds a token fetch before the SMTP handshake,
-    // so bounded timeouts matter more here than with password auth: a hung
-    // request must not turn a *committed* approval into a 502 for the admin.
     connectionTimeout: 5_000,
     greetingTimeout: 5_000,
     socketTimeout: 8_000,
+
+    disableFileAccess: true,
+    disableUrlAccess: true,
   }
 
   cachedTransporter = nodemailer.createTransport(options)
@@ -84,9 +94,15 @@ export class NodemailerEmailService implements IEmailService {
       const info = await getTransporter(this.config).sendMail({
         from: this.config.from,
         to: message.to,
+        replyTo: this.config.replyTo,
         subject: message.subject,
-        html: message.html,
+
         text: message.text,
+        html: message.html,
+
+        headers: {
+          'X-Entity-Ref-ID': randomUUID(),
+        },
       })
 
       // sendMail resolves even when the server accepted the envelope but
