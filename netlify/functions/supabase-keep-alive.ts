@@ -1,7 +1,7 @@
 import type { Config } from '@netlify/functions'
 import { createClient } from '@supabase/supabase-js'
 
-export default async () => {
+const handler = async (req: Request) => {
   const rawUrl = process.env.SUPABASE_URL
   const secretKey = process.env.SUPABASE_SECRET_KEY
 
@@ -67,3 +67,4 @@ export default async () => {
 }
 
 export const config: Config = { schedule: '0 6 * * *' }
+export default handler

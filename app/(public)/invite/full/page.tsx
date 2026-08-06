@@ -18,8 +18,8 @@ import { ParentsSection } from '@/components/sections/ParentsSection'
 import { RsvpSection } from '@/components/sections/RsvpSection'
 import { TestimonialSection } from '@/components/sections/TestimonialSection'
 import { TimelineSection } from '@/components/sections/TimelineSection'
+import { redirectInvalidInvite } from '@/src/lib/invite-redirect'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 import { after } from 'next/server'
 
 export const revalidate = 60
@@ -29,37 +29,21 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-type Props = {
-  searchParams: Promise<{
-    token?: string
-  }>
-}
+type Props = { searchParams: Promise<{ token?: string }> }
 
 export default async function FullInvitePage({ searchParams }: Props) {
   const { token } = await searchParams
+  if (!token) redirectInvalidInvite()
 
-  if (!token) {
-    redirect('/')
-  }
-
-  // Accepts a personalised token, a party token, or the generic shared link.
   const access = await resolveInviteAccessAction(token)
+  if (!access.ok) redirectInvalidInvite()
 
-  if (!access.ok) {
-    redirect('/')
-  }
-
-  // Visit counter for the shared link, scheduled after the response so it never
-  // adds latency and can never fail the page. Fires on cache miss only.
   if (access.data.kind === 'shared') {
     after(async () => {
       await touchInviteLinkAction(token)
     })
   }
 
-  // Every section below is already guest-agnostic — the sections that take a
-  // token only forward it into URLs — so the shared link renders the full
-  // invitation with no personalisation and no PII.
   return (
     <InvitationPageShell>
       <HeroSection />

@@ -3,15 +3,13 @@ import { HomeButton } from '@/components/public/HomeButton'
 import { RsvpForm } from '@/components/rsvp/RsvpForm'
 import { RsvpRequestForm } from '@/components/rsvp/RsvpRequestForm'
 import { SectionHeading } from '@/components/ui/SectionHeading'
+import { redirectInvalidInvite } from '@/src/lib/invite-redirect'
 import type { Metadata } from 'next'
-import { redirect } from 'next/navigation'
 
 export const metadata: Metadata = {
   title: 'Confirme sua presença · Ellen & Bruno',
   description: 'Confirme sua presença no nosso casamento.',
 }
-
-type Props = { searchParams: Promise<{ token?: string }> }
 
 /** Shared by the no-token and shared-link paths — identical experience. */
 function RequestFlow({ backHref }: { backHref: string }) {
@@ -36,28 +34,35 @@ function RequestFlow({ backHref }: { backHref: string }) {
   )
 }
 
+type Props = { searchParams: Promise<{ token?: string }> }
+
 export default async function RsvpPage({ searchParams }: Props) {
   const { token } = await searchParams
 
-  // --- No token: open request flow -----------------------------------------
+  // No token is a legitimate entry point here — the open request flow.
+  // Unlike the other pages, this must NOT redirect.
   if (!token) {
     return <RequestFlow backHref="/" />
   }
 
   const access = await resolveInviteAccessAction(token)
-  if (!access.ok) redirect('/')
+  if (!access.ok) redirectInvalidInvite()
 
-  // --- Shared link: same request flow, but keep the invitation reachable ---
+  // --- Shared link: same request flow, invitation still reachable ---------
   if (access.data.kind === 'shared') {
-    return <RequestFlow backHref={`/invite/full?token=${token}`} />
+    return (
+      <RequestFlow
+        backHref={`/invite/full?token=${encodeURIComponent(token)}`}
+      />
+    )
   }
 
-  // --- Personalised / party token: existing behaviour, unchanged -----------
+  // --- Personalised / party token: existing behaviour, unchanged ----------
   const { guest, partyMembers } = access.data
 
   return (
     <main className="relative overflow-hidden bg-cream">
-      <HomeButton href={'/invite/full?token=' + token} />
+      <HomeButton href={`/invite/full?token=${encodeURIComponent(token)}`} />
 
       <div
         aria-hidden

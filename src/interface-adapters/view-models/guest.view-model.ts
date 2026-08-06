@@ -16,6 +16,6 @@ export const toGuestRow = (g: Guest, baseUrl: string): GuestRowViewModel => ({
   status: g.status,
   partyId: g.partyId,
   inviteToken: g.inviteToken,
-  inviteUrl: `${baseUrl}/invite/full?token=${g.inviteToken}`,
+  inviteUrl: `${baseUrl}/invite?token=${g.inviteToken}`,
   confirmedAt: g.confirmedAt ? g.confirmedAt.toISOString() : null,
 })

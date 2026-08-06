@@ -31,7 +31,7 @@ export function ShareableInviteLinkCard({ link, siteUrl }: Props) {
   const [error, setError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
-  const url = link ? `${siteUrl}/invite/full?token=${link.token}` : null
+  const url = link ? `${siteUrl}/invite?token=${link.token}` : null
 
   const copy = async () => {
     if (!url) return
