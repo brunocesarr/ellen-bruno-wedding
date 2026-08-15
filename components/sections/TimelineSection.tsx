@@ -8,12 +8,12 @@ type TimelineItem = {
 }
 
 const ITEMS: TimelineItem[] = [
-  { time: '16:00', label: 'Recepção dos convidados' },
-  { time: '16:30', label: 'Cerimônia' },
+  { time: '15:30', label: 'Recepção dos convidados' },
+  { time: '16:00', label: 'Cerimônia' },
   { time: '17:30', label: 'Coquetel & Fotos' },
   { time: '19:00', label: 'Jantar' },
   { time: '21:00', label: 'Festa & Dança' },
-  { time: '00:00', label: 'Encerramento' },
+  { time: '23:30', label: 'Encerramento' },
 ]
 
 export function TimelineSection() {

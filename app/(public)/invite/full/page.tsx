@@ -49,17 +49,17 @@ export default async function FullInvitePage({ searchParams }: Props) {
       <HeroSection />
       <MonogramSection />
       <CountdownSection />
-      <AboutSection />
-      <TestimonialSection />
-      <GallerySection />
-      <JourneyTeaserSection token={token} />
-      <ParentsSection />
       <InvitationSection />
+      <TestimonialSection />
+      <ParentsSection />
       <LocationSection />
       <TimelineSection />
+      <RsvpSection token={token} />
       <DressCodeSection />
       <GiftsTeaserSection token={token} />
-      <RsvpSection token={token} />
+      <AboutSection />
+      <JourneyTeaserSection token={token} />
+      <GallerySection />
       <FooterSection />
     </InvitationPageShell>
   )
