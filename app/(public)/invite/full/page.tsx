@@ -53,9 +53,9 @@ export default async function FullInvitePage({ searchParams }: Props) {
       <TestimonialSection />
       <ParentsSection />
       <LocationSection />
+      <DressCodeSection />
       <TimelineSection />
       <RsvpSection token={token} />
-      <DressCodeSection />
       <GiftsTeaserSection token={token} />
       <AboutSection />
       <JourneyTeaserSection token={token} />
