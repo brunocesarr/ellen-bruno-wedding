@@ -1,7 +1,7 @@
 import type { Config } from '@netlify/functions'
 import { createClient } from '@supabase/supabase-js'
 
-const handler = async (req: Request) => {
+const handler = async (_: Request) => {
   const rawUrl = process.env.SUPABASE_URL
   const secretKey = process.env.SUPABASE_SECRET_KEY
 

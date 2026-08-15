@@ -36,6 +36,8 @@ export const SITE_IMAGE_CATALOG: SiteImageDef[] = [
     key: 'hero-bg',
     section: 'hero',
     label: 'Capa principal',
+    description:
+      'Legado — usado como reserva do Slide 1 até que um slide próprio seja enviado.',
     fallback: '/images/hero-bg.jpg',
     aspect: 'landscape',
   },
@@ -302,6 +304,48 @@ export const SITE_IMAGE_CATALOG: SiteImageDef[] = [
     section: 'journey',
     label: 'Jornada — Primeira corrida de rua',
     fallback: '/images/monogram-eb.png',
+    aspect: 'landscape',
+  },
+  // --- Capa: carrossel de fundo ---------------------------------------
+  {
+    key: 'hero-slide-1',
+    section: 'hero',
+    label: 'Capa — Slide 1',
+    description:
+      'Primeiro slide, carregado imediatamente. Use a melhor foto horizontal.',
+    fallback: '/images/hero-bg.jpg',
+    aspect: 'landscape',
+  },
+  {
+    key: 'hero-slide-2',
+    section: 'hero',
+    label: 'Capa — Slide 2',
+    description: 'Segundo slide do carrossel de fundo.',
+    fallback: '/images/couple-main.jpg',
+    aspect: 'landscape',
+  },
+  {
+    key: 'hero-slide-3',
+    section: 'hero',
+    label: 'Capa — Slide 3',
+    description: 'Terceiro slide do carrossel de fundo.',
+    fallback: '/images/couple-emotion.jpg',
+    aspect: 'landscape',
+  },
+  {
+    key: 'hero-slide-4',
+    section: 'hero',
+    label: 'Capa — Slide 4',
+    description: 'Quarto slide do carrossel de fundo.',
+    fallback: '/images/couple-emotion.jpg',
+    aspect: 'landscape',
+  },
+  {
+    key: 'hero-slide-5',
+    section: 'hero',
+    label: 'Capa — Slide 5',
+    description: 'Quinto slide do carrossel de fundo.',
+    fallback: '/images/couple-emotion.jpg',
     aspect: 'landscape',
   },
 ]

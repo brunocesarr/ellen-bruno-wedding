@@ -1,10 +1,9 @@
 'use client'
 
-import { SmartImage } from '@/components/ui/SmartImage'
 import { WEDDING_DETAILS } from '@/src/lib/constants'
-import type { ResolvedSiteImage } from '@/src/lib/get-site-image'
 import { motion, useReducedMotion, useScroll, useTransform } from 'motion/react'
 import { useRef, useSyncExternalStore } from 'react'
+import { HeroBackgroundCarousel, HeroSlide } from './HeroBackgroundCarousel'
 
 const DESKTOP_MEDIA_QUERY = '(min-width: 768px)'
 
@@ -34,7 +33,7 @@ function useDesktopMediaQuery() {
   )
 }
 
-export function HeroContent({ background }: { background: ResolvedSiteImage }) {
+export function HeroContent({ slides }: { slides: readonly HeroSlide[] }) {
   const { couple, displayDate } = WEDDING_DETAILS
   const ref = useRef<HTMLElement | null>(null)
   const reduce = useReducedMotion()
@@ -60,17 +59,7 @@ export function HeroContent({ background }: { background: ResolvedSiteImage }) {
         className="absolute inset-0 z-0"
         style={parallaxOn ? { y: backgroundY } : undefined}
       >
-        <SmartImage
-          src={background.src}
-          fallback={background.fallback}
-          alt={background.alt || 'Elegant wedding venue with warm lighting'}
-          fill
-          priority
-          className="object-cover"
-          sizes="100vw"
-          quality={80}
-        />
-
+        <HeroBackgroundCarousel slides={slides} />
         <div className="absolute inset-0 bg-gradient-to-b from-charcoal/25 via-charcoal/5 to-charcoal/35" />
       </motion.div>
 

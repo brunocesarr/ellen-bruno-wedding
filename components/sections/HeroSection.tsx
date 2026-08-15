@@ -1,7 +1,16 @@
-import { getSiteImage } from '@/src/lib/get-site-image'
+import { getOrderedSiteImages } from '@/src/lib/get-site-image'
 import { HeroContent } from './HeroContent'
 
+const HERO_SLIDE_KEYS = [
+  'hero-slide-1',
+  'hero-slide-2',
+  'hero-slide-3',
+  'hero-slide-4',
+  'hero-slide-5',
+] as const
+
 export async function HeroSection() {
-  const background = await getSiteImage('hero-bg')
-  return <HeroContent background={background} />
+  const slides = await getOrderedSiteImages(HERO_SLIDE_KEYS)
+
+  return <HeroContent slides={slides} />
 }

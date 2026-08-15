@@ -30,9 +30,7 @@ export default async function GiftsPage({ searchParams }: Props) {
 
   return (
     <main className="bg-cream">
-      <HomeButton
-        href={token ? '/invite/full?token=' + token : '/invite/full'}
-      />
+      <HomeButton href={token ? '/invite/full?token=' + token : '/'} />
 
       {photos.length >= 3 && photos[0] && photos[1] && photos[2] && (
         <GiftHero

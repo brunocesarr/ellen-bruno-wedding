@@ -25,7 +25,7 @@ const nextConfig: NextConfig = {
     imageSizes: [16, 32, 64, 96, 128, 256, 384],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co' }],
-    qualities: [70, 75, 80, 85],
+    qualities: [70, 75, 80, 85, 90],
   },
 
   // Keep nodemailer out of the bundle; require it from node_modules at runtime.
