@@ -47,10 +47,10 @@ export default function WeddingPage() {
       <HeroSection />
       <MonogramSection />
       <CountdownSection />
-      <AboutSection />
       <TestimonialSection />
-      <GallerySection />
       <GiftsTeaserSection />
+      <AboutSection />
+      <GallerySection />
       <FooterSection />
     </MotionWrapper>
   )

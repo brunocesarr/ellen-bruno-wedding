@@ -22,7 +22,7 @@ export function TimelineSection() {
   return (
     <section
       id="programacao"
-      className="bg-[#f5efe4] py-20 md:py-28"
+      className="bg-gradient-to-b from-[#faf6ef] to-[#f5efe4] py-20 md:py-28"
       aria-labelledby="programacao-title"
     >
       <div className="mx-auto max-w-3xl px-6">

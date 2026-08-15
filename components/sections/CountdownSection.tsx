@@ -25,7 +25,11 @@ export function CountdownSection() {
   const { timeLeft, isExpired, isMounted } = useCountdown(WEDDING_DETAILS.date)
 
   return (
-    <SectionWrapper id="countdown" variant="cream" className="py-16 md:py-24">
+    <SectionWrapper
+      id="countdown"
+      variant="cream"
+      className="py-16 md:py-24 bg-gradient-to-b from-[#faf6ef] to-[#f5efe4]"
+    >
       <div className="text-center">
         <motion.h2
           initial={{ opacity: 0, y: 15 }}

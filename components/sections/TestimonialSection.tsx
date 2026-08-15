@@ -45,7 +45,7 @@ export function TestimonialSection() {
   return (
     <section
       id="depoimentos"
-      className="relative overflow-hidden bg-gradient-to-b from-[#faf6ef] to-[#f5efe4] py-20 md:py-28"
+      className="relative overflow-hidden bg-[#f5efe4] py-20 md:py-28"
       aria-labelledby="testimonial-title"
     >
       <div className="absolute inset-x-0 top-12 h-px bg-amber-700/10 md:top-16" />

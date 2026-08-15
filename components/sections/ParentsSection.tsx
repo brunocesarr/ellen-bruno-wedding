@@ -37,7 +37,7 @@ export function ParentsSection() {
   return (
     <section
       id="nossos-pais"
-      className="bg-[#f5efe4] py-20 md:py-28"
+      className="bg-gradient-to-b from-[#f5efe4] to-[#faf6ef] py-20 md:py-28"
       aria-labelledby="parents-title"
     >
       <div className="mx-auto max-w-6xl px-6">
