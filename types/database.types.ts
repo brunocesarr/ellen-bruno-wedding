@@ -19,43 +19,55 @@ export type Database = {
           category: Database['public']['Enums']['gift_category']
           created_at: string | null
           description: string | null
+          goal_amount: number | null
           id: string
           image_path: string | null
-          is_reserved: boolean | null
+          is_reserved: boolean
+          kind: Database['public']['Enums']['gift_kind']
+          min_amount: number | null
           name: string
-          price: number
+          price: number | null
           reserved_at: string | null
           reserved_by_email: string | null
           reserved_by_name: string | null
           reserved_message: string | null
+          suggested_amounts: number[]
         }
         Insert: {
           category?: Database['public']['Enums']['gift_category']
           created_at?: string | null
           description?: string | null
+          goal_amount?: number | null
           id?: string
           image_path?: string | null
-          is_reserved?: boolean | null
+          is_reserved?: boolean
+          kind?: Database['public']['Enums']['gift_kind']
+          min_amount?: number | null
           name: string
-          price: number
+          price?: number | null
           reserved_at?: string | null
           reserved_by_email?: string | null
           reserved_by_name?: string | null
           reserved_message?: string | null
+          suggested_amounts?: number[]
         }
         Update: {
           category?: Database['public']['Enums']['gift_category']
           created_at?: string | null
           description?: string | null
+          goal_amount?: number | null
           id?: string
           image_path?: string | null
-          is_reserved?: boolean | null
+          is_reserved?: boolean
+          kind?: Database['public']['Enums']['gift_kind']
+          min_amount?: number | null
           name?: string
-          price?: number
+          price?: number | null
           reserved_at?: string | null
           reserved_by_email?: string | null
           reserved_by_name?: string | null
           reserved_message?: string | null
+          suggested_amounts?: number[]
         }
         Relationships: []
       }
@@ -158,7 +170,7 @@ export type Database = {
       pix_confirmations: {
         Row: {
           amount: number
-          confirmed: boolean | null
+          confirmed: boolean
           created_at: string | null
           gift_id: string | null
           guest_name: string
@@ -166,7 +178,7 @@ export type Database = {
         }
         Insert: {
           amount: number
-          confirmed?: boolean | null
+          confirmed?: boolean
           created_at?: string | null
           gift_id?: string | null
           guest_name: string
@@ -174,7 +186,7 @@ export type Database = {
         }
         Update: {
           amount?: number
-          confirmed?: boolean | null
+          confirmed?: boolean
           created_at?: string | null
           gift_id?: string | null
           guest_name?: string
@@ -186,6 +198,13 @@ export type Database = {
             columns: ['gift_id']
             isOneToOne: false
             referencedRelation: 'gifts'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'pix_confirmations_gift_id_fkey'
+            columns: ['gift_id']
+            isOneToOne: false
+            referencedRelation: 'gifts_with_totals'
             referencedColumns: ['id']
           },
         ]
@@ -331,7 +350,30 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      gifts_with_totals: {
+        Row: {
+          category: Database['public']['Enums']['gift_category'] | null
+          confirmed_total: number | null
+          contributor_count: number | null
+          created_at: string | null
+          description: string | null
+          goal_amount: number | null
+          id: string | null
+          image_path: string | null
+          is_reserved: boolean | null
+          kind: Database['public']['Enums']['gift_kind'] | null
+          min_amount: number | null
+          name: string | null
+          pledged_total: number | null
+          price: number | null
+          reserved_at: string | null
+          reserved_by_email: string | null
+          reserved_by_name: string | null
+          reserved_message: string | null
+          suggested_amounts: number[] | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       approve_rsvp_request: {
@@ -383,26 +425,39 @@ export type Database = {
         }
       }
       reserve_gift: {
-        Args: { p_gift_id: string; p_message?: string; p_name: string }
+        Args: {
+          p_amount?: number
+          p_contribution_id?: string
+          p_gift_id: string
+          p_message: string
+          p_name: string
+        }
         Returns: {
-          category: Database['public']['Enums']['gift_category']
+          category: Database['public']['Enums']['gift_category'] | null
+          confirmed_total: number | null
+          contributor_count: number | null
           created_at: string | null
           description: string | null
-          id: string
+          goal_amount: number | null
+          id: string | null
           image_path: string | null
           is_reserved: boolean | null
-          name: string
-          price: number
+          kind: Database['public']['Enums']['gift_kind'] | null
+          min_amount: number | null
+          name: string | null
+          pledged_total: number | null
+          price: number | null
           reserved_at: string | null
           reserved_by_email: string | null
           reserved_by_name: string | null
           reserved_message: string | null
-        }
+          suggested_amounts: number[] | null
+        }[]
         SetofOptions: {
           from: '*'
-          to: 'gifts'
-          isOneToOne: true
-          isSetofReturn: false
+          to: 'gifts_with_totals'
+          isOneToOne: false
+          isSetofReturn: true
         }
       }
       set_guest_statuses: {
@@ -431,6 +486,7 @@ export type Database = {
     }
     Enums: {
       gift_category: 'home' | 'kitchen' | 'travel' | 'experience' | 'other'
+      gift_kind: 'fixed_item' | 'open_item' | 'fund'
       guest_status: 'going' | 'pending' | 'not_going'
       rsvp_request_status: 'pending' | 'approved' | 'rejected'
     }
@@ -558,6 +614,7 @@ export const Constants = {
   public: {
     Enums: {
       gift_category: ['home', 'kitchen', 'travel', 'experience', 'other'],
+      gift_kind: ['fixed_item', 'open_item', 'fund'],
       guest_status: ['going', 'pending', 'not_going'],
       rsvp_request_status: ['pending', 'approved', 'rejected'],
     },

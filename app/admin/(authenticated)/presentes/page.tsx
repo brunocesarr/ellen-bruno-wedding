@@ -12,10 +12,29 @@ export const dynamic = 'force-dynamic'
 
 export default async function PresentesPage() {
   const gifts = unwrapForPage(await listGiftsAction())
-  const totalValue = gifts.reduce((s, g) => s + (g.price ?? 0), 0)
-  const reservedValue = gifts
-    .filter((g) => g.status !== 'pending')
-    .reduce((s, g) => s + (g.price ?? 0), 0)
+
+  // Funds contribute their goal (when set) to the target and their actual
+  // confirmed money to the received figure. Exclusive items keep the previous
+  // price-based behaviour.
+  const totalValue = gifts.reduce(
+    (s, g) => s + (g.kind === 'fund' ? (g.goalAmount ?? 0) : (g.price ?? 0)),
+    0
+  )
+
+  const reservedValue = gifts.reduce(
+    (s, g) =>
+      g.kind === 'fund'
+        ? s + g.confirmedTotal
+        : s + (g.status !== 'pending' ? (g.price ?? 0) : 0),
+    0
+  )
+
+  // Funds never lock, so they are never counted as "reserved".
+  const reservedCount = gifts.filter(
+    (g) => g.kind !== 'fund' && g.status !== 'pending'
+  ).length
+
+  const fundsCount = gifts.filter((g) => g.kind === 'fund').length
 
   return (
     <div className="space-y-6">
@@ -43,11 +62,7 @@ export default async function PresentesPage() {
           value={gifts.length}
           icon={<Gift className="h-4 w-4" />}
         />
-        <StatCard
-          label="Reservados"
-          value={gifts.filter((g) => g.status !== 'pending').length}
-          accent="emerald"
-        />
+        <StatCard label="Reservados" value={reservedCount} accent="emerald" />
         <StatCard
           label="Valor total"
           value={`R$ ${totalValue.toLocaleString('pt-BR')}`}
@@ -62,7 +77,11 @@ export default async function PresentesPage() {
 
       <SectionCard
         title="Todos os presentes"
-        description={`${gifts.length} itens cadastrados`}
+        description={
+          fundsCount > 0
+            ? `${gifts.length} itens cadastrados · ${fundsCount} vaquinha(s)`
+            : `${gifts.length} itens cadastrados`
+        }
       >
         <GiftsTable gifts={gifts} />
       </SectionCard>

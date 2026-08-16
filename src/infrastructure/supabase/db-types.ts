@@ -4,6 +4,11 @@ export type GiftRow = Database['public']['Tables']['gifts']['Row']
 export type GiftInsert = Database['public']['Tables']['gifts']['Insert']
 export type GiftUpdate = Database['public']['Tables']['gifts']['Update']
 
+// Supabase types every view column as nullable — it cannot infer NOT NULL
+// through a view. mapRow() coalesces each one; do not "fix" with `!`.
+export type GiftTotalsRow =
+  Database['public']['Views']['gifts_with_totals']['Row']
+
 export type RsvpRow = Database['public']['Tables']['rsvp']['Row']
 export type RsvpInsert = Database['public']['Tables']['rsvp']['Insert']
 export type RsvpUpdate = Database['public']['Tables']['rsvp']['Update']

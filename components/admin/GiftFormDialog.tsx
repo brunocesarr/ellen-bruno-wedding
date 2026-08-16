@@ -7,6 +7,7 @@ import {
 } from '@/app/admin/_actions/gifts.actions'
 import { DialogShell } from '@/components/ui/DialogShell'
 import { FormField as Field } from '@/components/ui/FormField'
+import { GIFT_KINDS, type GiftKind } from '@/src/entities/models/gift'
 import type { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import { inputField as inputClassName } from '@/src/lib/class-names'
 import * as Dialog from '@radix-ui/react-dialog'
@@ -29,6 +30,22 @@ const CATEGORIES = [
   { value: 'other', label: 'Outros' },
 ] as const
 
+const KIND_OPTIONS: Record<GiftKind, { label: string; hint: string }> = {
+  fixed_item: { label: 'Preço fixo', hint: 'Um valor, um comprador.' },
+  open_item: {
+    label: 'Sem preço definido',
+    hint: 'O comprador escolhe quanto pagar. Um comprador.',
+  },
+  fund: { label: 'Vaquinha', hint: 'Várias pessoas contribuem.' },
+}
+
+// Empty is valid for every kind — clear the field for a no-suggestion gift.
+const DEFAULT_SUGGESTED: Record<GiftKind, string> = {
+  fixed_item: '',
+  open_item: '100, 200, 350',
+  fund: '50, 150, 300, 500',
+}
+
 type Props = {
   trigger: React.ReactNode
   gift?: GiftViewModel
@@ -44,6 +61,12 @@ export function GiftFormDialog({ trigger, gift }: Props) {
   const [open, setOpen] = useState(false)
   const [previewUrl, setPreviewUrl] = useState<string | null>()
   const [selectedFileName, setSelectedFileName] = useState<string | null>()
+
+  // Single source of truth for `kind`. Submitted via the hidden input below —
+  // never via the option controls themselves. Drives conditional rendering too;
+  // this form is uncontrolled, so unmounted inputs simply drop out of FormData.
+  const [kind, setKind] = useState<GiftKind>(gift?.kind ?? 'fixed_item')
+  const kindLocked = (gift?.contributorCount ?? 0) > 0
 
   const currentImageUrl = gift?.imageUrl ?? null
 
@@ -66,13 +89,18 @@ export function GiftFormDialog({ trigger, gift }: Props) {
   const resetForm = useCallback(() => {
     clearSelectedFile()
     formRef.current?.reset()
-  }, [clearSelectedFile])
+    setKind(gift?.kind ?? 'fixed_item')
+  }, [clearSelectedFile, gift?.kind])
 
   const submitAction = useCallback(
     async (
       previousState: GiftFormActionState,
       formData: FormData
     ): Promise<GiftFormActionState> => {
+      console.log(
+        'Submitting form data:',
+        Object.fromEntries(formData.entries())
+      )
       const result = isEdit
         ? await updateGiftAction(previousState, formData)
         : await createGiftAction(previousState, formData)
@@ -92,6 +120,14 @@ export function GiftFormDialog({ trigger, gift }: Props) {
     GiftFormActionState,
     FormData
   >(submitAction, null)
+
+  // handle() returns ValidationError as { error, issues }. Surface the field
+  // paths from z.flattenError instead of only the generic "Dados inválidos".
+  const fieldErrors: Record<string, string[]> =
+    state && !state.ok ? (state.issues?.fieldErrors ?? {}) : {}
+  const formErrors: string[] =
+    state && !state.ok ? (state.issues?.formErrors ?? []) : []
+  const fieldError = (key: string): string | undefined => fieldErrors[key]?.[0]
 
   const previewSrc = useMemo(
     () => previewUrl || currentImageUrl || null,
@@ -129,6 +165,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
 
     if (!nextOpen) {
       clearSelectedFile()
+      setKind(gift?.kind ?? 'fixed_item')
     }
   }
 
@@ -164,10 +201,16 @@ export function GiftFormDialog({ trigger, gift }: Props) {
       <form
         ref={formRef}
         action={formAction}
-        encType="multipart/form-data"
         className="max-h-[calc(92vh-76px)] overflow-y-auto p-5 md:p-6"
       >
         {gift?.id && <input type="hidden" name="id" value={gift.id} />}
+
+        {/* The ONLY `kind` control in the form. Radios inside FormField's
+            <label> produced nested labels: the outer label targeted its first
+            labelable descendant (fixed_item) and forwarded every click there,
+            so FormData carried fixed_item no matter which card was picked.
+            Always rendered — also covers the kindLocked case. */}
+        <input type="hidden" name="kind" value={kind} />
 
         <div className="grid gap-5 md:grid-cols-[220px_1fr]">
           <div className="space-y-3">
@@ -249,7 +292,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
           </div>
 
           <div className="space-y-4">
-            <Field label="Nome">
+            <Field label="Nome" error={fieldError('name')}>
               <input
                 name="name"
                 required
@@ -260,7 +303,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
               />
             </Field>
 
-            <Field label="Descrição">
+            <Field label="Descrição" error={fieldError('description')}>
               <textarea
                 name="description"
                 rows={3}
@@ -271,8 +314,70 @@ export function GiftFormDialog({ trigger, gift }: Props) {
               />
             </Field>
 
+            {/* Plain <div> + <span>, deliberately NOT <Field>: FormField renders
+                a <label>, and a label must not wrap multiple form controls. */}
+            <div className="block">
+              <span
+                id="gift-kind-label"
+                className="mb-1.5 block text-xs font-medium text-stone-600"
+              >
+                Tipo de presente
+              </span>
+
+              <div
+                role="radiogroup"
+                aria-labelledby="gift-kind-label"
+                className="grid gap-2 sm:grid-cols-3"
+              >
+                {GIFT_KINDS.map((k) => (
+                  <button
+                    key={k}
+                    type="button"
+                    role="radio"
+                    aria-checked={kind === k}
+                    disabled={isPending || kindLocked}
+                    onClick={() => setKind(k)}
+                    className={`
+                      rounded-xl border p-3 text-left transition
+                      ${
+                        kind === k
+                          ? 'border-amber-600 bg-amber-50/60'
+                          : 'border-stone-200 hover:border-stone-300'
+                      }
+                      ${
+                        isPending || kindLocked
+                          ? 'cursor-not-allowed opacity-60'
+                          : 'cursor-pointer'
+                      }
+                    `}
+                  >
+                    <span className="block text-sm font-medium text-stone-800">
+                      {KIND_OPTIONS[k].label}
+                    </span>
+
+                    <span className="mt-0.5 block text-[11px] text-stone-500">
+                      {KIND_OPTIONS[k].hint}
+                    </span>
+                  </button>
+                ))}
+              </div>
+
+              {fieldError('kind') && (
+                <span className="mt-1 block text-xs text-rose-600">
+                  {fieldError('kind')}
+                </span>
+              )}
+
+              {kindLocked && (
+                <p className="mt-1.5 text-xs text-amber-700">
+                  O tipo não pode ser alterado: {gift?.contributorCount}{' '}
+                  contribuição(ões) registrada(s).
+                </p>
+              )}
+            </div>
+
             <div className="grid gap-3 sm:grid-cols-2">
-              <Field label="Categoria">
+              <Field label="Categoria" error={fieldError('category')}>
                 <select
                   name="category"
                   defaultValue={gift?.category ?? 'other'}
@@ -287,27 +392,106 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                 </select>
               </Field>
 
-              <Field label="Valor (R$)">
-                <input
-                  name="price"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  required
-                  defaultValue={gift?.price ?? ''}
-                  placeholder="250,00"
-                  disabled={isPending}
-                  className={inputClassName}
-                />
-              </Field>
+              {kind === 'fixed_item' ? (
+                <Field label="Valor (R$)" error={fieldError('price')}>
+                  <input
+                    name="price"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    required
+                    defaultValue={gift?.price ?? ''}
+                    placeholder="250,00"
+                    disabled={isPending}
+                    className={inputClassName}
+                  />
+                </Field>
+              ) : (
+                <Field
+                  label="Valor mínimo (R$) — opcional"
+                  error={fieldError('minAmount')}
+                >
+                  <input
+                    name="minAmount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={gift?.minAmount ?? ''}
+                    placeholder="50,00"
+                    disabled={isPending}
+                    className={inputClassName}
+                  />
+                </Field>
+              )}
+
+              {kind === 'fund' && (
+                <Field
+                  label="Meta (R$) — opcional"
+                  error={fieldError('goalAmount')}
+                >
+                  <input
+                    name="goalAmount"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    defaultValue={gift?.goalAmount ?? ''}
+                    placeholder="3000,00"
+                    disabled={isPending}
+                    className={inputClassName}
+                  />
+                </Field>
+              )}
+
+              {kind !== 'fixed_item' && (
+                <div className="sm:col-span-2">
+                  {/* key={kind} remounts the input so defaultValue refreshes on
+                      switch — React keeps the stale uncontrolled value otherwise. */}
+                  <Field
+                    label="Valores sugeridos (até 4, separados por vírgula)"
+                    error={fieldError('suggestedAmounts')}
+                  >
+                    <input
+                      name="suggestedAmounts"
+                      key={kind}
+                      defaultValue={
+                        gift?.suggestedAmounts.length
+                          ? gift.suggestedAmounts.join(', ')
+                          : DEFAULT_SUGGESTED[kind]
+                      }
+                      placeholder="50, 150, 300"
+                      disabled={isPending}
+                      className={inputClassName}
+                    />
+                  </Field>
+
+                  <p className="mt-1 text-[11px] text-stone-400">
+                    Um campo vazio ancora as contribuições para baixo — deixe
+                    sugestões.
+                  </p>
+                </div>
+              )}
             </div>
 
             {state && !state.ok && (
               <div
                 role="alert"
-                className="rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700"
+                className="space-y-1 rounded-xl bg-rose-50 px-4 py-3 text-sm text-rose-700"
               >
-                {state.error}
+                <p className="font-medium">{state.error}</p>
+
+                {formErrors.map((message) => (
+                  <p key={message} className="text-xs">
+                    {message}
+                  </p>
+                ))}
+
+                {/* A field error on an unmounted input (e.g. `price` while
+                    kind=fund) would otherwise render nowhere at all. */}
+                {Object.entries(fieldErrors).map(([field, messages]) => (
+                  <p key={field} className="text-xs">
+                    <span className="font-medium">{field}:</span> {messages[0]}
+                  </p>
+                ))}
               </div>
             )}
 

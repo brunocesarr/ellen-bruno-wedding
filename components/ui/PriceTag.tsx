@@ -1,5 +1,5 @@
 type Props = {
-  price: number
+  price: number | null
   original?: number
   size?: 'sm' | 'md'
   prefix?: string
@@ -21,9 +21,9 @@ export function PriceTag({ price, original, size = 'md', prefix }: Props) {
         <span
           className={`font-display font-semibold text-terracotta-dark ${priceCls}`}
         >
-          {formatBRL(price)}
+          {price !== null ? formatBRL(price) : '?'}
         </span>
-        {original && original > price && (
+        {original && price && original > price && (
           <span className="text-sm text-ink-muted line-through">
             {formatBRL(original)}
           </span>

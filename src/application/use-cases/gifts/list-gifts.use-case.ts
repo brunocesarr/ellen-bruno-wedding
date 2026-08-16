@@ -8,27 +8,23 @@ import type {
 
 type Deps = {
   giftsRepo: IGiftsRepository
-  pixRepo: IPixConfirmationsRepository
+  pixRepo: IPixConfirmationsRepository // no longer read here; safe to drop
   authService: IAuthService
 }
 
 export function listGiftsUseCase(d: Deps) {
   return async (): Promise<GiftWithStatus[]> => {
-    const [gifts, pixList] = await Promise.all([
-      d.giftsRepo.list(),
-      d.pixRepo.list(),
-    ])
-
-    const confirmedByGift = new Set(
-      pixList
-        .filter((p) => p.confirmed && p.giftId !== null)
-        .map((p) => p.giftId as string)
-    )
+    const gifts = await d.giftsRepo.list()
 
     return gifts.map((g) => {
       let status: ReservationStatus = 'pending'
-      if (g.isReserved)
-        status = confirmedByGift.has(g.id) ? 'thanked' : 'reserved'
+
+      if (g.kind === 'fund') {
+        status = g.confirmedTotal > 0 ? 'thanked' : 'pending'
+      } else if (g.isReserved) {
+        status = g.confirmedTotal > 0 ? 'thanked' : 'reserved'
+      }
+
       return { ...g, status }
     })
   }

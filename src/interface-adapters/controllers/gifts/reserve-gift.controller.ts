@@ -5,7 +5,15 @@ import { handle } from '../_handle'
 export async function reserveGiftController(input: unknown) {
   const { giftsRepo } = await getContainer()
   return handle(async () => {
-    const gift = await reserveGiftUseCase({ giftsRepo })(input)
-    return { id: gift.id, name: gift.name }
+    const { gift, contributionId } = await reserveGiftUseCase({ giftsRepo })(
+      input
+    )
+    return {
+      id: gift.id,
+      name: gift.name,
+      kind: gift.kind,
+      amount: gift.kind === 'fixed_item' ? gift.price : null,
+      contributionId,
+    }
   })
 }

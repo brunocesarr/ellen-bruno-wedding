@@ -12,7 +12,14 @@ const initial: ActionResult<{ id: string; name: string }> = {
   error: '',
 }
 
-export function ReserveGiftForm({ giftId }: { giftId: string }) {
+export function ReserveGiftForm({
+  giftId,
+  amount = null,
+}: {
+  giftId: string
+  /** Set for open_item / fund — the exact figure the displayed QR was built from. */
+  amount?: string | null
+}) {
   const [state, action, pending] = useActionState(reserveGiftAction, initial)
 
   if (state.ok) {
@@ -42,6 +49,9 @@ export function ReserveGiftForm({ giftId }: { giftId: string }) {
       className="space-y-6 rounded-3xl bg-white p-6 shadow-sm md:p-8"
     >
       <input type="hidden" name="giftId" value={giftId} />
+
+      {/* Omitted for fixed_item, where the gift's own price is used. */}
+      {amount !== null && <input type="hidden" name="amount" value={amount} />}
 
       <Field
         label="Seu nome"
@@ -76,6 +86,12 @@ export function ReserveGiftForm({ giftId }: { giftId: string }) {
       {state.error && !state.issues && (
         <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
           {state.error}
+        </p>
+      )}
+
+      {fieldError('amount') && (
+        <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
+          {fieldError('amount')}
         </p>
       )}
 

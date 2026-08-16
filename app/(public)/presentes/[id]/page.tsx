@@ -43,8 +43,16 @@ export default async function GiftDetailPage({
       <GiftDetailHero gift={giftView} token={token} />
       <GiftPaymentSection
         giftId={reservation.giftId}
-        qrImage={pix.qrImage}
-        brCode={pix.brCode}
+        kind={giftView.kind}
+        minAmount={giftView.minAmount}
+        suggestedAmounts={giftView.suggestedAmounts}
+        goalAmount={giftView.goalAmount}
+        confirmedTotal={giftView.confirmedTotal}
+        contributorCount={giftView.contributorCount}
+        progressPct={giftView.progressPct}
+        amountLabel={giftView.amountLabel}
+        qrImage={pix?.qrImage ?? null}
+        brCode={pix?.brCode ?? null}
         isReserved={reservation.isReserved}
         reservedByName={reservation.reservedByName}
         reservedMessage={reservation.reservedMessage}
