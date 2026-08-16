@@ -174,11 +174,11 @@ View: `gifts_with_totals`.
 **Gift kinds** (`gift_kind`) — the `gifts_kind_valid` CHECK makes the meaningless
 fourth combination unrepresentable:
 
-| kind | price | claimers |
-|---|---|---|
-| `fixed_item` | required | one |
-| `open_item` | null, buyer chooses | one |
-| `fund` | null, contributor chooses | many; `is_reserved` pinned false |
+| kind         | price                     | claimers                         |
+| ------------ | ------------------------- | -------------------------------- |
+| `fixed_item` | required                  | one                              |
+| `open_item`  | null, buyer chooses       | one                              |
+| `fund`       | null, contributor chooses | many; `is_reserved` pinned false |
 
 Consequences to respect everywhere:
 
@@ -194,7 +194,7 @@ Consequences to respect everywhere:
 - **Every view column is typed nullable** — Supabase cannot infer NOT NULL
   through a view. `mapRow` coalesces each one; do not "fix" with `!`.
 - **Reservation is atomic in Postgres.** `reserve_gift(uuid, text, text, numeric,
-  uuid)` locks `for update`, validates the amount, inserts the ledger row, and
+uuid)` locks `for update`, validates the amount, inserts the ledger row, and
   only sets `is_reserved` for non-funds. It raises sentinel strings
   (`GIFT_ALREADY_RESERVED`, `GIFT_AMOUNT_REQUIRED`,
   `GIFT_AMOUNT_TOO_LOW:<min>`, `GIFT_NOT_FOUND`) which the repository maps to

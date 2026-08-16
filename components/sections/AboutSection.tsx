@@ -10,7 +10,7 @@ export async function AboutSection() {
   return (
     <section
       id="sobre-nos"
-      className="relative overflow-hidden bg-[#faf6ef] py-20 md:py-28"
+      className="relative overflow-hidden bg-gradient-to-t from-[#faf6ef] to-[#f5efe4] py-20 md:py-28"
       aria-labelledby="about-title"
     >
       <div className="mx-auto max-w-6xl px-6">

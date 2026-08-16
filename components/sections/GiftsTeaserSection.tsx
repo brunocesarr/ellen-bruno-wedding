@@ -25,7 +25,7 @@ export async function GiftsTeaserSection({ token }: Props) {
   return (
     <section
       id="presentes"
-      className="relative overflow-hidden bg-gradient-to-br from-[#faf6ef] via-[#f5efe4] to-[#ede2cd] py-20 md:py-28"
+      className="relative overflow-hidden bg-gradient-to-br from-[#f5efe4] to-[#ede2cd] via-[#f5efe4] to-[#faf6ef] py-20 md:py-28"
       aria-labelledby="gifts-teaser-title"
     >
       <div className="mx-auto max-w-6xl px-6">
