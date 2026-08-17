@@ -21,7 +21,7 @@ export function PriceTag({ price, original, size = 'md', prefix }: Props) {
         <span
           className={`font-display font-semibold text-terracotta-dark ${priceCls}`}
         >
-          {price !== null ? formatBRL(price) : '?'}
+          {price !== null ? formatBRL(price) : 'Seu coração mandar'}
         </span>
         {original && price && original > price && (
           <span className="text-sm text-ink-muted line-through">
