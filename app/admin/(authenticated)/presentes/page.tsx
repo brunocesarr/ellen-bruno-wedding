@@ -11,7 +11,9 @@ import { Gift, Plus } from 'lucide-react'
 export const dynamic = 'force-dynamic'
 
 export default async function PresentesPage() {
-  const gifts = unwrapForPage(await listGiftsAction())
+  const gifts = unwrapForPage(await listGiftsAction()).sort((a, b) =>
+    a.name.localeCompare(b.name)
+  )
 
   // Funds contribute their goal (when set) to the target and their actual
   // confirmed money to the received figure. Exclusive items keep the previous
