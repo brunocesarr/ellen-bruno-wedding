@@ -74,7 +74,21 @@ export class PixUtilsService implements IPixService {
     const qrImage = await pix.toImage()
 
     const reason = validateBRCode(brCode)
-    if (reason) throw new InvalidPixCodeError(reason)
+    if (reason) {
+      // Log the payload so the offending field can be inspected in server logs.
+      console.error('[pix] invalid BR Code', {
+        reason,
+        brCode,
+        inputs: {
+          pixKey,
+          merchantName,
+          merchantCity,
+          amount,
+          typeofAmount: typeof amount,
+        },
+      })
+      throw new InvalidPixCodeError(reason)
+    }
 
     return { brCode, qrImage }
   }
