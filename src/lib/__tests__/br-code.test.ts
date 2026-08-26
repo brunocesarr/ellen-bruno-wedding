@@ -82,16 +82,32 @@ describe('crc16', () => {
 })
 
 describe('validateTlv', () => {
-  it('flags an accent that breaks the declared byte count', () => {
-    expect(validateTlv('5905Joãoé')).toMatch(/declares 5 bytes but value is 7/)
+  it('flags non-ASCII bytes in a text field', () => {
+    expect(validateTlv('5905JoãoX')).toMatch(/Field 59 contains non-ASCII/)
+  })
+
+  it('flags emoji, which is what breaks infoAdicional', () => {
+    expect(validateTlv('0204💕')).toMatch(/contains non-ASCII/)
   })
 
   it('passes clean ASCII', () => {
     expect(validateTlv('5905JOAOX')).toBeNull()
   })
 
-  it('reports the nested path for template subfields', () => {
-    expect(validateTlv('62110503***0402ãé')).toMatch(/Field 62\.04/)
+  it('walks nested template subfields', () => {
+    expect(validateTlv('26180014br.gov.bcb.pix')).toBeNull()
+  })
+
+  it('reports the nested path when a subfield is malformed', () => {
+    expect(validateTlv('2618XX14br.gov.bcb.pix')).toMatch(
+      /Malformed TLV header at 26\.XX/
+    )
+  })
+
+  it('detects a length that overruns the payload', () => {
+    expect(validateTlv('5999ABC')).toMatch(
+      /declares 99 bytes but only 3 remain/
+    )
   })
 })
 
@@ -99,7 +115,7 @@ describe('validateBRCode', () => {
   const withCrc = (body: string) => body + crc16(body)
 
   it('rejects a payload with the wrong prefix', () => {
-    expect(validateBRCode('999901' + '6304ABCD')).toMatch(/must start with/)
+    expect(validateBRCode('9999016304ABCD')).toMatch(/must start with/)
   })
 
   it('rejects a mutated payload', () => {
@@ -109,8 +125,8 @@ describe('validateBRCode', () => {
   })
 
   it('reaches the TLV walk once the CRC is correct', () => {
-    const broken = withCrc('0002015905Joãoé6009SAO PAULO6304')
-    expect(validateBRCode(broken)).toMatch(/Field 59 declares/)
+    const broken = withCrc('0002015905JoãoX6009SAO PAULO6304')
+    expect(validateBRCode(broken)).toMatch(/Field 59 contains non-ASCII/)
   })
 
   it('accepts a well-formed ASCII payload', () => {

@@ -1,4 +1,8 @@
-const byteLen = (s: string) => new TextEncoder().encode(s).length
+const encoder = new TextEncoder()
+const decoder = new TextDecoder()
+
+const toBytes = (input: string | Uint8Array) =>
+  typeof input === 'string' ? encoder.encode(input) : input
 
 /**
  * CRC16-CCITT-FALSE (poly 0x1021, init 0xFFFF) over UTF-8 bytes —
@@ -7,9 +11,7 @@ const byteLen = (s: string) => new TextEncoder().encode(s).length
  */
 export function crc16(payload: string): string {
   let crc = 0xffff
-  // for...of over a Uint8Array yields number, avoiding the
-  // number | undefined that noUncheckedIndexedAccess gives bytes[i]
-  for (const byte of new TextEncoder().encode(payload)) {
+  for (const byte of encoder.encode(payload)) {
     crc ^= byte << 8
     for (let j = 0; j < 8; j++) {
       crc = crc & 0x8000 ? ((crc << 1) ^ 0x1021) & 0xffff : (crc << 1) & 0xffff
@@ -20,8 +22,10 @@ export function crc16(payload: string): string {
 
 /** Returns null when valid, otherwise a message naming the broken field. */
 export function validateBRCode(code: string): string | null {
+  const bytes = encoder.encode(code)
+
   if (!code.startsWith('000201')) return 'BR Code must start with 000201'
-  if (byteLen(code) > 512) return `BR Code too long: ${byteLen(code)} bytes`
+  if (bytes.length > 512) return `BR Code too long: ${bytes.length} bytes`
 
   const expected = crc16(code.slice(0, -4))
   const actual = code.slice(-4).toUpperCase()
@@ -29,27 +33,58 @@ export function validateBRCode(code: string): string | null {
     return `CRC mismatch: expected ${expected}, got ${actual}`
   }
 
-  return validateTlv(code)
+  return validateTlv(bytes)
 }
 
-/** Exported so byte-length checks are testable without a valid CRC. */
-export function validateTlv(s: string, path = ''): string | null {
+/**
+ * Walks the payload in BYTES, because TLV lengths are byte counts.
+ * Slicing by characters drifts on any multibyte input and reports a
+ * bogus offset several fields later.
+ */
+export function validateTlv(
+  input: string | Uint8Array,
+  path = ''
+): string | null {
+  const bytes = toBytes(input)
   let i = 0
-  while (i < s.length) {
-    const id = s.slice(i, i + 2)
-    const len = Number.parseInt(s.slice(i + 2, i + 4), 10)
-    if (!/^\d{2}$/.test(id) || Number.isNaN(len)) {
-      return `Malformed TLV header at ${path}${id || '??'}`
+
+  while (i < bytes.length) {
+    if (i + 4 > bytes.length) {
+      return `Truncated TLV header at ${path}(byte offset ${i})`
     }
-    const val = s.slice(i + 4, i + 4 + len)
-    if (byteLen(val) !== len) {
-      return `Field ${path}${id} declares ${len} bytes but value is ${byteLen(val)} ("${val}")`
+
+    const id = decoder.decode(bytes.subarray(i, i + 2))
+    const rawLen = decoder.decode(bytes.subarray(i + 2, i + 4))
+
+    if (!/^\d{2}$/.test(id) || !/^\d{2}$/.test(rawLen)) {
+      return `Malformed TLV header at ${path}${id} (byte offset ${i}, length read as "${rawLen}")`
     }
-    if (id === '26' || id === '62') {
-      const nested = validateTlv(val, `${path}${id}.`)
+
+    const len = Number.parseInt(rawLen, 10)
+    const end = i + 4 + len
+
+    if (end > bytes.length) {
+      return `Field ${path}${id} declares ${len} bytes but only ${
+        bytes.length - i - 4
+      } remain`
+    }
+
+    const value = bytes.subarray(i + 4, end)
+    const isTemplate = id === '26' || id === '62'
+
+    if (!isTemplate && value.some((b) => b > 0x7f)) {
+      return `Field ${path}${id} contains non-ASCII bytes ("${decoder.decode(
+        value
+      )}") — strip accents and emoji before generating`
+    }
+
+    if (isTemplate) {
+      const nested = validateTlv(value, `${path}${id}.`)
       if (nested) return nested
     }
-    i += 4 + len
+
+    i = end
   }
+
   return null
 }
