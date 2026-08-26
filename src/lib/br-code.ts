@@ -88,3 +88,65 @@ export function validateTlv(
 
   return null
 }
+
+/**
+ * Tolerant walk that prints every field with byte offsets and does NOT stop
+ * at the first problem. Use this to see where a payload actually breaks.
+ */
+export function dumpBRCode(code: string): string {
+  const bytes = encoder.encode(code)
+  const lines = [
+    `bytes=${bytes.length} chars=${code.length}`,
+    `crc declared=${code.slice(-4).toUpperCase()} computed=${crc16(code.slice(0, -4))}`,
+    `head=${JSON.stringify(code.slice(0, 30))}`,
+    '--- fields ---',
+  ]
+  dumpLevel(bytes, '', lines)
+  return lines.join('\n')
+}
+
+function dumpLevel(bytes: Uint8Array, path: string, lines: string[]): void {
+  let i = 0
+  while (i < bytes.length) {
+    if (i + 4 > bytes.length) {
+      lines.push(`${path}@${i} TRUNCATED header: ${hex(bytes.subarray(i))}`)
+      return
+    }
+
+    const id = decoder.decode(bytes.subarray(i, i + 2))
+    const rawLen = decoder.decode(bytes.subarray(i + 2, i + 4))
+
+    if (!/^\d{2}$/.test(id) || !/^\d{2}$/.test(rawLen)) {
+      lines.push(
+        `${path}@${i} BAD header id=${JSON.stringify(id)} len=${JSON.stringify(rawLen)}`
+      )
+      lines.push(
+        `${path}@${i} context=${hex(bytes.subarray(Math.max(0, i - 6), i + 10))}`
+      )
+      return
+    }
+
+    const len = Number.parseInt(rawLen, 10)
+    const end = i + 4 + len
+    const value = bytes.subarray(i + 4, Math.min(end, bytes.length))
+    const text = decoder.decode(value)
+    const flags = [
+      end > bytes.length ? 'OVERRUN' : '',
+      value.some((b) => b > 0x7f) ? 'NON-ASCII' : '',
+    ]
+      .filter(Boolean)
+      .join(' ')
+
+    lines.push(
+      `${path}@${i} id=${id} len=${len} value=${JSON.stringify(text)} ${flags}`.trim()
+    )
+
+    if (id === '26' || id === '62') dumpLevel(value, `${path}${id}.`, lines)
+    i = end
+  }
+}
+
+const hex = (b: Uint8Array) =>
+  Array.from(b)
+    .map((n) => n.toString(16).padStart(2, '0'))
+    .join(' ')

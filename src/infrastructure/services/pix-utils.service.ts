@@ -1,95 +1,123 @@
-import type { IPixService } from '@/src/application/services/pix.service.interface'
-import { InvalidPixCodeError, PixError } from '@/src/entities/errors/pix'
-import type { PixQr } from '@/src/entities/models/pix'
-import { validateBRCode } from '@/src/lib/br-code'
-import {
-  PIX_MAX,
-  normalizePixKey,
-  toAsciiField,
-  toPixAmount,
-} from '@/src/lib/pix-sanitize'
 import { createStaticPix, hasError } from 'pix-utils'
 
-function toAscii(value: string): string {
-  return value
-    .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '')
-    .replace(/[^\x20-\x7E]/g, '')
-    .replace(/\s+/g, ' ')
-    .trim()
-}
+import type { IPixService } from '@/src/application/services/pix.service.interface'
+import { InvalidPixCodeError } from '@/src/entities/errors/pix'
+import type { PixQr } from '@/src/entities/models/pix'
+import { dumpBRCode, validateBRCode } from '@/src/lib/br-code'
+import {
+  PIX_MAX,
+  infoAdicionalBudget,
+  normalizePixKey,
+  requirePixAmount,
+  toAsciiField,
+  validatePixInputs,
+  type PixKeyType,
+} from '@/src/lib/pix-sanitize'
 
-function sanitizeField(value: string, maxLen: number): string {
-  return toAscii(value).slice(0, maxLen)
-}
+type CreateStaticPixParams = Parameters<typeof createStaticPix>[0]
 
-function sanitizeTxid(value?: string): string {
-  const clean = (value ?? '').replace(/[^A-Za-z0-9]/g, '').slice(0, 25)
-  return clean.length > 0 ? clean : '***'
+export type PixMerchantConfig = {
+  pixKey: string
+  /** Pass when the key is a mobile — bare 11 digits default to CPF. */
+  pixKeyType?: PixKeyType
+  merchantName: string
+  merchantCity: string
 }
 
 export class PixUtilsService implements IPixService {
-  async generateStaticQr({
-    amount,
-    description,
-    txid,
-  }: {
+  private readonly config: PixMerchantConfig
+
+  constructor(config?: Partial<PixMerchantConfig>) {
+    const pixKey = config?.pixKey ?? process.env.PIX_KEY ?? ''
+    if (!pixKey) throw new InvalidPixCodeError('PIX_KEY is not configured')
+
+    this.config = {
+      pixKey,
+      pixKeyType:
+        config?.pixKeyType ??
+        (process.env.PIX_KEY_TYPE as PixKeyType | undefined),
+      merchantName:
+        config?.merchantName ??
+        process.env.PIX_MERCHANT_NAME ??
+        'ELLEN E BRUNO',
+      merchantCity:
+        config?.merchantCity ??
+        process.env.PIX_MERCHANT_CITY ??
+        'BELO HORIZONTE',
+    }
+  }
+
+  async generateStaticQr(input: {
     amount: number
     description: string
-    txid?: string
   }): Promise<PixQr> {
-    const value = Number(amount)
-    if (!Number.isFinite(value) || value <= 0) {
-      throw new PixError(`Valor Pix inválido: ${amount}`)
+    const pix = this.createPix(input)
+    const brCode = this.assertValid(pix.toBRCode(), input)
+    const qrCodeImage = await pix.toImage()
+
+    // Field names come from PixQr — rename here if yours differ.
+    return { brCode, qrImage: qrCodeImage } satisfies PixQr
+  }
+
+  private createPix(input: { amount: number; description: string }) {
+    const key = normalizePixKey(this.config.pixKey, this.config.pixKeyType)
+    const name = toAsciiField(this.config.merchantName, PIX_MAX.merchantName)
+    const city = toAsciiField(this.config.merchantCity, PIX_MAX.merchantCity)
+
+    // `description` is nested inside tag 26 by pix-utils. Past 99 bytes the
+    // library emits a 3-digit length and every bank rejects the payload.
+    const budget = Math.min(PIX_MAX.infoAdicional, infoAdicionalBudget(key))
+    const info = input.description
+      ? toAsciiField(input.description, budget) || undefined
+      : undefined
+
+    const preflight = validatePixInputs({
+      pixKey: key,
+      merchantName: name,
+      merchantCity: city,
+      infoAdicional: info,
+    })
+    if (preflight) throw new InvalidPixCodeError(preflight)
+
+    let transactionAmount: number
+    try {
+      transactionAmount = requirePixAmount(input.amount)
+    } catch (error) {
+      throw new InvalidPixCodeError((error as Error).message)
     }
 
-    const merchantName = sanitizeField(
-      process.env.PIX_MERCHANT_NAME ?? 'Casamento EB',
-      25
-    )
-    const merchantCity = sanitizeField(
-      process.env.PIX_MERCHANT_CITY ?? 'UNKNOWN',
-      15
-    )
-    const pixKey = (process.env.PIX_KEY ?? '').trim()
-    const pixAmount = toPixAmount(value)
-    if (!pixKey || !pixAmount) throw new PixError('PIX_KEY ou valor inválido')
+    const params: CreateStaticPixParams = {
+      pixKey: key,
+      merchantName: name,
+      merchantCity: city,
+      transactionAmount,
+      txid: '***',
+      ...(info ? { infoAdicional: info } : {}),
+    }
 
-    const reserved = 'br.gov.bcb.pix'.length + pixKey.length + 8
-    const maxInfoLen = Math.max(0, 99 - reserved)
-    const infoAdicional = sanitizeField(description, Math.min(maxInfoLen, 40))
+    const pix = createStaticPix(params)
 
-    const pix = createStaticPix({
-      merchantName: toAsciiField(merchantName, PIX_MAX.merchantName),
-      merchantCity: toAsciiField(merchantCity, PIX_MAX.merchantCity),
-      pixKey: normalizePixKey(pixKey),
-      ...(infoAdicional ? { infoAdicional } : {}),
-      txid: sanitizeTxid(txid),
-      transactionAmount: pixAmount,
-    })
-
+    // hasError() validates INPUTS only — it never inspects the emitted
+    // payload, which is why the tag-26 overflow passed silently.
     if (hasError(pix)) throw new InvalidPixCodeError(pix.message)
 
-    const brCode = pix.toBRCode()
-    const qrImage = await pix.toImage()
+    return pix
+  }
 
+  private assertValid(
+    brCode: string,
+    input: { amount: number; description: string }
+  ): string {
     const reason = validateBRCode(brCode)
     if (reason) {
-      // Log the payload so the offending field can be inspected in server logs.
-      console.error('[pix] invalid BR Code', {
+      console.error('[pix] invalid BR Code\n' + dumpBRCode(brCode), {
         reason,
-        brCode,
-        inputs: {
-          pixKey,
-          merchantName,
-          merchantCity,
-          amount,
-          typeofAmount: typeof amount,
-        },
+        amount: input.amount,
+        descriptionBytes: new TextEncoder().encode(input.description).length,
+        pixKeyTail: this.config.pixKey.slice(-4),
       })
       throw new InvalidPixCodeError(reason)
     }
-
-    return { brCode, qrImage }
+    return brCode
   }
 }
