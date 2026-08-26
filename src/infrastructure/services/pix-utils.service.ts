@@ -1,6 +1,13 @@
 import type { IPixService } from '@/src/application/services/pix.service.interface'
-import { PixError } from '@/src/entities/errors/pix'
+import { InvalidPixCodeError, PixError } from '@/src/entities/errors/pix'
 import type { PixQr } from '@/src/entities/models/pix'
+import { validateBRCode } from '@/src/lib/br-code'
+import {
+  PIX_MAX,
+  normalizePixKey,
+  toAsciiField,
+  toPixAmount,
+} from '@/src/lib/pix-sanitize'
 import { createStaticPix, hasError } from 'pix-utils'
 
 function toAscii(value: string): string {
@@ -45,27 +52,30 @@ export class PixUtilsService implements IPixService {
       15
     )
     const pixKey = (process.env.PIX_KEY ?? '').trim()
-    if (!pixKey) throw new PixError('PIX_KEY não configurada')
+    const pixAmount = toPixAmount(value)
+    if (!pixKey || !pixAmount) throw new PixError('PIX_KEY ou valor inválido')
 
     const reserved = 'br.gov.bcb.pix'.length + pixKey.length + 8
     const maxInfoLen = Math.max(0, 99 - reserved)
     const infoAdicional = sanitizeField(description, Math.min(maxInfoLen, 40))
 
     const pix = createStaticPix({
-      merchantName,
-      merchantCity,
-      pixKey,
+      merchantName: toAsciiField(merchantName, PIX_MAX.merchantName),
+      merchantCity: toAsciiField(merchantCity, PIX_MAX.merchantCity),
+      pixKey: normalizePixKey(pixKey),
       ...(infoAdicional ? { infoAdicional } : {}),
       txid: sanitizeTxid(txid),
-      transactionAmount: Math.round(value * 100) / 100,
+      transactionAmount: pixAmount,
     })
 
-    if (hasError(pix)) {
-      throw new PixError('Falha ao gerar Pix: ' + JSON.stringify(pix.error))
-    }
+    if (hasError(pix)) throw new InvalidPixCodeError(pix.message)
 
     const brCode = pix.toBRCode()
     const qrImage = await pix.toImage()
+
+    const reason = validateBRCode(brCode)
+    if (reason) throw new InvalidPixCodeError(reason)
+
     return { brCode, qrImage }
   }
 }

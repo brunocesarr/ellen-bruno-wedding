@@ -4,3 +4,10 @@ export class PixError extends Error {
     this.name = 'PixError'
   }
 }
+
+export class InvalidPixCodeError extends Error {
+  constructor(reason: string) {
+    super(`Generated PIX code is invalid: ${reason}`)
+    this.name = 'InvalidPixCodeError'
+  }
+}
