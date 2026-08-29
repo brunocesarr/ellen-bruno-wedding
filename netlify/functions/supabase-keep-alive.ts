@@ -66,5 +66,5 @@ const handler = async (_: Request) => {
   return new Response('OK', { status: 200 })
 }
 
-export const config: Config = { schedule: '0 6 * * *' }
+export const config: Config = { schedule: '*/5 * * * *' }
 export default handler

@@ -86,10 +86,12 @@ export default async function DespesasPage() {
             {upcoming.map((i) => (
               <div
                 key={i.id}
-                className="flex flex-wrap items-center justify-between gap-2 py-2.5 text-sm"
+                className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 py-2.5 text-sm"
               >
-                <div>
-                  <p className="font-medium text-stone-800">{i.description}</p>
+                <div className="min-w-0">
+                  <p className="truncate font-medium text-stone-800">
+                    {i.description}
+                  </p>
                   <p
                     className={
                       i.isOverdue
@@ -101,7 +103,7 @@ export default async function DespesasPage() {
                     {i.isOverdue && ' · atrasada'}
                   </p>
                 </div>
-                <p className="tabular-nums text-stone-600">
+                <p className="whitespace-nowrap tabular-nums text-stone-600">
                   {i.paidAmountLabel} de {i.amountLabel}
                 </p>
               </div>

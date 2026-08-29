@@ -40,19 +40,19 @@ export function StatCard({
         delay: index * 0.06,
         ease: [0.22, 1, 0.36, 1],
       }}
-      className="rounded-2xl border border-stone-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition hover:shadow-md"
+      className="min-w-0 rounded-2xl border border-stone-200/70 bg-white/80 p-5 shadow-sm backdrop-blur-sm transition hover:shadow-md"
     >
-      <header className="flex items-center justify-between">
-        <p className="text-sm text-stone-500">{label}</p>
+      <header className="flex items-center justify-between gap-2">
+        <p className="truncate text-sm text-stone-500">{label}</p>
         {icon && (
           <span
-            className={`grid h-9 w-9 place-items-center rounded-full ${ACCENT[accent]}`}
+            className={`grid h-9 w-9 flex-shrink-0 place-items-center rounded-full ${ACCENT[accent]}`}
           >
             {icon}
           </span>
         )}
       </header>
-      <p className="mt-3 font-serif text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
+      <p className="mt-3 break-words font-serif text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
         {value}
       </p>
       {(delta || hint) && (

@@ -46,19 +46,23 @@ function InstallmentRow({
   installment: InstallmentViewModel
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-2 border-t border-stone-100 px-4 py-2 text-xs first:border-t-0">
+    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-stone-100 px-4 py-2 text-xs first:border-t-0">
       <span
         className={
-          installment.isOverdue ? 'font-medium text-rose-600' : 'text-stone-500'
+          installment.isOverdue
+            ? 'whitespace-nowrap font-medium text-rose-600'
+            : 'whitespace-nowrap text-stone-500'
         }
       >
         {installment.dueDateLabel}
         {installment.isOverdue && ' · atrasada'}
       </span>
-      <span className="text-stone-700">
+      <span className="whitespace-nowrap text-stone-700">
         {installment.paidAmountLabel} de {installment.amountLabel}
       </span>
-      <span className="text-stone-400">{installment.paidBy || '—'}</span>
+      <span className="min-w-0 truncate text-stone-400">
+        {installment.paidBy || '—'}
+      </span>
     </div>
   )
 }
@@ -216,8 +220,10 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
             className="rounded-xl border border-stone-200 bg-white p-4"
           >
             <div className="flex items-start justify-between gap-2">
-              <div>
-                <p className="font-medium text-stone-800">{e.description}</p>
+              <div className="min-w-0">
+                <p className="truncate font-medium text-stone-800">
+                  {e.description}
+                </p>
                 <p className="text-xs text-stone-400">
                   {e.installments.length} parcela(s)
                 </p>
@@ -226,21 +232,21 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
             </div>
 
             <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
-              <div>
+              <div className="min-w-0">
                 <p className="text-stone-400">Total</p>
-                <p className="font-medium text-stone-800">
+                <p className="break-words font-medium text-stone-800">
                   {e.totalAmountLabel}
                 </p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-stone-400">Pago</p>
-                <p className="font-medium text-emerald-700">
+                <p className="break-words font-medium text-emerald-700">
                   {e.paidTotalLabel}
                 </p>
               </div>
-              <div>
+              <div className="min-w-0">
                 <p className="text-stone-400">Saldo</p>
-                <p className="font-medium text-stone-800">
+                <p className="break-words font-medium text-stone-800">
                   {e.outstandingLabel}
                 </p>
               </div>

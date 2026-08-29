@@ -200,8 +200,10 @@ layout/                 # FloralFrame, MotionWrapper, …
 adding it elsewhere does not.
 
 **Two independent keep-alive paths, with different env vars:**
-`netlify/functions/supabase-keep-alive.ts` (scheduled `0 6 * * *`, reads
-`SUPABASE_URL` + `SUPABASE_SECRET_KEY`, upserts into `keep_alive`) and
+`netlify/functions/supabase-keep-alive.ts` (scheduled `*/5 * * * *` — bumped
+from once a day after intermittent Netlify edge-function timeouts on admin
+pages traced to Supabase cold-start latency; reads `SUPABASE_URL` +
+`SUPABASE_SECRET_KEY`, upserts into `keep_alive`) and
 `app/api/keep-alive/route.ts` (reads `NEXT_PUBLIC_SUPABASE_URL` via the admin
 client, requires `Bearer ${CRON_SECRET}`). The URL env var name differs between
 them and nothing enforces they match — a known drift risk.

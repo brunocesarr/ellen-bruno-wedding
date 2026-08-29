@@ -11,9 +11,16 @@ export default async function AuthenticatedAdminLayout({
   children: React.ReactNode
 }) {
   const supabase = await createSupabaseServerClient()
-  const {
-    data: { user },
-  } = await supabase.auth.getUser()
+
+  const [
+    {
+      data: { user },
+    },
+    alerts,
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    countRsvpRequestAlertsAction(),
+  ])
 
   if (!user) {
     redirect('/admin/login')
@@ -21,7 +28,6 @@ export default async function AuthenticatedAdminLayout({
 
   // Badge only — degrade to 0 rather than breaking the whole admin shell.
   // A decided-but-unnotified request is just as actionable as an undecided one.
-  const alerts = await countRsvpRequestAlertsAction()
   const pendingRsvpRequests = alerts.ok
     ? alerts.data.pending + alerts.data.unnotified
     : 0
