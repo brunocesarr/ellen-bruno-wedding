@@ -48,3 +48,12 @@ export type InviteLinkInsert =
   Database['public']['Tables']['invite_links']['Insert']
 export type InviteLinkUpdate =
   Database['public']['Tables']['invite_links']['Update']
+
+// --- Wedding planning expenses ----------------------------------------------
+export type ExpenseRow = Database['public']['Tables']['expenses']['Row']
+export type ExpenseInsert = Database['public']['Tables']['expenses']['Insert']
+
+export type ExpenseInstallmentRow =
+  Database['public']['Tables']['expense_installments']['Row']
+export type ExpenseInstallmentInsert =
+  Database['public']['Tables']['expense_installments']['Insert']

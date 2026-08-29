@@ -35,6 +35,9 @@ pnpm db:push        # Push migrations to linked project
 pnpm db:reset       # Reset local DB and re-run migrations
 ```
 
+CI (`.github/workflows/ci.yml`) runs `lint`, `format`, `test:ci`, then `build` on
+every PR and push to `main`.
+
 ## Architecture
 
 Clean Architecture with strict layer boundaries:
@@ -82,7 +85,19 @@ factories. They validate raw input with Zod and throw typed domain errors
 `InvalidInviteTokenError`, …). Admin-facing use cases call
 `authService.getCurrentUser()` and throw `UnauthenticatedError` themselves —
 `manage-gift.use-case.ts` is the reference. Note `listGiftsUseCase` does **not**;
-it relies on the authenticated layout.
+it relies on the authenticated layout. (Its `Deps` still lists `pixRepo` — the
+field is dead, kept only because deleting it isn't worth a signature churn; the
+file itself says so.)
+
+**Not every admin mutation goes through this pipeline.** `src/lib/admin/gifts.ts`
+and `src/lib/admin/messages.ts` are pre-Clean-Architecture `'use server'` files
+that query Supabase directly (no repository, no use case, no controller) and
+call `revalidatePath` with a hardcoded list instead of `revalidateGroup`.
+`GiftsTable.tsx` still calls `deleteGift` from there, and `MessagesGrid.tsx`
+imports its `GuestMessage` type — both components otherwise render data that
+_did_ come through `listGiftsAction` / `listMessagesAction`. Don't extend
+these two files; migrate the call site to the real use-case/controller/action
+stack when you touch it instead.
 
 **`getContainer()` / `getPublicContainer()`** are wrapped in React `cache()`, so
 the Supabase client + repositories are built once per request even when several
@@ -112,6 +127,24 @@ access rather than loosened RLS. Preserve this split.
   dress-code palette) and `SECTION_IDS`. Types live in root `types/`.
 - **`invite-redirect.ts`** — `redirectInvalidInvite()` for bad/absent tokens.
 - **`utils.ts`** — `cn()` (clsx + tailwind-merge).
+- **`site-images-catalog.ts`** — static registry of every uploadable image slot
+  (`key`, `section`, `label`, `fallback`, aspect). Drives both the admin
+  `/admin/imagens` upload UI and public rendering; adding a new image slot
+  anywhere on the site means adding an entry here first.
+- **`get-site-image.ts`** — `server-only`; `getSiteImage(key)` /
+  `getOrderedSiteImages(keys)` resolve a catalog key to whichever image an
+  admin uploaded (via the public container + `resolveStorageUrl`), falling
+  back to the catalog's static `fallback` path. Wrapped in React `cache()`.
+  Swallows every error except Next's `DYNAMIC_SERVER_USAGE` digest, so a
+  Supabase outage degrades to fallback images instead of failing the render.
+- **`journey-catalog.ts`** — static content for the "Nossa Jornada" photo-story
+  feature (books/pages/photo layouts); photos reference `site-images-catalog`
+  keys rather than embedding URLs.
+- **`email-templates.ts`** — HTML bodies for the nodemailer service.
+- **`format.ts`**, **`guests.ts`** — small formatting / guest-shape helpers.
+- **`pix-sanitize.ts`** / **`br-code.ts`** — see PIX section below.
+- **`admin/gifts.ts`, `admin/messages.ts`** — legacy, see the callout above;
+  do not add to this directory.
 
 ## App Router structure
 
@@ -121,11 +154,14 @@ layout.tsx              # Root layout; 4 Google fonts, NuqsAdapter, MusicToggle
 globals.css             # Tailwind v4
 (public)/
   page.tsx              # Landing (revalidate = 60)
+  invite/                # Envelope reveal animation; ?token=, noindex
   invite/full/          # Full invitation; ?token= searchParam, noindex
+  nossa-jornada/         # Standalone "Our journey" photo-story book
   presentes/            # Gift registry (list + detail [id])
   rsvp/                 # Public RSVP form
   _actions/             # gifts.actions.ts, rsvp.actions.ts,
-                        # guests.actions.ts, invite-access.actions.ts
+                        # guests.actions.ts, invite-access.actions.ts,
+                        # rsvp-requests.actions.ts
 admin/
   login/                # Client page; signInWithPassword + router.replace
   (authenticated)/      # Auth gate lives HERE (see below)
@@ -134,9 +170,10 @@ admin/
     presentes/          # Gift management
     mensagens/          # Guest messages
     imagens/            # Site image uploads
-    solicitacoes/       # Public RSVP requests awaiting approval
+    solicitacoes/       # Public RSVP requests + shareable invite link admin
     resumo/             # Stats summary
-  _actions/             # gifts.actions.ts, rsvp-requests.actions.ts, …
+  _actions/             # gifts.actions.ts, rsvp-requests.actions.ts,
+                        # invite-links.actions.ts, dashboard.actions.ts, …
   auth/callback/route.ts # exchangeCodeForSession → /admin
 api/
   invitation/route.tsx  # OG image via next/og — .tsx, it returns JSX
@@ -148,6 +185,11 @@ sections/               # Landing + invitation sections
 gifts/                  # Public registry components
 admin/                  # Admin tables, dialogs, charts
 invite/                 # InvitationPageShell
+envelope/               # Envelope open/reveal animation shown at /invite
+journey/                # JourneyBook/JourneyLibrary — the /nossa-jornada UI
+photo-gallery/          # PhotoGallery
+public/                 # HomeButton, InvalidInviteNotice — small shared bits
+                        # reused across (public) pages
 rsvp/                   # RSVP form
 layout/                 # FloralFrame, MotionWrapper, …
 ```
@@ -213,6 +255,22 @@ uuid)` locks `for update`, validates the amount, inserts the ledger row, and
 `getInviteContextUseCase` accepts either token and returns
 `{ guest, partyMembers }`; `confirmAttendanceUseCase` validates every submitted
 `guestId` belongs to the owner's party before writing.
+
+**Shared invite links (`invite_links` table)** cover guests who never got a
+personal token — e.g. a link posted in a group chat. At most one link is
+active at a time; `createInviteLinkUseCase` revokes any predecessor before
+creating a new one, so "generate new" doubles as rotation if a link leaks.
+`resolveInviteAccessAction` (`app/(public)/_actions/invite-access.actions.ts`)
+tries the guest-token path first via `getInviteContextController`, and only
+falls back to `getSharedInviteLinkController` if that fails — a shared token
+can never shadow a real guest token. The result is a discriminated
+`InviteAccess` (`{ kind: 'guest', guest, partyMembers }` or
+`{ kind: 'shared', link }`); a `'shared'` visit lands on the full invitation
+but the RSVP section falls back to the "request pending approval" flow, same
+as having no token at all. `touchInviteLinkAction` (visit counter) is fired
+from `after()` in `invite/full/page.tsx`, never awaited in render. Admin
+generates/revokes the active link from `/admin/solicitacoes` via
+`ShareableInviteLinkCard`.
 
 **`rsvp_requests` is an outbox/retry:** `notify_attempts` / `notify_error` /
 `notified_at` make email failures retryable, with `status` + `decided_at` as an
@@ -298,24 +356,77 @@ changes.
 
 `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`,
 `SUPABASE_SECRET_KEY`, `SUPABASE_URL` (Netlify function only), `CRON_SECRET`,
-`PIX_KEY`, `PIX_MERCHANT_NAME`, `PIX_MERCHANT_CITY`, `NEXT_PUBLIC_SITE_URL`,
-plus nodemailer credentials. See `.env.example`.
+`PIX_KEY`, `PIX_KEY_TYPE` (optional — `cpf`/`cnpj`/`phone`/`email`/`evp`; only
+matters to disambiguate an 11-digit key, which is otherwise assumed CPF),
+`PIX_MERCHANT_NAME`, `PIX_MERCHANT_CITY`, `NEXT_PUBLIC_SITE_URL`.
+
+Email is sent via Gmail SMTP + OAuth2
+(`src/infrastructure/services/nodemailer-email.service.ts`), not plain
+credentials: `GMAIL_USER`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
+`GOOGLE_REFRESH_TOKEN`, plus optional `EMAIL_FROM` / `EMAIL_REPLY_TO`. The
+transporter is a module-scoped singleton, not built per-request — `getContainer()`
+is per-request via React `cache()`, and rebuilding it every call would mean
+re-fetching an OAuth access token from Google before every send. If `EMAIL_FROM`
+doesn't resolve to the same address as `GMAIL_USER`, it logs a DMARC-alignment
+warning but still sends.
+
+No `.env.example` is committed (`.gitignore` excludes all `.env*`) despite the
+README referencing one — ask the user for values rather than assuming the file
+exists.
 
 ## PIX
 
-`PixUtilsService.generateStaticQr({ amount, description, txid? })` is defensive
-because BR Code is a fixed-length EMV format that fails silently on bad input:
-NFD-strips diacritics to ASCII, clamps merchant name to 25 / city to 15, and
-computes the remaining payload budget as
-`99 - ('br.gov.bcb.pix'.length + pixKey.length + 8)` before truncating
-`infoAdicional`. Do not "simplify" these.
+`PixUtilsService.generateStaticQr({ amount, description })` (no `txid` param)
+is defensive because BR Code is a fixed-length EMV format that fails silently
+on bad input. The sanitization primitives live in `src/lib/pix-sanitize.ts`,
+not the service itself — do not "simplify" or inline them:
 
-It throws `PixError` on a non-positive amount — which is why the QR **cannot** be
-generated at render time for `open_item` / `fund`. Those go through
-`generateGiftPixAction` once the guest picks a value;
+- `normalizePixKey(raw, type?)` — canonicalizes a PIX key by type (`cpf`,
+  `cnpj`, `phone`, `email`, `evp`); an 11-digit key is ambiguous between CPF
+  and a DDD+mobile number, so pass `type` (`PIX_KEY_TYPE`) explicitly when the
+  key could be either.
+- `toAsciiField(value, maxBytes)` — NFD-strips diacritics, uppercases, strips
+  `&`, clamps to a byte budget.
+- `merchantTemplateSize()` / `infoAdicionalBudget(pixKey)` — computes exactly
+  how many bytes tag 26 (the merchant account template) will occupy and how
+  much of that is left for `infoAdicional`, since pix-utils nests it inside
+  tag 26 and an overflow past 99 bytes makes the library emit a 3-digit
+  length that every bank rejects.
+- `validatePixInputs()` — preflight check called before `createStaticPix`;
+  throws `InvalidPixCodeError` (not the older `PixError` class in
+  `entities/errors/pix.ts`, which is now dead code).
+- `toPixAmount()` / `requirePixAmount()` — coerces Postgres `numeric` (arrives
+  from supabase-js as a string) to a 2-decimal number; the throwing variant is
+  used here because every gift has a chosen amount by the time a QR is built.
+
+**A second line of defense runs after generation.** `pix-utils`'s own
+`hasError()` only validates inputs — it never inspects the emitted payload,
+which is how a tag-26 overflow used to pass silently. `PixUtilsService`
+additionally runs the finished BR Code through `src/lib/br-code.ts`
+(`validateBRCode` — reparses the TLV structure byte-by-byte and recomputes the
+CRC16) before returning it, and logs `dumpBRCode()`'s full field-by-field dump
+on failure. This pairing is the result of several recent fixes to the PIX flow
+(see git log) — if a new bug surfaces here, reproduce it with `dumpBRCode`
+before changing the sanitizer.
+
+`generateStaticQr` throws `InvalidPixCodeError` on a non-positive amount —
+which is why the QR **cannot** be generated at render time for `open_item` /
+`fund`. Those go through `generateGiftPixAction` once the guest picks a value;
 `get-gift-detail.controller.ts` returns `pix: null` for them.
 
-`sanitizeTxid` currently falls back to `'***'` because the QR is generated before
-the contribution row exists. Passing the contribution id as txid would make
-multi-contributor funds reconcilable against a bank statement, but needs a
-duplicate-submit story first (the RPC would hit a PK violation on replay).
+The txid is hardcoded to `'***'` in `PixUtilsService` because the QR is
+generated before the contribution row exists. `reserveGiftUseCase` already
+generates a `contributionId` (`randomUUID()`) and the `reserve_gift` RPC
+accepts it as `p_contribution_id`, but nothing wires that id into the PIX
+payload yet — and since the client generates a fresh UUID per call rather than
+reusing one, a resubmitted form would still create a second ledger row. Wiring
+txid to the contribution id for bank-statement reconciliation still needs that
+duplicate-submit story solved first.
+
+**Two use cases already exist for this but are not wired up anywhere:**
+`src/application/use-cases/pix/generate-pix-qr.use-case.ts` and
+`list-untied-pix.use-case.ts` (would let admin see PIX payments with no
+`gift_id` — i.e. paid but unmatched to a gift). No controller, action, or UI
+calls either one. If you need "list untied PIX" for the admin dashboard, this
+is the use case to wire in — check it still matches `IPixConfirmationsRepository`
+before assuming it's ready to use as-is.

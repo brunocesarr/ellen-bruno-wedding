@@ -14,6 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
+      expense_installments: {
+        Row: {
+          amount: number
+          created_at: string
+          due_date: string
+          expense_id: string
+          id: string
+          paid_amount: number
+          paid_by: string | null
+          updated_at: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          due_date: string
+          expense_id: string
+          id?: string
+          paid_amount?: number
+          paid_by?: string | null
+          updated_at?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          due_date?: string
+          expense_id?: string
+          id?: string
+          paid_amount?: number
+          paid_by?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'expense_installments_expense_id_fkey'
+            columns: ['expense_id']
+            isOneToOne: false
+            referencedRelation: 'expenses'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          total_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          total_amount: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          total_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       gifts: {
         Row: {
           category: Database['public']['Enums']['gift_category']

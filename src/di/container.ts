@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { SupabaseExpensesRepository } from '@/src/infrastructure/repositories/supabase-expenses.repository'
 import { SupabaseGiftsRepository } from '@/src/infrastructure/repositories/supabase-gifts.repository'
 import { SupabaseGuestsRepository } from '@/src/infrastructure/repositories/supabase-guests.repository'
 import { SupabaseInviteLinksRepository } from '@/src/infrastructure/repositories/supabase-invite-links.repository'
@@ -19,6 +20,7 @@ export const getContainer = cache(async () => {
   return {
     rsvpRepo: new SupabaseRsvpRepository(supabase),
     giftsRepo: new SupabaseGiftsRepository(supabase),
+    expensesRepo: new SupabaseExpensesRepository(supabase),
     pixRepo: new SupabasePixConfirmationsRepository(supabase),
     storageRepo: new SupabaseStorageRepository(supabase),
     siteImagesRepo: new SupabaseSiteImagesRepository(supabase),

@@ -10,6 +10,7 @@ import {
   Menu,
   MessageCircleHeart,
   Users,
+  Wallet,
   X,
 } from 'lucide-react'
 import { motion } from 'motion/react'
@@ -27,6 +28,7 @@ const NAV = [
     badge: 'pendingRsvpRequests' as const,
   },
   { href: '/admin/presentes', label: 'Presentes', icon: Gift },
+  { href: '/admin/despesas', label: 'Despesas', icon: Wallet },
   { href: '/admin/mensagens', label: 'Mensagens', icon: MessageCircleHeart },
   { href: '/admin/resumo', label: 'Resumo', icon: ChartBar },
   { href: '/admin/imagens', label: 'Imagens', icon: ImageIcon },

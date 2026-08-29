@@ -20,6 +20,7 @@ const GROUPS = {
     '/admin/resumo',
   ],
   inviteLinks: [['/invite/full', 'page'] as const, '/admin/solicitacoes'],
+  expenses: ['/admin', '/admin/despesas'],
 } as const satisfies Record<string, readonly PathSpec[]>
 
 export type RevalidationGroup = keyof typeof GROUPS
