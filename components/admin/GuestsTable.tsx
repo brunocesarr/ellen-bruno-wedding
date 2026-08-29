@@ -13,8 +13,12 @@ import {
   filterPartyMembers,
   fullName,
   groupByParty,
+  GUEST_SORT_KEYS,
+  GUEST_SORT_LABEL,
   inviteUrlFor,
   partyMatchesQuery,
+  sortParties,
+  type GuestSortKey,
   type Party,
   type StatusFilter,
 } from '@/src/lib/guests'
@@ -25,6 +29,7 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
   const [list, setList] = useState<Guest[]>(guests)
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all')
+  const [sortBy, setSortBy] = useState<GuestSortKey>('name')
   const { copiedValue: copiedToken, copy } = useCopyToClipboard()
 
   const deletion = useGuestDeletion({
@@ -33,11 +38,14 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
 
   const parties = useMemo(
     () =>
-      groupByParty(list)
-        .map((p) => filterPartyMembers(p, statusFilter))
-        .filter((p): p is Party => p !== null)
-        .filter((p) => partyMatchesQuery(p, query)),
-    [list, query, statusFilter]
+      sortParties(
+        groupByParty(list)
+          .map((p) => filterPartyMembers(p, statusFilter))
+          .filter((p): p is Party => p !== null)
+          .filter((p) => partyMatchesQuery(p, query)),
+        sortBy
+      ),
+    [list, query, statusFilter, sortBy]
   )
 
   const totals = useMemo(
@@ -99,6 +107,19 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
           <option value="going">Confirmados</option>
           <option value="pending">Pendentes</option>
           <option value="not_going">Não vai</option>
+        </select>
+
+        <select
+          aria-label="Ordenar por"
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value as GuestSortKey)}
+          className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm outline-none focus:border-amber-600"
+        >
+          {GUEST_SORT_KEYS.map((key) => (
+            <option key={key} value={key}>
+              Ordenar: {GUEST_SORT_LABEL[key]}
+            </option>
+          ))}
         </select>
 
         <GuestFormDialog
