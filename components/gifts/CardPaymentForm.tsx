@@ -14,6 +14,7 @@ export function CardPaymentForm({
   amount: string | null
 }) {
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [message, setMessage] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({})
@@ -28,6 +29,7 @@ export function CardPaymentForm({
       const result = await createGiftCardPaymentAction({
         giftId,
         name,
+        email,
         message: message.trim() || undefined,
         amount: amount ?? undefined,
       })
@@ -59,6 +61,22 @@ export function CardPaymentForm({
           onChange={(e) => setName(e.target.value)}
           required
           placeholder="Como você se chama?"
+        />
+      </Field>
+
+      <Field
+        label="Seu e-mail"
+        htmlFor="card-email"
+        required
+        error={fieldErrors.email?.[0]}
+      >
+        <FieldInput
+          id="card-email"
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          placeholder="seuemail@exemplo.com"
         />
       </Field>
 

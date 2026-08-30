@@ -27,7 +27,7 @@ export function createGiftCardPaymentUseCase(d: Deps) {
     const parsed = CreateCardPaymentInputSchema.safeParse(raw)
     if (!parsed.success) throw new ValidationError(z.flattenError(parsed.error))
 
-    const { giftId, name, message, amount } = parsed.data
+    const { giftId, name, email, message, amount } = parsed.data
 
     const gift = await d.giftsRepo.getById(giftId)
     if (!gift) throw new GiftNotFoundError()
@@ -56,6 +56,7 @@ export function createGiftCardPaymentUseCase(d: Deps) {
       description: `Presente: ${gift.name}`,
       contributionId,
       guestName: name,
+      guestEmail: email,
       message,
     })
   }

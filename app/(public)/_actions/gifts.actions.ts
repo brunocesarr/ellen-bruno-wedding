@@ -40,6 +40,7 @@ export async function generateGiftPixAction(input: {
 export async function createGiftCardPaymentAction(input: {
   giftId: string
   name: string
+  email: string
   message?: string
   amount?: string
 }) {

@@ -4,6 +4,7 @@ export type CreateCardPreferenceInput = {
   description: string
   contributionId: string
   guestName: string
+  guestEmail: string
   message?: string
 }
 

@@ -66,6 +66,13 @@ export class MercadoPagoService implements ICardPaymentService {
         ],
         external_reference: input.contributionId,
         notification_url: this.notificationUrl,
+        // A named, identifiable payer is one of the stronger signals in
+        // Mercado Pago's antifraud scoring — an anonymous payer raises the
+        // odds of an otherwise-legitimate card getting declined.
+        payer: {
+          name: input.guestName,
+          email: input.guestEmail,
+        },
         // Card only — PIX already has its own in-app flow, no need to
         // duplicate it on Mercado Pago's hosted page.
         payment_methods: {
@@ -75,9 +82,13 @@ export class MercadoPagoService implements ICardPaymentService {
             { id: 'atm' },
           ],
         },
-        // No pending/in_process limbo: every payment resolves straight to
-        // approved or rejected, which is all confirmCardPaymentUseCase handles.
-        binary_mode: true,
+        // binary_mode deliberately left off: it forces every payment to
+        // resolve straight to approved/rejected, which means anything MP's
+        // antifraud would otherwise hold in_process for manual review gets
+        // auto-rejected instead. Without it, some payments can sit
+        // in_process; confirmCardPaymentUseCase already no-ops on any
+        // status other than 'approved', so a later webhook redelivery once
+        // MP resolves the review is all that's needed to confirm it.
         metadata: {
           gift_id: input.giftId,
           guest_name: input.guestName,

@@ -51,7 +51,7 @@ const cardPaymentService = () => ({
   verifyWebhookSignature: vi.fn(),
 })
 
-const validInput = { giftId: ID, name: 'Ana Souza' }
+const validInput = { giftId: ID, name: 'Ana Souza', email: 'ana@example.com' }
 
 describe('createGiftCardPaymentUseCase', () => {
   it('rejects a malformed gift id', async () => {
@@ -135,6 +135,19 @@ describe('createGiftCardPaymentUseCase', () => {
         cardPaymentService: cardPaymentService(),
       })({ ...validInput, amount: 10 })
     ).rejects.toBeInstanceOf(GiftAmountTooLowError)
+  })
+
+  it('forwards the guest email as the preference payer', async () => {
+    const service = cardPaymentService()
+
+    await createGiftCardPaymentUseCase({
+      giftsRepo: giftsRepo() as never,
+      cardPaymentService: service,
+    })(validInput)
+
+    expect(service.createPreference).toHaveBeenCalledWith(
+      expect.objectContaining({ guestEmail: 'ana@example.com' })
+    )
   })
 
   it('generates a fresh contribution id per call', async () => {

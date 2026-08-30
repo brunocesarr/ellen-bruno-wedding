@@ -38,6 +38,10 @@ export type PixConfirmation = z.infer<typeof PixConfirmationSchema>
 export const CreateCardPaymentInputSchema = z.object({
   giftId: z.string().uuid(),
   name: z.string().min(2, 'Informe seu nome').max(120),
+  // Required (not just collected for a receipt): a payer identity with no
+  // email is a strong fraud-score signal on Mercado Pago's side and raises
+  // the odds a legitimate card gets auto-declined under binary_mode.
+  email: z.string().email('Informe um e-mail válido'),
   message: z.string().max(500).optional(),
   amount: z.coerce
     .number()
