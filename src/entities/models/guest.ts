@@ -56,3 +56,18 @@ export const ConfirmAttendanceInputSchema = z.object({
 export type ConfirmAttendanceInput = z.infer<
   typeof ConfirmAttendanceInputSchema
 >
+
+export const RenameGuestNamesInputSchema = z.object({
+  inviteToken: z.string().uuid('Convite inválido'),
+
+  names: z
+    .array(
+      z.object({
+        guestId: z.string().uuid(),
+        firstName: z.string().min(1, 'Informe o primeiro nome').max(80),
+        lastName: z.string().min(1, 'Informe o sobrenome').max(80),
+      })
+    )
+    .min(1),
+})
+export type RenameGuestNamesInput = z.infer<typeof RenameGuestNamesInputSchema>

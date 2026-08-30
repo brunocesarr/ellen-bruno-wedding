@@ -2,6 +2,7 @@
 
 import { confirmAttendanceController } from '@/src/interface-adapters/controllers/guests/confirm-attendance.controller'
 import { getInviteContextController } from '@/src/interface-adapters/controllers/guests/get-invite-context.controller'
+import { renameGuestNamesController } from '@/src/interface-adapters/controllers/guests/rename-guest-names.controller'
 import { revalidateGroup } from '@/src/lib/revalidate'
 
 export async function getInviteContextAction(token: string) {
@@ -10,6 +11,12 @@ export async function getInviteContextAction(token: string) {
 
 export async function confirmAttendanceAction(input: unknown) {
   const res = await confirmAttendanceController(input)
+  if (res.ok) revalidateGroup('invite')
+  return res
+}
+
+export async function renameGuestNamesAction(input: unknown) {
+  const res = await renameGuestNamesController(input)
   if (res.ok) revalidateGroup('invite')
   return res
 }

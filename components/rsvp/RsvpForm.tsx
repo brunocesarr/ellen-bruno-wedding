@@ -1,6 +1,9 @@
 'use client'
 
-import { confirmAttendanceAction } from '@/app/(public)/_actions/guests.actions'
+import {
+  confirmAttendanceAction,
+  renameGuestNamesAction,
+} from '@/app/(public)/_actions/guests.actions'
 import {
   Field,
   FieldInput,
@@ -33,6 +36,31 @@ export function RsvpForm({ invite }: Props) {
 
       const message = (formData.get('message') as string | null) ?? undefined
 
+      const names = [invite.guest, ...invite.partyMembers]
+        .map((g) => {
+          const firstName = (
+            formData.get(`name-${g.id}-firstName`) as string | null
+          )?.trim()
+          const lastName = (
+            formData.get(`name-${g.id}-lastName`) as string | null
+          )?.trim()
+          if (!firstName || !lastName) return null
+          if (firstName === g.firstName && lastName === g.lastName) return null
+          return { guestId: g.id, firstName, lastName }
+        })
+        .filter(
+          (n): n is { guestId: string; firstName: string; lastName: string } =>
+            n !== null
+        )
+
+      if (names.length > 0) {
+        const renameResult = await renameGuestNamesAction({
+          inviteToken: invite.guest.inviteToken,
+          names,
+        })
+        if (!renameResult.ok) return renameResult
+      }
+
       return confirmAttendanceAction({
         inviteToken: invite.guest.inviteToken,
         attendees,
@@ -41,8 +69,6 @@ export function RsvpForm({ invite }: Props) {
     },
     null
   )
-
-  const fullName = `${invite.guest.firstName} ${invite.guest.lastName}`
 
   if (state && state.ok) {
     return (
@@ -67,21 +93,33 @@ export function RsvpForm({ invite }: Props) {
     <form action={action} className="mx-auto max-w-4xl">
       <div className="grid grid-cols-1 gap-x-12 gap-y-7 md:grid-cols-2">
         <Field
-          label="Seu nome"
-          htmlFor="fullName"
+          label="Seu primeiro nome"
+          htmlFor="ownerFirstName"
           required
-          error={fieldError('fullName')}
+          hint="Viu um erro? Pode corrigir aqui."
+          error={fieldError('firstName')}
         >
           <FieldInput
-            id="fullName"
-            name="fullName"
+            id="ownerFirstName"
+            name={`name-${invite.guest.id}-firstName`}
             type="text"
-            autoComplete="name"
-            defaultValue={fullName}
-            readOnly
-            disabled
-            aria-readonly
-            className="cursor-not-allowed"
+            autoComplete="given-name"
+            defaultValue={invite.guest.firstName}
+          />
+        </Field>
+
+        <Field
+          label="Seu sobrenome"
+          htmlFor="ownerLastName"
+          required
+          error={fieldError('lastName')}
+        >
+          <FieldInput
+            id="ownerLastName"
+            name={`name-${invite.guest.id}-lastName`}
+            type="text"
+            autoComplete="family-name"
+            defaultValue={invite.guest.lastName}
           />
         </Field>
 
@@ -120,24 +158,45 @@ export function RsvpForm({ invite }: Props) {
             <Field
               label="Confirmar acompanhantes?"
               htmlFor="companion"
+              hint="Viu um nome errado? Pode corrigir antes de confirmar."
               error={fieldError('attendees')}
             >
-              {invite.partyMembers.map((m) => (
-                <div
-                  key={m.id}
-                  className="flex items-center justify-start gap-4"
-                >
-                  <FieldInput
-                    type="checkbox"
-                    name={`companion-${m.id}`}
-                    defaultChecked={m.status === 'going'}
-                    className="h-[16px] w-[16px] text-terracotta focus:ring-terracotta/50"
-                  />
-                  <span>
-                    {m.firstName} {m.lastName}
-                  </span>
-                </div>
-              ))}
+              <div className="flex flex-col gap-4">
+                {invite.partyMembers.map((m) => (
+                  <div
+                    key={m.id}
+                    className="flex flex-col gap-2 rounded-sm border border-ink/10 p-3"
+                  >
+                    <div className="flex items-center gap-3">
+                      <FieldInput
+                        type="checkbox"
+                        name={`companion-${m.id}`}
+                        defaultChecked={m.status === 'going'}
+                        className="h-[16px] w-[16px] text-terracotta focus:ring-terracotta/50"
+                      />
+                      <span className="text-sm text-ink-muted">
+                        Confirmar presença
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <FieldInput
+                        type="text"
+                        name={`name-${m.id}-firstName`}
+                        defaultValue={m.firstName}
+                        placeholder="Primeiro nome"
+                        aria-label={`Primeiro nome de ${m.firstName} ${m.lastName}`}
+                      />
+                      <FieldInput
+                        type="text"
+                        name={`name-${m.id}-lastName`}
+                        defaultValue={m.lastName}
+                        placeholder="Sobrenome"
+                        aria-label={`Sobrenome de ${m.firstName} ${m.lastName}`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
             </Field>
           </div>
         )}
