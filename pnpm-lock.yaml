@@ -46,6 +46,9 @@ importers:
       lucide-react:
         specifier: ^1.23.0
         version: 1.28.0(react@19.2.8)
+      mercadopago:
+        specifier: ^3.6.0
+        version: 3.6.0
       motion:
         specifier: ^12.42.2
         version: 12.43.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
@@ -3960,6 +3963,13 @@ packages:
         integrity: sha512-9Yubnt3e8A0OKwxYSXyhLymGW4sCufcLG6VdiDdUGVkPhpqLxlvP5vl1983gQjJl3tqbrM731mjaZaP68AgosQ==,
       }
 
+  mercadopago@3.6.0:
+    resolution:
+      {
+        integrity: sha512-Dk47c/bgRPdbMPcRvopitgZq4jOujMfeMf/msWNr942QQ4p+CDBhhov+059UWhsoyGjdizzJaZeyveApoEgDBg==,
+      }
+    engines: { node: '>=18' }
+
   merge2@1.4.1:
     resolution:
       {
@@ -7671,6 +7681,8 @@ snapshots:
   math-intrinsics@1.1.0: {}
 
   mdn-data@2.27.1: {}
+
+  mercadopago@3.6.0: {}
 
   merge2@1.4.1: {}
 

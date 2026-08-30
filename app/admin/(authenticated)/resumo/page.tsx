@@ -1,4 +1,5 @@
 import { getDashboardStatsAction } from '@/app/admin/_actions/dashboard.actions'
+import { listUntiedPixAction } from '@/app/admin/_actions/pix.actions'
 import { DonutChart } from '@/components/admin/charts/DonutChart'
 import { ReservationsChart } from '@/components/admin/charts/ReservationsChart'
 import { SectionCard } from '@/components/admin/SectionCard'
@@ -11,6 +12,7 @@ export const dynamic = 'force-dynamic'
 
 export default async function ResumoPage() {
   const stats = unwrapForPage(await getDashboardStatsAction())
+  const untiedPayments = unwrapForPage(await listUntiedPixAction())
 
   return (
     <div className="space-y-6">
@@ -129,6 +131,42 @@ export default async function ResumoPage() {
       >
         <ReservationsChart data={stats.timeline} />
       </SectionCard>
+
+      {untiedPayments.length > 0 && (
+        <SectionCard
+          title="⚠️ Pagamentos sem presente vinculado"
+          description="Confirmados, mas o presente já não estava mais disponível quando o pagamento chegou. Verifique e reembolse pelo painel do Mercado Pago se necessário."
+        >
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-stone-200 text-stone-500">
+                  <th className="py-2 pr-4 font-medium">Convidado</th>
+                  <th className="py-2 pr-4 font-medium">Valor</th>
+                  <th className="py-2 pr-4 font-medium">Método</th>
+                  <th className="py-2 pr-4 font-medium">ID Mercado Pago</th>
+                  <th className="py-2 font-medium">Data</th>
+                </tr>
+              </thead>
+              <tbody>
+                {untiedPayments.map((p) => (
+                  <tr key={p.id} className="border-b border-stone-100">
+                    <td className="py-2 pr-4">{p.guestName}</td>
+                    <td className="py-2 pr-4">{formatCurrencyBRL(p.amount)}</td>
+                    <td className="py-2 pr-4 uppercase">{p.paymentMethod}</td>
+                    <td className="py-2 pr-4 font-mono text-xs">
+                      {p.mpPaymentId ?? '—'}
+                    </td>
+                    <td className="py-2">
+                      {p.createdAt.toLocaleDateString('pt-BR')}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </SectionCard>
+      )}
     </div>
   )
 }

@@ -1,5 +1,6 @@
 import type {
   IGiftsRepository,
+  ReserveGiftConfirmedParams,
   ReserveGiftParams,
   ReserveGiftResult,
 } from '@/src/application/repositories/gifts.repository.interface'
@@ -21,6 +22,7 @@ import type {
   GiftTotalsRow,
   GiftUpdate,
   ReserveGiftArgs,
+  ReserveGiftPaidArgs,
 } from '@/src/infrastructure/supabase/db-types'
 import type { TypedSupabaseClient } from '@/src/infrastructure/supabase/types'
 
@@ -100,6 +102,31 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
     } satisfies ReserveGiftArgs
 
     const { data, error } = await this.client.rpc('reserve_gift', args)
+    if (error) throw mapSentinel(error.message ?? '') ?? error
+
+    const row = Array.isArray(data) ? data[0] : data
+    if (!row) throw new GiftNotFoundError()
+
+    return {
+      gift: mapRow(row as GiftTotalsRow),
+      contributionId: p.contributionId,
+    }
+  }
+
+  async reserveConfirmed(
+    p: ReserveGiftConfirmedParams
+  ): Promise<ReserveGiftResult> {
+    const args = {
+      p_gift_id: p.id,
+      p_name: p.name,
+      p_message: p.message ?? '',
+      p_amount: p.amount,
+      p_contribution_id: p.contributionId,
+      p_payment_method: p.paymentMethod,
+      p_mp_payment_id: p.mpPaymentId,
+    } satisfies ReserveGiftPaidArgs
+
+    const { data, error } = await this.client.rpc('reserve_gift_paid', args)
     if (error) throw mapSentinel(error.message ?? '') ?? error
 
     const row = Array.isArray(data) ? data[0] : data

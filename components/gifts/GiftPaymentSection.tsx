@@ -5,8 +5,11 @@ import type { GiftKind } from '@/src/entities/models/gift'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
+import { CardPaymentForm } from './CardPaymentForm'
 import { PixQrCode } from './PixQrCode'
 import { ReserveGiftForm } from './ReserveGiftForm'
+
+type PaymentMethod = 'pix' | 'card'
 
 type Props = {
   giftId: string
@@ -46,6 +49,7 @@ export function GiftPaymentSection({
 }: Props) {
   const isOpenAmount = kind !== 'fixed_item'
 
+  const [method, setMethod] = useState<PaymentMethod>('pix')
   const [amount, setAmount] = useState('')
   const [pix, setPix] = useState<{ qrImage: string; brCode: string } | null>(
     qrImage && brCode ? { qrImage, brCode } : null
@@ -125,46 +129,57 @@ export function GiftPaymentSection({
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-16">
-      <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-        >
-          <header className="mb-6">
+      <div className="mb-10 flex justify-center">
+        <div className="inline-flex rounded-full border border-stone-200 bg-white p-1 shadow-sm">
+          <button
+            type="button"
+            onClick={() => setMethod('pix')}
+            className={`rounded-full px-5 py-2 text-sm font-medium transition ${
+              method === 'pix'
+                ? 'bg-terracotta text-white'
+                : 'text-ink-muted hover:text-ink'
+            }`}
+          >
+            Pix
+          </button>
+          <button
+            type="button"
+            onClick={() => setMethod('card')}
+            className={`rounded-full px-5 py-2 text-sm font-medium transition ${
+              method === 'card'
+                ? 'bg-terracotta text-white'
+                : 'text-ink-muted hover:text-ink'
+            }`}
+          >
+            Cartão
+          </button>
+        </div>
+      </div>
+
+      {method === 'card' ? (
+        <div className="mx-auto max-w-xl">
+          <header className="mb-8 text-center">
             <p className="eyebrow">Pagamento</p>
             <h2 className="heading-display mt-3 text-3xl md:text-4xl">
-              Pague pelo Pix
+              Pague com cartão
             </h2>
             <p className="mt-3 text-ink-muted">
-              {isOpenAmount
-                ? 'Escolha o valor, gere o QR Code e pague pelo Pix 🤍'
-                : 'Escaneie o QR Code ou copie o código abaixo. É rápido, seguro e gratuito 🤍'}
+              Rápido e seguro, direto pelo Mercado Pago 🤍
             </p>
           </header>
-
-          {/* Fund progress uses confirmedTotal only — money actually received. */}
-          {kind === 'fund' && (
-            <div className="mb-6 rounded-2xl border border-sage/20 bg-sage/5 p-5">
-              <p className="text-xs text-ink-muted">
-                Agradecemos muito a todos que já contribuíram 💕
-              </p>
-            </div>
-          )}
 
           {isOpenAmount && (
             <div className="mb-6 space-y-4 rounded-2xl bg-white p-6 shadow-sm">
               <div>
                 <label
-                  htmlFor="pix-amount"
+                  htmlFor="card-amount"
                   className="mb-1.5 block text-sm font-medium text-ink"
                 >
                   Quanto você gostaria de contribuir?
                 </label>
 
                 <input
-                  id="pix-amount"
+                  id="card-amount"
                   type="number"
                   inputMode="decimal"
                   step="0.01"
@@ -203,66 +218,161 @@ export function GiftPaymentSection({
                   ))}
                 </div>
               )}
+            </div>
+          )}
 
-              <button
-                type="button"
-                onClick={handleGenerate}
-                disabled={pending || !amount}
-                className="w-full rounded-full bg-terracotta px-6 py-2.5 text-sm font-medium text-white transition hover:bg-terracotta-dark disabled:cursor-not-allowed disabled:opacity-50"
-              >
-                {pending
-                  ? 'Gerando…'
-                  : pix
-                    ? 'Gerar novo QR Code'
-                    : 'Gerar QR Code'}
-              </button>
+          {isOpenAmount && amount === '' ? (
+            <div className="rounded-2xl border border-dashed border-stone-200 p-10 text-center text-sm text-ink-muted">
+              Escolha um valor acima para continuar 🤍
+            </div>
+          ) : (
+            <CardPaymentForm
+              giftId={giftId}
+              amount={isOpenAmount ? amount : null}
+            />
+          )}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-2 md:gap-16">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            <header className="mb-6">
+              <p className="eyebrow">Pagamento</p>
+              <h2 className="heading-display mt-3 text-3xl md:text-4xl">
+                Pague pelo Pix
+              </h2>
+              <p className="mt-3 text-ink-muted">
+                {isOpenAmount
+                  ? 'Escolha o valor, gere o QR Code e pague pelo Pix 🤍'
+                  : 'Escaneie o QR Code ou copie o código abaixo. É rápido, seguro e gratuito 🤍'}
+              </p>
+            </header>
 
-              {error && (
-                <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
-                  {error}
+            {/* Fund progress uses confirmedTotal only — money actually received. */}
+            {kind === 'fund' && (
+              <div className="mb-6 rounded-2xl border border-sage/20 bg-sage/5 p-5">
+                <p className="text-xs text-ink-muted">
+                  Agradecemos muito a todos que já contribuíram 💕
                 </p>
-              )}
-            </div>
-          )}
-
-          {pix ? (
-            <PixQrCode qrImage={pix.qrImage} brCode={pix.brCode} />
-          ) : (
-            isOpenAmount && (
-              <div className="rounded-2xl border border-dashed border-stone-200 p-10 text-center text-sm text-ink-muted">
-                Escolha um valor acima para gerar o QR Code 🤍
               </div>
-            )
-          )}
-        </motion.div>
+            )}
 
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-        >
-          <header className="mb-12">
-            <p className="eyebrow">Marcar como presenteado</p>
-            <h2 className="heading-display mt-3 text-3xl md:text-4xl">
-              Deixe um carinho
-            </h2>
-            <p className="mt-3 text-ink-muted">
-              Opcional, mas adoraríamos saber que foi você 💕
-            </p>
-          </header>
+            {isOpenAmount && (
+              <div className="mb-6 space-y-4 rounded-2xl bg-white p-6 shadow-sm">
+                <div>
+                  <label
+                    htmlFor="pix-amount"
+                    className="mb-1.5 block text-sm font-medium text-ink"
+                  >
+                    Quanto você gostaria de contribuir?
+                  </label>
 
-          {/* Gated on quotedAmount, not on `amount`: the form may only submit the
+                  <input
+                    id="pix-amount"
+                    type="number"
+                    inputMode="decimal"
+                    step="0.01"
+                    min={minAmount ?? 0.01}
+                    value={amount}
+                    onChange={(e) => handleAmountChange(e.target.value)}
+                    placeholder={minAmount ? minAmount.toFixed(2) : '150,00'}
+                    className="w-full rounded-lg border border-stone-300 bg-white px-3 py-2.5 text-sm outline-none transition placeholder:text-stone-300 focus:border-terracotta"
+                  />
+
+                  {minAmount != null && (
+                    <p className="mt-1 text-xs text-ink-muted">
+                      Valor mínimo: {brl(minAmount)}
+                    </p>
+                  )}
+                </div>
+
+                {suggestedAmounts.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {suggestedAmounts.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => handleAmountChange(String(suggestion))}
+                        className={`
+                        rounded-full border px-4 py-1.5 text-sm transition
+                        ${
+                          amount === String(suggestion)
+                            ? 'border-terracotta bg-terracotta/10 text-terracotta-dark'
+                            : 'border-stone-200 text-ink-muted hover:border-terracotta/40'
+                        }
+                      `}
+                      >
+                        {brl(suggestion)}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <button
+                  type="button"
+                  onClick={handleGenerate}
+                  disabled={pending || !amount}
+                  className="w-full rounded-full bg-terracotta px-6 py-2.5 text-sm font-medium text-white transition hover:bg-terracotta-dark disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {pending
+                    ? 'Gerando…'
+                    : pix
+                      ? 'Gerar novo QR Code'
+                      : 'Gerar QR Code'}
+                </button>
+
+                {error && (
+                  <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
+                    {error}
+                  </p>
+                )}
+              </div>
+            )}
+
+            {pix ? (
+              <PixQrCode qrImage={pix.qrImage} brCode={pix.brCode} />
+            ) : (
+              isOpenAmount && (
+                <div className="rounded-2xl border border-dashed border-stone-200 p-10 text-center text-sm text-ink-muted">
+                  Escolha um valor acima para gerar o QR Code 🤍
+                </div>
+              )
+            )}
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
+            <header className="mb-12">
+              <p className="eyebrow">Marcar como presenteado</p>
+              <h2 className="heading-display mt-3 text-3xl md:text-4xl">
+                Deixe um carinho
+              </h2>
+              <p className="mt-3 text-ink-muted">
+                Opcional, mas adoraríamos saber que foi você 💕
+              </p>
+            </header>
+
+            {/* Gated on quotedAmount, not on `amount`: the form may only submit the
               exact figure the displayed QR was built from. */}
-          {isOpenAmount && quotedAmount === null ? (
-            <div className="rounded-3xl border border-dashed border-stone-200 bg-white/50 p-8 text-center text-sm text-ink-muted">
-              Gere o QR Code com o valor escolhido para registrar seu carinho 🤍
-            </div>
-          ) : (
-            <ReserveGiftForm giftId={giftId} amount={quotedAmount} />
-          )}
-        </motion.div>
-      </div>
+            {isOpenAmount && quotedAmount === null ? (
+              <div className="rounded-3xl border border-dashed border-stone-200 bg-white/50 p-8 text-center text-sm text-ink-muted">
+                Gere o QR Code com o valor escolhido para registrar seu carinho
+                🤍
+              </div>
+            ) : (
+              <ReserveGiftForm giftId={giftId} amount={quotedAmount} />
+            )}
+          </motion.div>
+        </div>
+      )}
     </section>
   )
 }

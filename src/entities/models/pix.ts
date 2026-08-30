@@ -6,6 +6,10 @@ export const PixQrSchema = z.object({
 })
 export type PixQr = z.infer<typeof PixQrSchema>
 
+export const PAYMENT_METHODS = ['pix', 'card'] as const
+export const PaymentMethodSchema = z.enum(PAYMENT_METHODS)
+export type PaymentMethod = z.infer<typeof PaymentMethodSchema>
+
 export const PixConfirmationInputSchema = z.object({
   giftId: z.string().uuid().optional(),
   guestName: z.string().min(2),
@@ -19,9 +23,34 @@ export const PixConfirmationSchema = z.object({
   guestName: z.string(),
   amount: z.number(),
   confirmed: z.boolean(),
+  paymentMethod: PaymentMethodSchema,
+  mpPaymentId: z.string().nullable(),
   createdAt: z.date(),
 })
 export type PixConfirmation = z.infer<typeof PixConfirmationSchema>
+
+/**
+ * Input for "pay by card" — same shape as ReserveGiftInputSchema (giftId,
+ * name, message, optional amount required only for open_item/fund) since
+ * the guest fills this in *before* being redirected to Mercado Pago, not
+ * after paying like the PIX-side ReserveGiftForm.
+ */
+export const CreateCardPaymentInputSchema = z.object({
+  giftId: z.string().uuid(),
+  name: z.string().min(2, 'Informe seu nome').max(120),
+  message: z.string().max(500).optional(),
+  amount: z.coerce
+    .number()
+    .positive('Informe um valor maior que zero')
+    .max(50_000)
+    .refine((n) => Math.abs(n * 100 - Math.round(n * 100)) < 1e-6, {
+      message: 'Use no máximo 2 casas decimais',
+    })
+    .optional(),
+})
+export type CreateCardPaymentInput = z.infer<
+  typeof CreateCardPaymentInputSchema
+>
 
 /**
  * On-demand QR for open_item / fund, where the amount is chosen by the guest

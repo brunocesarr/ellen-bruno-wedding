@@ -1,4 +1,5 @@
 'use server'
+import { createGiftCardPaymentController } from '@/src/interface-adapters/controllers/gifts/create-gift-card-payment.controller'
 import { generateGiftPixController } from '@/src/interface-adapters/controllers/gifts/generate-gift-pix.controller'
 import { reserveGiftController } from '@/src/interface-adapters/controllers/gifts/reserve-gift.controller'
 import { getOptionalString, getString } from '@/src/lib/form-data'
@@ -29,4 +30,18 @@ export async function generateGiftPixAction(input: {
   amount: string
 }) {
   return generateGiftPixController(input)
+}
+
+/**
+ * Creates a Mercado Pago checkout preference and returns its URL. Read-only
+ * from our own DB's perspective: nothing is reserved/recorded until the
+ * webhook confirms payment (confirmCardPaymentUseCase), so no revalidation.
+ */
+export async function createGiftCardPaymentAction(input: {
+  giftId: string
+  name: string
+  message?: string
+  amount?: string
+}) {
+  return createGiftCardPaymentController(input)
 }

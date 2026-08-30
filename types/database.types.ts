@@ -240,6 +240,8 @@ export type Database = {
           gift_id: string | null
           guest_name: string
           id: string
+          mp_payment_id: string | null
+          payment_method: string
         }
         Insert: {
           amount: number
@@ -248,6 +250,8 @@ export type Database = {
           gift_id?: string | null
           guest_name: string
           id?: string
+          mp_payment_id?: string | null
+          payment_method?: string
         }
         Update: {
           amount?: number
@@ -256,6 +260,8 @@ export type Database = {
           gift_id?: string | null
           guest_name?: string
           id?: string
+          mp_payment_id?: string | null
+          payment_method?: string
         }
         Relationships: [
           {
@@ -496,6 +502,44 @@ export type Database = {
           p_gift_id: string
           p_message: string
           p_name: string
+        }
+        Returns: {
+          category: Database['public']['Enums']['gift_category'] | null
+          confirmed_total: number | null
+          contributor_count: number | null
+          created_at: string | null
+          description: string | null
+          goal_amount: number | null
+          id: string | null
+          image_path: string | null
+          is_reserved: boolean | null
+          kind: Database['public']['Enums']['gift_kind'] | null
+          min_amount: number | null
+          name: string | null
+          pledged_total: number | null
+          price: number | null
+          reserved_at: string | null
+          reserved_by_email: string | null
+          reserved_by_name: string | null
+          reserved_message: string | null
+          suggested_amounts: number[] | null
+        }[]
+        SetofOptions: {
+          from: '*'
+          to: 'gifts_with_totals'
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
+      reserve_gift_paid: {
+        Args: {
+          p_amount: number
+          p_contribution_id: string
+          p_gift_id: string
+          p_message: string
+          p_mp_payment_id: string
+          p_name: string
+          p_payment_method: string
         }
         Returns: {
           category: Database['public']['Enums']['gift_category'] | null
