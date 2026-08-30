@@ -7,6 +7,8 @@ export async function submitRsvpRequestController(input: unknown) {
     const c = getPublicContainer()
     return await submitRsvpRequestUseCase({
       rsvpRequestsRepo: c.rsvpRequestsRepo,
+      guestsRepo: c.guestsRepo,
+      emailService: c.emailService,
     })(input)
   })
 }

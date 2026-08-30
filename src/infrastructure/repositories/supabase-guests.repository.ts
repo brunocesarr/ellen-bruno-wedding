@@ -10,6 +10,22 @@ import type {
 import { GuestRow, GuestUpdate } from '@/src/infrastructure/supabase/db-types'
 import type { TypedSupabaseClient } from '@/src/infrastructure/supabase/types'
 
+/** Escapes ILIKE wildcards so a literal name is never treated as a pattern. */
+const escapeIlike = (value: string) => value.replace(/[\\%_]/g, (c) => `\\${c}`)
+
+/** Mirrors `approve_rsvp_request`'s split: first word vs. the trimmed rest. */
+const splitFullName = (
+  fullName: string
+): { firstName: string; lastName: string } => {
+  const trimmed = fullName.trim()
+  const spaceIndex = trimmed.indexOf(' ')
+  if (spaceIndex === -1) return { firstName: trimmed, lastName: '-' }
+  return {
+    firstName: trimmed.slice(0, spaceIndex),
+    lastName: trimmed.slice(spaceIndex + 1).trim() || '-',
+  }
+}
+
 const mapRow = (row: GuestRow): Guest => ({
   id: row.id,
   firstName: row.first_name,
@@ -51,6 +67,21 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
       .from('guests')
       .select('*')
       .eq('invite_token', token)
+      .maybeSingle()
+    if (error) throw new Error(error.message)
+    return data ? mapRow(data as GuestRow) : null
+  }
+
+  async findByName(fullName: string): Promise<Guest | null> {
+    const { firstName, lastName } = splitFullName(fullName)
+
+    const { data, error } = await this.supabase
+      .from('guests')
+      .select('*')
+      .ilike('first_name', escapeIlike(firstName))
+      .ilike('last_name', escapeIlike(lastName))
+      .order('created_at', { ascending: true })
+      .limit(1)
       .maybeSingle()
     if (error) throw new Error(error.message)
     return data ? mapRow(data as GuestRow) : null

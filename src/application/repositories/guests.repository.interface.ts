@@ -9,6 +9,7 @@ export interface IGuestsRepository {
   list(): Promise<Guest[]>
   findById(id: string): Promise<Guest | null>
   findByInviteToken(token: string): Promise<Guest | null>
+  findByName(fullName: string): Promise<Guest | null>
 
   findByPartyInviteToken(token: string): Promise<Guest | null>
   listByPartyId(partyId: string): Promise<Guest[]>

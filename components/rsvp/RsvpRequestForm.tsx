@@ -35,9 +35,9 @@ export function RsvpRequestForm() {
         </h3>
         <p className="mt-3 text-ink-muted">
           Recebemos seus dados com todo o carinho. Vamos conferir nossa lista e
-          entraremos em contato pelo e-mail. (Atente-se também a sua caixa de spam){' '}
-          <strong className="text-ink">{state.data.email}</strong> o mais breve
-          possível.
+          entraremos em contato pelo e-mail. (Atente-se também a sua caixa de
+          spam) <strong className="text-ink">{state.data.email}</strong> o mais
+          breve possível.
         </p>
       </div>
     )
