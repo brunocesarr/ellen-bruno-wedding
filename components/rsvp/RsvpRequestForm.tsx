@@ -35,7 +35,7 @@ export function RsvpRequestForm() {
         </h3>
         <p className="mt-3 text-ink-muted">
           Recebemos seus dados com todo o carinho. Vamos conferir nossa lista e
-          entraremos em contato pelo e-mail{' '}
+          entraremos em contato pelo e-mail. (Atente-se também a sua caixa de spam){' '}
           <strong className="text-ink">{state.data.email}</strong> o mais breve
           possível.
         </p>
@@ -61,7 +61,7 @@ export function RsvpRequestForm() {
 
       <div className="grid grid-cols-1 gap-x-12 gap-y-7 md:grid-cols-2">
         <Field
-          label="Seu nome completo"
+          label="Seu nome e sobrenome"
           htmlFor="fullName"
           required
           hint="Nome e sobrenome, por favor"
