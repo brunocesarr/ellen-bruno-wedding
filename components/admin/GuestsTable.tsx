@@ -19,6 +19,7 @@ import {
   inviteUrlFor,
   partyMatchesQuery,
   sortParties,
+  STATUS_LABEL,
   type GuestSortKey,
   type Party,
   type StatusFilter,
@@ -56,6 +57,16 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
     setResetOpen(false)
     setResetError(null)
   }
+
+  const pdfHref =
+    statusFilter === 'all'
+      ? '/api/admin/reports/guests'
+      : `/api/admin/reports/guests?status=${statusFilter}`
+
+  const pdfLabel =
+    statusFilter === 'all'
+      ? 'Baixar PDF'
+      : `Baixar PDF (${STATUS_LABEL[statusFilter]})`
 
   const parties = useMemo(
     () =>
@@ -144,11 +155,11 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         </select>
 
         <a
-          href="/api/admin/reports/guests"
+          href={pdfHref}
           className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
         >
           <Download className="h-4 w-4" />
-          Baixar PDF
+          {pdfLabel}
         </a>
 
         <button

@@ -12,8 +12,17 @@ const columns: ReportColumn[] = [
 // Confirmado → Pendente → Não vai, matching the order used across the admin.
 const STATUS_ORDER: GuestStatus[] = ['going', 'pending', 'not_going']
 
-export async function renderGuestsReportPdf(guests: Guest[]): Promise<Buffer> {
-  const sections = STATUS_ORDER.map((status) => {
+/**
+ * `statusFilter` restricts the report to a single status (e.g. only
+ * confirmed guests) instead of the usual three-section breakdown.
+ */
+export async function renderGuestsReportPdf(
+  guests: Guest[],
+  statusFilter?: GuestStatus
+): Promise<Buffer> {
+  const statuses = statusFilter ? [statusFilter] : STATUS_ORDER
+
+  const sections = statuses.map((status) => {
     const members = guests
       .filter((g) => g.status === status)
       .sort((a, b) =>
@@ -26,9 +35,17 @@ export async function renderGuestsReportPdf(guests: Guest[]): Promise<Buffer> {
     }
   })
 
+  const total = statusFilter
+    ? guests.filter((g) => g.status === statusFilter).length
+    : guests.length
+
+  const scope = statusFilter
+    ? `apenas "${STATUS_LABEL[statusFilter]}"`
+    : 'agrupado por status'
+
   return renderReportPdf({
     title: 'Lista de convidados',
-    subtitle: `Gerado em ${new Date().toLocaleDateString('pt-BR')} — agrupado por status, ordenado por nome. Total: ${guests.length} convidado(s).`,
+    subtitle: `Gerado em ${new Date().toLocaleDateString('pt-BR')} — ${scope}, ordenado por nome. Total: ${total} convidado(s).`,
     columns,
     sections,
   })
