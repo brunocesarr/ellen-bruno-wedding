@@ -50,7 +50,7 @@ export function Envelope({ token }: { token: string }) {
             fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)',
             letterSpacing: '0.2em',
             textTransform: 'uppercase',
-            color: 'rgba(138,126,118,0.6)',
+            color: 'var(--color-terracotta, #b97a57)',
           }}
         >
           Você recebeu um convite
@@ -89,7 +89,7 @@ export function Envelope({ token }: { token: string }) {
                 fontSize: 'clamp(0.7rem, 1.8vw, 0.8rem)',
                 letterSpacing: '0.12em',
                 textTransform: 'uppercase',
-                color: 'rgba(138,126,118,0.5)',
+                color: 'var(--color-terracotta, #b97a57)',
               }}
             >
               Toque para abrir
@@ -150,7 +150,7 @@ export function Envelope({ token }: { token: string }) {
             fontSize: 'clamp(0.55rem, 1.4vw, 0.65rem)',
             letterSpacing: '0.25em',
             textTransform: 'uppercase',
-            color: 'rgba(138,126,118,0.25)',
+            color: 'rgba(138,126,118,0.6)',
             marginTop: '0.5rem',
           }}
         >

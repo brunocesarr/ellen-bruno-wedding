@@ -8,7 +8,7 @@ export const WEDDING_DETAILS: WeddingDetails = {
   },
   date: '2026-10-24',
   displayDate: '24 de Outubro, 2026',
-  time: '15:30',
+  time: '16:00',
   location: {
     venue: 'Sítio Sossego Events',
     city: 'Contagem, MG',
