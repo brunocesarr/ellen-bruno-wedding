@@ -1,15 +1,38 @@
 import type { IGiftsRepository } from '@/src/application/repositories/gifts.repository.interface'
 import type { IPixConfirmationsRepository } from '@/src/application/repositories/pix-confirmations.repository.interface'
 import type { ICardPaymentService } from '@/src/application/services/card-payment.service.interface'
+import type { INotificationService } from '@/src/application/services/notification.service.interface'
 import {
   GiftAlreadyReservedError,
   GiftNotFoundError,
 } from '@/src/entities/errors/gifts'
+import {
+  buildGiftPaymentConfirmedAlert,
+  buildUntiedPaymentAlert,
+} from '@/src/lib/notification-templates'
 
 type Deps = {
   giftsRepo: IGiftsRepository
   pixRepo: IPixConfirmationsRepository
   cardPaymentService: ICardPaymentService
+  notificationService: INotificationService
+}
+
+/**
+ * Best-effort admin alert. Takes a thunk (not a pre-built string) so a bug in
+ * message-building can never throw into the caller's try/catch and get
+ * mistaken for a payment-processing failure — the payment is already
+ * committed by the time this runs.
+ */
+async function notify(
+  service: INotificationService,
+  buildMessage: () => string
+) {
+  try {
+    await service.send(buildMessage())
+  } catch (error) {
+    console.error('[confirmCardPayment] admin notification FAILED', { error })
+  }
 }
 
 /**
@@ -45,11 +68,17 @@ export function confirmCardPaymentUseCase(d: Deps) {
         paymentMethod: 'card',
         mpPaymentId: payment.id,
       })
+      await notify(d.notificationService, () =>
+        buildUntiedPaymentAlert({
+          buyerName: guestName,
+          amount: payment.transactionAmount,
+        })
+      )
       return
     }
 
     try {
-      await d.giftsRepo.reserveConfirmed({
+      const { gift } = await d.giftsRepo.reserveConfirmed({
         id: payment.giftId,
         name: guestName,
         message: payment.message ?? undefined,
@@ -58,6 +87,14 @@ export function confirmCardPaymentUseCase(d: Deps) {
         paymentMethod: 'card',
         mpPaymentId: payment.id,
       })
+
+      await notify(d.notificationService, () =>
+        buildGiftPaymentConfirmedAlert({
+          giftName: gift.name,
+          buyerName: guestName,
+          amount: payment.transactionAmount,
+        })
+      )
     } catch (error) {
       // Only a genuine "gift unavailable" business error falls back to the
       // untied ledger row. Anything else (including a raw duplicate-key
@@ -79,6 +116,12 @@ export function confirmCardPaymentUseCase(d: Deps) {
           paymentMethod: 'card',
           mpPaymentId: payment.id,
         })
+        await notify(d.notificationService, () =>
+          buildUntiedPaymentAlert({
+            buyerName: guestName,
+            amount: payment.transactionAmount,
+          })
+        )
         return
       }
 

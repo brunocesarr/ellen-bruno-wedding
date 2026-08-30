@@ -2,6 +2,7 @@ import { confirmCardPaymentUseCase } from '@/src/application/use-cases/gifts/con
 import { SupabaseGiftsRepository } from '@/src/infrastructure/repositories/supabase-gifts.repository'
 import { SupabasePixConfirmationsRepository } from '@/src/infrastructure/repositories/supabase-pix-confirmations.repository'
 import { MercadoPagoService } from '@/src/infrastructure/services/mercado-pago.service'
+import { createNotificationService } from '@/src/infrastructure/services/telegram-notification.service'
 import { createSupabaseAdminClient } from '@/src/infrastructure/supabase/admin'
 import { NextResponse } from 'next/server'
 
@@ -53,11 +54,15 @@ export async function POST(req: Request) {
   const admin = createSupabaseAdminClient()
   const giftsRepo = new SupabaseGiftsRepository(admin)
   const pixRepo = new SupabasePixConfirmationsRepository(admin)
+  const notificationService = createNotificationService()
 
   try {
-    await confirmCardPaymentUseCase({ giftsRepo, pixRepo, cardPaymentService })(
-      String(body.data.id)
-    )
+    await confirmCardPaymentUseCase({
+      giftsRepo,
+      pixRepo,
+      cardPaymentService,
+      notificationService,
+    })(String(body.data.id))
   } catch (error) {
     console.error('[mercado-pago webhook] processing failed', error)
     return NextResponse.json({ ok: false }, { status: 500 })

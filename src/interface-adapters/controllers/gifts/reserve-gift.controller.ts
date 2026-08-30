@@ -3,11 +3,12 @@ import { getContainer } from '@/src/di/container'
 import { handle } from '../_handle'
 
 export async function reserveGiftController(input: unknown) {
-  const { giftsRepo } = await getContainer()
+  const { giftsRepo, notificationService } = await getContainer()
   return handle(async () => {
-    const { gift, contributionId } = await reserveGiftUseCase({ giftsRepo })(
-      input
-    )
+    const { gift, contributionId } = await reserveGiftUseCase({
+      giftsRepo,
+      notificationService,
+    })(input)
     return {
       id: gift.id,
       name: gift.name,

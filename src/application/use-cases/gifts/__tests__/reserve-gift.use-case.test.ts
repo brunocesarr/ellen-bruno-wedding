@@ -11,15 +11,20 @@ const repo = () => ({
   update: vi.fn(),
   delete: vi.fn(),
   reserve: vi.fn().mockResolvedValue({
-    gift: { id: ID, name: 'Vaquinha' },
+    gift: { id: ID, name: 'Vaquinha', kind: 'fund', price: null },
     contributionId: 'c1',
   }),
 })
 
+const notify = () => ({ send: vi.fn().mockResolvedValue(undefined) })
+
 describe('reserveGiftUseCase', () => {
   it('rejects a malformed gift id', async () => {
     await expect(
-      reserveGiftUseCase({ giftsRepo: repo() as never })({
+      reserveGiftUseCase({
+        giftsRepo: repo() as never,
+        notificationService: notify(),
+      })({
         giftId: 'nope',
         name: 'Ana',
       })
@@ -28,7 +33,10 @@ describe('reserveGiftUseCase', () => {
 
   it('rejects a name shorter than 2 characters', async () => {
     await expect(
-      reserveGiftUseCase({ giftsRepo: repo() as never })({
+      reserveGiftUseCase({
+        giftsRepo: repo() as never,
+        notificationService: notify(),
+      })({
         giftId: ID,
         name: 'A',
       })
@@ -37,7 +45,10 @@ describe('reserveGiftUseCase', () => {
 
   it('rejects more than 2 decimal places', async () => {
     await expect(
-      reserveGiftUseCase({ giftsRepo: repo() as never })({
+      reserveGiftUseCase({
+        giftsRepo: repo() as never,
+        notificationService: notify(),
+      })({
         giftId: ID,
         name: 'Ana',
         amount: '10.999',
@@ -50,7 +61,10 @@ describe('reserveGiftUseCase', () => {
   it('accepts a float that IEEE-754 rounding would trip up', async () => {
     const giftsRepo = repo()
 
-    await reserveGiftUseCase({ giftsRepo: giftsRepo as never })({
+    await reserveGiftUseCase({
+      giftsRepo: giftsRepo as never,
+      notificationService: notify(),
+    })({
       giftId: ID,
       name: 'Ana',
       amount: '10.99',
@@ -64,7 +78,10 @@ describe('reserveGiftUseCase', () => {
   it('coerces a numeric string amount', async () => {
     const giftsRepo = repo()
 
-    await reserveGiftUseCase({ giftsRepo: giftsRepo as never })({
+    await reserveGiftUseCase({
+      giftsRepo: giftsRepo as never,
+      notificationService: notify(),
+    })({
       giftId: ID,
       name: 'Ana',
       amount: '150',
@@ -79,7 +96,10 @@ describe('reserveGiftUseCase', () => {
   it('passes amount through as undefined when omitted', async () => {
     const giftsRepo = repo()
 
-    await reserveGiftUseCase({ giftsRepo: giftsRepo as never })({
+    await reserveGiftUseCase({
+      giftsRepo: giftsRepo as never,
+      notificationService: notify(),
+    })({
       giftId: ID,
       name: 'Ana',
     })
@@ -92,7 +112,10 @@ describe('reserveGiftUseCase', () => {
   it('generates a contribution id for the PIX txid', async () => {
     const giftsRepo = repo()
 
-    await reserveGiftUseCase({ giftsRepo: giftsRepo as never })({
+    await reserveGiftUseCase({
+      giftsRepo: giftsRepo as never,
+      notificationService: notify(),
+    })({
       giftId: ID,
       name: 'Ana',
       amount: '100',
@@ -104,15 +127,50 @@ describe('reserveGiftUseCase', () => {
   })
 
   it('returns both the gift and the contribution id', async () => {
-    const result = await reserveGiftUseCase({ giftsRepo: repo() as never })({
+    const result = await reserveGiftUseCase({
+      giftsRepo: repo() as never,
+      notificationService: notify(),
+    })({
       giftId: ID,
       name: 'Ana',
       amount: '100',
     })
 
     expect(result).toEqual({
-      gift: { id: ID, name: 'Vaquinha' },
+      gift: { id: ID, name: 'Vaquinha', kind: 'fund', price: null },
       contributionId: 'c1',
     })
+  })
+
+  it('sends an admin notification once the reservation succeeds', async () => {
+    const giftsRepo = repo()
+    const notificationService = notify()
+
+    await reserveGiftUseCase({
+      giftsRepo: giftsRepo as never,
+      notificationService,
+    })({
+      giftId: ID,
+      name: 'Ana',
+      amount: '100',
+    })
+
+    expect(notificationService.send).toHaveBeenCalledOnce()
+    expect(notificationService.send).toHaveBeenCalledWith(
+      expect.stringContaining('Vaquinha')
+    )
+  })
+
+  it('still returns the reservation when the admin notification fails', async () => {
+    const giftsRepo = repo()
+    const notificationService = notify()
+    notificationService.send.mockRejectedValue(new Error('Telegram down'))
+
+    const result = await reserveGiftUseCase({
+      giftsRepo: giftsRepo as never,
+      notificationService,
+    })({ giftId: ID, name: 'Ana', amount: '100' })
+
+    expect(result.contributionId).toBe('c1')
   })
 })

@@ -23,7 +23,7 @@ function makeDeps() {
     getById: vi.fn(),
     reserve: vi.fn(),
     reserveConfirmed: vi.fn().mockResolvedValue({
-      gift: { id: GIFT_ID },
+      gift: { id: GIFT_ID, name: 'Jogo de panelas' },
       contributionId: 'contribution-1',
     }),
     create: vi.fn(),
@@ -43,8 +43,9 @@ function makeDeps() {
     getPayment: vi.fn().mockResolvedValue(payment()),
     verifyWebhookSignature: vi.fn(),
   }
+  const notificationService = { send: vi.fn().mockResolvedValue(undefined) }
 
-  return { giftsRepo, pixRepo, cardPaymentService }
+  return { giftsRepo, pixRepo, cardPaymentService, notificationService }
 }
 
 describe('confirmCardPaymentUseCase', () => {
@@ -154,5 +155,38 @@ describe('confirmCardPaymentUseCase', () => {
     await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
 
     expect(deps.pixRepo.create).not.toHaveBeenCalled()
+  })
+
+  it('sends an admin notification once the payment is confirmed', async () => {
+    const deps = makeDeps()
+
+    await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
+
+    expect(deps.notificationService.send).toHaveBeenCalledOnce()
+    expect(deps.notificationService.send).toHaveBeenCalledWith(
+      expect.stringContaining('Jogo de panelas')
+    )
+  })
+
+  it('sends an untied-payment alert when the gift is unavailable', async () => {
+    const deps = makeDeps()
+    deps.giftsRepo.reserveConfirmed.mockRejectedValue(
+      new GiftAlreadyReservedError()
+    )
+
+    await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
+
+    expect(deps.notificationService.send).toHaveBeenCalledWith(
+      expect.stringContaining('sem presente vinculado')
+    )
+  })
+
+  it('does not blow up when the notification itself fails', async () => {
+    const deps = makeDeps()
+    deps.notificationService.send.mockRejectedValue(new Error('Telegram down'))
+
+    await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
+
+    expect(deps.giftsRepo.reserveConfirmed).toHaveBeenCalledOnce()
   })
 })
