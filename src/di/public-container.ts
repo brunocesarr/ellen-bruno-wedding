@@ -6,6 +6,7 @@ import { SupabaseRsvpRequestsRepository } from '@/src/infrastructure/repositorie
 import { SupabaseSiteImagesRepository } from '@/src/infrastructure/repositories/supabase-site-images.repository'
 import { SupabaseStorageRepository } from '@/src/infrastructure/repositories/supabase-storage.repository'
 import { createEmailService } from '@/src/infrastructure/services/nodemailer-email.service'
+import { createNotificationService } from '@/src/infrastructure/services/telegram-notification.service'
 import { createSupabaseAdminClient } from '@/src/infrastructure/supabase/admin'
 import { createSupabasePublicServerClient } from '@/src/infrastructure/supabase/public'
 import { cache } from 'react'
@@ -21,6 +22,7 @@ export const getPublicContainer = cache(() => {
     rsvpRequestsRepo: new SupabaseRsvpRequestsRepository(adminClient),
     inviteLinksRepo: new SupabaseInviteLinksRepository(adminClient),
     emailService: createEmailService(),
+    notificationService: createNotificationService(),
   }
 })
 

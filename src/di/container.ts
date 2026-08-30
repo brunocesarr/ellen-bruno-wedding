@@ -12,6 +12,7 @@ import { SupabaseStorageRepository } from '@/src/infrastructure/repositories/sup
 import { createEmailService } from '@/src/infrastructure/services/nodemailer-email.service'
 import { PixUtilsService } from '@/src/infrastructure/services/pix-utils.service'
 import { SupabaseAuthService } from '@/src/infrastructure/services/supabase-auth.service'
+import { createNotificationService } from '@/src/infrastructure/services/telegram-notification.service'
 import { createSupabaseServerClient } from '@/src/infrastructure/supabase/server'
 import { cache } from 'react'
 
@@ -30,6 +31,7 @@ export const getContainer = cache(async () => {
     rsvpRequestsRepo: new SupabaseRsvpRequestsRepository(supabase),
     inviteLinksRepo: new SupabaseInviteLinksRepository(supabase),
     emailService: createEmailService(),
+    notificationService: createNotificationService(),
   }
 })
 export type Container = Awaited<ReturnType<typeof getContainer>>

@@ -1,6 +1,7 @@
 import type { IGuestsRepository } from '@/src/application/repositories/guests.repository.interface'
 import type { IRsvpRequestsRepository } from '@/src/application/repositories/rsvp-requests.repository.interface'
 import type { IEmailService } from '@/src/application/services/email.service.interface'
+import type { INotificationService } from '@/src/application/services/notification.service.interface'
 import { ValidationError } from '@/src/entities/errors/common'
 import { DuplicateRsvpRequestError } from '@/src/entities/errors/rsvp-requests'
 import {
@@ -8,12 +9,14 @@ import {
   type RsvpRequest,
 } from '@/src/entities/models/rsvp-request'
 import { buildRsvpDecisionEmail } from '@/src/lib/email-templates'
+import { buildRsvpRequestAlert } from '@/src/lib/notification-templates'
 import { z } from 'zod'
 
 export function submitRsvpRequestUseCase(deps: {
   rsvpRequestsRepo: IRsvpRequestsRepository
   guestsRepo: IGuestsRepository
   emailService: IEmailService
+  notificationService: INotificationService
 }) {
   return async (raw: unknown): Promise<RsvpRequest> => {
     const parsed = CreateRsvpRequestInputSchema.safeParse(raw)
@@ -25,6 +28,17 @@ export function submitRsvpRequestUseCase(deps: {
     if (existing) throw new DuplicateRsvpRequestError()
 
     const created = await deps.rsvpRequestsRepo.create(input)
+
+    // Best-effort admin alert. Never blocks the submission — a guest must not
+    // see an error just because the couple's phone notification failed.
+    try {
+      await deps.notificationService.send(buildRsvpRequestAlert(created))
+    } catch (error) {
+      console.error('[submitRsvpRequest] admin notification FAILED', {
+        requestId: created.id,
+        error,
+      })
+    }
 
     const matchedGuest = await deps.guestsRepo.findByName(input.fullName)
     if (!matchedGuest) return created

@@ -376,6 +376,14 @@ No `.env.example` is committed (`.gitignore` excludes all `.env*`) despite the
 README referencing one — ask the user for values rather than assuming the file
 exists.
 
+Admin alert for new RSVP requests is sent via a Telegram bot
+(`src/infrastructure/services/telegram-notification.service.ts`):
+`TELEGRAM_BOT_TOKEN` (from @BotFather) and `TELEGRAM_CHAT_ID` (the couple's
+chat with that bot). Both optional — missing either falls back to a no-op that
+only logs, same pattern as `createEmailService()`. Fired from
+`submitRsvpRequestUseCase` right after the request row is created, before the
+auto-approve check; never blocks the submission on failure.
+
 ## PIX
 
 `PixUtilsService.generateStaticQr({ amount, description })` (no `txid` param)

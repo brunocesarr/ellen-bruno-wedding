@@ -9,6 +9,7 @@ export async function submitRsvpRequestController(input: unknown) {
       rsvpRequestsRepo: c.rsvpRequestsRepo,
       guestsRepo: c.guestsRepo,
       emailService: c.emailService,
+      notificationService: c.notificationService,
     })(input)
   })
 }

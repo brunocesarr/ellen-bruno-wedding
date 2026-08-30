@@ -1,6 +1,7 @@
 import type { IGuestsRepository } from '@/src/application/repositories/guests.repository.interface'
 import type { IRsvpRequestsRepository } from '@/src/application/repositories/rsvp-requests.repository.interface'
 import type { IEmailService } from '@/src/application/services/email.service.interface'
+import type { INotificationService } from '@/src/application/services/notification.service.interface'
 import { ValidationError } from '@/src/entities/errors/common'
 import { DuplicateRsvpRequestError } from '@/src/entities/errors/rsvp-requests'
 import type { Guest } from '@/src/entities/models/guest'
@@ -22,6 +23,9 @@ type GuestsRepoMock = {
 }
 type EmailServiceMock = {
   [K in keyof IEmailService]: Mock<IEmailService[K]>
+}
+type NotificationServiceMock = {
+  [K in keyof INotificationService]: Mock<INotificationService[K]>
 }
 
 const asRequest = (
@@ -105,6 +109,12 @@ function makeEmailService(): EmailServiceMock {
   return service
 }
 
+function makeNotificationService(): NotificationServiceMock {
+  const service: NotificationServiceMock = { send: vi.fn() }
+  service.send.mockResolvedValue(undefined)
+  return service
+}
+
 const validInput = {
   fullName: 'Maria Souza',
   email: 'maria@example.com',
@@ -117,6 +127,7 @@ function makeDeps() {
     rsvpRequestsRepo: makeRsvpRequestsRepo(),
     guestsRepo: makeGuestsRepo(),
     emailService: makeEmailService(),
+    notificationService: makeNotificationService(),
   }
 }
 
@@ -212,6 +223,27 @@ describe('submitRsvpRequestUseCase', () => {
     await submitRsvpRequestUseCase(deps)(validInput)
 
     expect(deps.guestsRepo.findByName).toHaveBeenCalledWith('Maria Souza')
+  })
+
+  it('sends an admin notification as soon as the request is created', async () => {
+    const deps = makeDeps()
+
+    await submitRsvpRequestUseCase(deps)(validInput)
+
+    expect(deps.notificationService.send).toHaveBeenCalledOnce()
+    expect(deps.notificationService.send).toHaveBeenCalledWith(
+      expect.stringContaining('Maria Souza')
+    )
+  })
+
+  it('still creates the request when the admin notification fails', async () => {
+    const deps = makeDeps()
+    deps.notificationService.send.mockRejectedValue(new Error('Telegram down'))
+
+    const result = await submitRsvpRequestUseCase(deps)(validInput)
+
+    expect(result.status).toBe('pending')
+    expect(deps.rsvpRequestsRepo.create).toHaveBeenCalledOnce()
   })
 
   describe('when the name matches a known invitee', () => {
