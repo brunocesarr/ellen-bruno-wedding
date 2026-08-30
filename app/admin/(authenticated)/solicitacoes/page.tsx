@@ -1,5 +1,6 @@
 import { getActiveInviteLinkAction } from '@/app/admin/_actions/invite-links.actions'
 import { listRsvpRequestsAction } from '@/app/admin/_actions/rsvp-requests.actions'
+import { ClearRsvpHistoryButton } from '@/components/admin/ClearRsvpHistoryButton'
 import { RsvpRequestsTable } from '@/components/admin/RsvpRequestsTable'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { ShareableInviteLinkCard } from '@/components/admin/ShareableInviteLinkCard'
@@ -24,6 +25,7 @@ export default async function SolicitacoesPage() {
   const unnotified = requests.filter(
     (r) => r.status !== 'pending' && r.notifiedAt === null
   )
+  const history = requests.filter((r) => r.status !== 'pending')
 
   return (
     <div className="space-y-6">
@@ -86,11 +88,10 @@ export default async function SolicitacoesPage() {
 
       <SectionCard
         title="Histórico"
-        description="Todas as solicitações, em ordem cronológica"
+        description="Todas as solicitações já decididas, em ordem cronológica"
+        action={<ClearRsvpHistoryButton count={history.length} />}
       >
-        <RsvpRequestsTable
-          requests={requests.filter((r) => r.status !== 'pending')}
-        />
+        <RsvpRequestsTable requests={history} />
       </SectionCard>
     </div>
   )

@@ -1,6 +1,7 @@
 'use client'
 
 import { deleteExpenseAction } from '@/app/admin/_actions/expenses.actions'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { EmptyState } from '@/components/ui/EmptyState'
 import type {
   ExpenseViewModel,
@@ -14,6 +15,7 @@ import {
   Search,
   Trash2,
 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 import { Fragment, useMemo, useState, useTransition } from 'react'
 import { ExpenseFormDialog } from './ExpenseFormDialog'
 
@@ -68,9 +70,29 @@ function InstallmentRow({
 }
 
 export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [expanded, setExpanded] = useState<Set<string>>(new Set())
-  const [, startTransition] = useTransition()
+  const [target, setTarget] = useState<ExpenseViewModel | null>(null)
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  const closeDialog = () => {
+    if (pending) return
+    setTarget(null)
+    setError(null)
+  }
+
+  const confirmDelete = () => {
+    if (!target) return
+    setError(null)
+    startTransition(async () => {
+      const res = await deleteExpenseAction(target.id)
+      if (!res.ok) return setError(res.error)
+      setTarget(null)
+      router.refresh()
+    })
+  }
 
   const filtered = useMemo(
     () =>
@@ -181,12 +203,7 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
                           }
                         />
                         <button
-                          onClick={() => {
-                            if (!confirm(`Remover "${e.description}"?`)) return
-                            startTransition(() => {
-                              deleteExpenseAction(e.id)
-                            })
-                          }}
+                          onClick={() => setTarget(e)}
                           className="rounded-lg p-2 text-rose-500 hover:bg-rose-50"
                           aria-label="Remover"
                         >
@@ -282,12 +299,7 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
                 }
               />
               <button
-                onClick={() => {
-                  if (!confirm(`Remover "${e.description}"?`)) return
-                  startTransition(() => {
-                    deleteExpenseAction(e.id)
-                  })
-                }}
+                onClick={() => setTarget(e)}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-sm text-rose-700"
               >
                 <Trash2 className="h-3.5 w-3.5" /> Remover
@@ -296,6 +308,28 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
           </article>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={target !== null}
+        onOpenChange={(open) => (open ? null : closeDialog())}
+        tone="danger"
+        pending={pending}
+        error={error}
+        title="Remover despesa?"
+        description={
+          target ? (
+            <>
+              Esta ação não pode ser desfeita.{' '}
+              <strong className="text-stone-800">{target.description}</strong> e
+              todas as suas parcelas serão removidas.
+            </>
+          ) : null
+        }
+        confirmLabel="Remover"
+        pendingLabel="Removendo..."
+        cancelLabel="Cancelar"
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }

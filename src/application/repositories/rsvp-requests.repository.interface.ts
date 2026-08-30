@@ -27,4 +27,11 @@ export interface IRsvpRequestsRepository {
    * must not be removable. Enforced in SQL, not just in the use case.
    */
   deletePending(id: string): Promise<void>
+  /**
+   * Bulk-deletes every already-decided (approved/rejected) request, i.e. the
+   * "Histórico" section on /admin/solicitacoes. An explicit, admin-initiated
+   * override of the deletePending audit-trail guarantee above — pending
+   * requests are never touched. Returns the number of rows removed.
+   */
+  deleteDecided(): Promise<number>
 }

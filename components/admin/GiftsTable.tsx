@@ -1,21 +1,42 @@
 'use client'
 
 import { deleteGiftAction } from '@/app/admin/_actions/gifts.actions'
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
-import { deleteGift } from '@/src/lib/admin/gifts'
 import { Gift as GiftIcon, Pencil, Search, Trash2 } from 'lucide-react'
 import Image from 'next/image'
+import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
 import { EmptyState } from '../ui/EmptyState'
 import { GiftFormDialog } from './GiftFormDialog'
 import { StatusPill } from './StatusPill'
 
 export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
+  const router = useRouter()
   const [query, setQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState<
     'all' | 'reserved' | 'pending'
   >('all')
-  const [, startTransition] = useTransition()
+  const [target, setTarget] = useState<GiftViewModel | null>(null)
+  const [pending, startTransition] = useTransition()
+  const [error, setError] = useState<string | null>(null)
+
+  const closeDialog = () => {
+    if (pending) return
+    setTarget(null)
+    setError(null)
+  }
+
+  const confirmDelete = () => {
+    if (!target) return
+    setError(null)
+    startTransition(async () => {
+      const res = await deleteGiftAction(target.id)
+      if (!res.ok) return setError(res.error)
+      setTarget(null)
+      router.refresh()
+    })
+  }
 
   const filtered = useMemo(() => {
     return gifts.filter((g) => {
@@ -127,12 +148,7 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
                       }
                     />
                     <button
-                      onClick={() => {
-                        if (!confirm(`Remover "${g.name}"?`)) return
-                        startTransition(() => {
-                          deleteGiftAction(g.id)
-                        })
-                      }}
+                      onClick={() => setTarget(g)}
                       className="rounded-lg p-2 text-rose-500 hover:bg-rose-50"
                       aria-label="Remover"
                     >
@@ -189,12 +205,7 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
                 }
               />
               <button
-                onClick={() => {
-                  if (!confirm(`Remover "${g.name}"?`)) return
-                  startTransition(() => {
-                    deleteGift(g.id)
-                  })
-                }}
+                onClick={() => setTarget(g)}
                 className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-3 py-1.5 text-sm text-rose-700"
               >
                 <Trash2 className="h-3.5 w-3.5" /> Remover
@@ -203,6 +214,28 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
           </article>
         ))}
       </div>
+
+      <ConfirmDialog
+        open={target !== null}
+        onOpenChange={(open) => (open ? null : closeDialog())}
+        tone="danger"
+        pending={pending}
+        error={error}
+        title="Remover presente?"
+        description={
+          target ? (
+            <>
+              Esta ação não pode ser desfeita.{' '}
+              <strong className="text-stone-800">{target.name}</strong> será
+              removido da lista de presentes.
+            </>
+          ) : null
+        }
+        confirmLabel="Remover"
+        pendingLabel="Removendo..."
+        cancelLabel="Cancelar"
+        onConfirm={confirmDelete}
+      />
     </div>
   )
 }

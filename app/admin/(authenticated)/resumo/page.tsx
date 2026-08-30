@@ -5,6 +5,7 @@ import { ReservationsChart } from '@/components/admin/charts/ReservationsChart'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
 import { formatCurrencyBRL } from '@/src/lib/format'
+import { GIFT_CATEGORY_LABELS } from '@/src/lib/gift-categories'
 import { unwrapForPage } from '@/src/lib/server-action-result'
 import { Download } from 'lucide-react'
 
@@ -30,6 +31,89 @@ export default async function ResumoPage() {
           <Download className="h-4 w-4" /> Exportar CSV
         </a>
       </header>
+
+      <SectionCard title="📋 Panorama geral" description="Tudo em um só lugar">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+          <StatCard
+            label="Convidados"
+            value={stats.guestsSummary.total}
+            hint={`${stats.guestsSummary.going} confirmados`}
+            accent="stone"
+          />
+          <StatCard
+            label="Solicitações"
+            value={stats.requestsSummary.total}
+            hint={
+              stats.requestsSummary.pending > 0
+                ? `${stats.requestsSummary.pending} aguardando`
+                : undefined
+            }
+            accent="amber"
+          />
+          <StatCard
+            label="Receitas"
+            value={formatCurrencyBRL(stats.totalReceived)}
+            hint="Presentes confirmados"
+            accent="emerald"
+          />
+          <StatCard
+            label="Despesas"
+            value={formatCurrencyBRL(stats.totalExpensesPaid)}
+            hint={`de ${formatCurrencyBRL(stats.totalExpenses)} previstos`}
+            accent="rose"
+          />
+        </div>
+        <p className="mt-4 text-sm text-stone-500">
+          Saldo (recebido − pago):{' '}
+          <strong
+            className={
+              stats.netBalance >= 0 ? 'text-emerald-700' : 'text-rose-600'
+            }
+          >
+            {formatCurrencyBRL(stats.netBalance)}
+          </strong>
+        </p>
+      </SectionCard>
+
+      <SectionCard
+        title="💰 Presentes por categoria"
+        description="Valor recebido e comprometido, por categoria"
+        action={
+          <a
+            href="/api/admin/reports/gifts-by-category"
+            className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+          >
+            <Download className="h-4 w-4" /> Baixar PDF
+          </a>
+        }
+      >
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-stone-200 text-stone-500">
+                <th className="py-2 pr-4 font-medium">Categoria</th>
+                <th className="py-2 pr-4 font-medium">Presentes</th>
+                <th className="py-2 pr-4 font-medium">Recebido</th>
+                <th className="py-2 font-medium">Comprometido</th>
+              </tr>
+            </thead>
+            <tbody>
+              {stats.giftsByCategory.map((c) => (
+                <tr key={c.category} className="border-b border-stone-100">
+                  <td className="py-2 pr-4">
+                    {GIFT_CATEGORY_LABELS[c.category]}
+                  </td>
+                  <td className="py-2 pr-4">{c.giftCount}</td>
+                  <td className="py-2 pr-4">
+                    {formatCurrencyBRL(c.confirmedTotal)}
+                  </td>
+                  <td className="py-2">{formatCurrencyBRL(c.pledgedTotal)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </SectionCard>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <SectionCard title="🎁 Presentes">

@@ -29,7 +29,10 @@ const nextConfig: NextConfig = {
   },
 
   // Keep nodemailer out of the bundle; require it from node_modules at runtime.
-  serverExternalPackages: ['nodemailer'],
+  // pdfkit (used by @react-pdf/renderer) loads its AFM font metrics from disk
+  // at runtime by relative path — bundling it rewrites those paths and breaks
+  // font loading, so it needs the same treatment.
+  serverExternalPackages: ['nodemailer', '@react-pdf/renderer', 'pdfkit'],
 
   async headers() {
     // Only in production. In dev, Turbopack rebuilds chunks on every edit while

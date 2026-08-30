@@ -181,4 +181,15 @@ export class SupabaseRsvpRequestsRepository implements IRsvpRequestsRepository {
     if (error) throw new Error(error.message)
     if (!data) throw new RsvpRequestAlreadyDecidedError()
   }
+
+  async deleteDecided(): Promise<number> {
+    const { data, error } = await this.client
+      .from('rsvp_requests')
+      .delete()
+      .neq('status', 'pending')
+      .select('id')
+
+    if (error) throw new Error(error.message)
+    return data?.length ?? 0
+  }
 }

@@ -49,6 +49,7 @@ function makeDeps() {
     reject: vi.fn(),
     recordNotification: vi.fn(),
     deletePending: vi.fn(),
+    deleteDecided: vi.fn(),
   }
 
   const authService: AuthMock = {

@@ -1,18 +1,25 @@
+import type { IExpensesRepository } from '@/src/application/repositories/expenses.repository.interface'
 import type { IGiftsRepository } from '@/src/application/repositories/gifts.repository.interface'
+import type { IGuestsRepository } from '@/src/application/repositories/guests.repository.interface'
 import type { IPixConfirmationsRepository } from '@/src/application/repositories/pix-confirmations.repository.interface'
+import type { IRsvpRequestsRepository } from '@/src/application/repositories/rsvp-requests.repository.interface'
 import type { IRsvpRepository } from '@/src/application/repositories/rsvp.repository.interface'
 import type { IAuthService } from '@/src/application/services/auth.service.interface'
 import { UnauthenticatedError } from '@/src/entities/errors/auth'
 import type {
   DashboardStats,
+  GiftCategoryBreakdown,
   ReservationStatus,
 } from '@/src/entities/models/dashboard'
-import type { Gift } from '@/src/entities/models/gift'
+import type { Gift, GiftCategory } from '@/src/entities/models/gift'
 
 type Deps = {
   giftsRepo: IGiftsRepository
   rsvpRepo: IRsvpRepository
   pixRepo: IPixConfirmationsRepository
+  guestsRepo: IGuestsRepository
+  rsvpRequestsRepo: IRsvpRequestsRepository
+  expensesRepo: IExpensesRepository
   authService: IAuthService
 }
 
@@ -21,11 +28,15 @@ export function getDashboardStatsUseCase(d: Deps) {
     if (!(await d.authService.getCurrentUser()))
       throw new UnauthenticatedError()
 
-    const [gifts, rsvps, pixList] = await Promise.all([
-      d.giftsRepo.list(),
-      d.rsvpRepo.list(),
-      d.pixRepo.list(),
-    ])
+    const [gifts, rsvps, pixList, guests, rsvpRequests, expenses] =
+      await Promise.all([
+        d.giftsRepo.list(),
+        d.rsvpRepo.list(),
+        d.pixRepo.list(),
+        d.guestsRepo.list(),
+        d.rsvpRequestsRepo.list(),
+        d.expensesRepo.list(),
+      ])
 
     const confirmedByGift = new Map<string, number>()
     let untiedConfirmedAmount = 0
@@ -133,6 +144,43 @@ export function getDashboardStatsUseCase(d: Deps) {
         createdAt: (g.reservedAt ?? new Date()).toISOString(),
       }))
 
+    const byCategory = new Map<GiftCategory, GiftCategoryBreakdown>()
+    for (const g of gifts) {
+      const entry = byCategory.get(g.category) ?? {
+        category: g.category,
+        giftCount: 0,
+        confirmedTotal: 0,
+        pledgedTotal: 0,
+      }
+      entry.giftCount += 1
+      entry.confirmedTotal += confirmedByGift.get(g.id) ?? 0
+      entry.pledgedTotal += g.pledgedTotal
+      byCategory.set(g.category, entry)
+    }
+    const giftsByCategory = Array.from(byCategory.values()).sort(
+      (a, b) => b.confirmedTotal - a.confirmedTotal
+    )
+
+    const guestsSummary = {
+      total: guests.length,
+      going: guests.filter((g) => g.status === 'going').length,
+      pending: guests.filter((g) => g.status === 'pending').length,
+      notGoing: guests.filter((g) => g.status === 'not_going').length,
+    }
+
+    const requestsSummary = {
+      total: rsvpRequests.length,
+      pending: rsvpRequests.filter((r) => r.status === 'pending').length,
+      approved: rsvpRequests.filter((r) => r.status === 'approved').length,
+      rejected: rsvpRequests.filter((r) => r.status === 'rejected').length,
+    }
+
+    const totalExpenses = expenses.reduce((s, e) => s + e.totalAmount, 0)
+    const totalExpensesPaid = expenses.reduce(
+      (s, e) => s + e.installments.reduce((si, i) => si + i.paidAmount, 0),
+      0
+    )
+
     return {
       totalGifts: gifts.length,
       // Funds never lock, so they are never counted as reserved.
@@ -150,6 +198,12 @@ export function getDashboardStatsUseCase(d: Deps) {
       messagesCount: gifts.filter((g) => !!g.reservedMessage).length,
       timeline,
       recentActivity,
+      giftsByCategory,
+      guestsSummary,
+      requestsSummary,
+      totalExpenses,
+      totalExpensesPaid,
+      netBalance: totalReceived - totalExpensesPaid,
     }
   }
 }

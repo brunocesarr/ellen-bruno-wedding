@@ -1,5 +1,6 @@
 'use client'
 
+import { resetAllGuestsToPendingAction } from '@/app/admin/_actions/guests.actions'
 import { GuestFormDialog } from '@/components/admin/GuestFormDialog'
 import { PartyCard } from '@/components/admin/guests/PartyCard'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
@@ -22,8 +23,8 @@ import {
   type Party,
   type StatusFilter,
 } from '@/src/lib/guests'
-import { Search, UserPlus, Users } from 'lucide-react'
-import { useCallback, useMemo, useState } from 'react'
+import { Download, RotateCcw, Search, UserPlus, Users } from 'lucide-react'
+import { useCallback, useMemo, useState, useTransition } from 'react'
 
 export function GuestsTable({ guests }: { guests: Guest[] }) {
   const [list, setList] = useState<Guest[]>(guests)
@@ -35,6 +36,26 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
   const deletion = useGuestDeletion({
     onSuccess: (id) => setList((prev) => prev.filter((g) => g.id !== id)),
   })
+
+  const [resetOpen, setResetOpen] = useState(false)
+  const [resetPending, startReset] = useTransition()
+  const [resetError, setResetError] = useState<string | null>(null)
+
+  const handleResetAll = () => {
+    setResetError(null)
+    startReset(async () => {
+      const res = await resetAllGuestsToPendingAction()
+      if (!res.ok) return setResetError(res.error)
+      setList(res.data)
+      setResetOpen(false)
+    })
+  }
+
+  const closeResetDialog = () => {
+    if (resetPending) return
+    setResetOpen(false)
+    setResetError(null)
+  }
 
   const parties = useMemo(
     () =>
@@ -122,6 +143,23 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
           ))}
         </select>
 
+        <a
+          href="/api/admin/reports/guests"
+          className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+        >
+          <Download className="h-4 w-4" />
+          Baixar PDF
+        </a>
+
+        <button
+          type="button"
+          onClick={() => setResetOpen(true)}
+          className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-4 py-2 text-sm text-stone-700 hover:bg-stone-50"
+        >
+          <RotateCcw className="h-4 w-4" />
+          Redefinir todos para pendente
+        </button>
+
         <GuestFormDialog
           onSaved={handleSaved}
           trigger={
@@ -181,6 +219,28 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         confirmLabel={deletion.pending ? 'Removendo...' : 'Remover'}
         cancelLabel="Cancelar"
         onConfirm={deletion.confirm}
+      />
+
+      <ConfirmDialog
+        open={resetOpen}
+        onOpenChange={(open) => (open ? null : closeResetDialog())}
+        tone="danger"
+        pending={resetPending}
+        error={resetError}
+        title="Redefinir todos os convidados?"
+        description={
+          <>
+            Todos os <strong className="text-stone-800">{list.length}</strong>{' '}
+            convidados voltarão para o status{' '}
+            <strong className="text-stone-800">pendente</strong> e a data de
+            confirmação de cada um será apagada. Esta ação não pode ser
+            desfeita.
+          </>
+        }
+        confirmLabel="Redefinir todos"
+        pendingLabel="Redefinindo..."
+        cancelLabel="Cancelar"
+        onConfirm={handleResetAll}
       />
     </div>
   )

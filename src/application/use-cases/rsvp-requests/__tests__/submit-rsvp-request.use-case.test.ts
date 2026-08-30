@@ -71,6 +71,7 @@ function makeRsvpRequestsRepo(): RsvpRequestsRepoMock {
     reject: vi.fn(),
     recordNotification: vi.fn(),
     deletePending: vi.fn(),
+    deleteDecided: vi.fn(),
   }
 
   repo.findPendingByEmail.mockResolvedValue(null)
