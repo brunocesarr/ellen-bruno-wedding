@@ -570,7 +570,7 @@ export type Database = {
           p_contribution_id: string
           p_gift_id: string
           p_message: string
-          p_mp_payment_id: string
+          p_mp_payment_id?: string
           p_name: string
           p_pagbank_payment_id?: string
           p_payment_method: string

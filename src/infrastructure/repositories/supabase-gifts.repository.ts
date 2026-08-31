@@ -116,6 +116,12 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
   async reserveConfirmed(
     p: ReserveGiftConfirmedParams
   ): Promise<ReserveGiftResult> {
+    // Both id columns default to null in the RPC — omit whichever doesn't
+    // apply rather than passing null explicitly. Supabase's generated Args
+    // type doesn't include `| null` for these (only "has a default" maps to
+    // `?`), so an explicit null fails to type-check; letting Postgres apply
+    // its own default is also what keeps the unique index on each column
+    // correct (a stand-in value like '' would collide across rows instead).
     const args = {
       p_gift_id: p.id,
       p_name: p.name,
@@ -124,10 +130,9 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
       p_contribution_id: p.contributionId,
       p_payment_method: p.paymentMethod,
       p_payment_provider: p.paymentProvider,
-      p_mp_payment_id:
-        p.paymentProvider === 'mercado_pago' ? p.mpPaymentId : null,
-      p_pagbank_payment_id:
-        p.paymentProvider === 'pagbank' ? p.pagbankPaymentId : null,
+      ...(p.paymentProvider === 'mercado_pago'
+        ? { p_mp_payment_id: p.mpPaymentId }
+        : { p_pagbank_payment_id: p.pagbankPaymentId }),
     } satisfies ReserveGiftPaidArgs
 
     const { data, error } = await this.client.rpc('reserve_gift_paid', args)
