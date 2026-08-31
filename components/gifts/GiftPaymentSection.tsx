@@ -62,6 +62,11 @@ export function GiftPaymentSection({
   // and have a different one recorded in the ledger.
   const [quotedAmount, setQuotedAmount] = useState<string | null>(null)
 
+  // Number('') === 0 and Number(undefined) === NaN, so normalise and compare
+  // > 0 rather than truthiness — rejects "," or other unparseable input too.
+  const chargeAmount = Number(amount.replace(',', '.'))
+  const hasValidAmount = Number.isFinite(chargeAmount) && chargeAmount > 0
+
   function handleAmountChange(next: string) {
     setAmount(next)
     setError(null)
@@ -315,7 +320,7 @@ export function GiftPaymentSection({
                 <button
                   type="button"
                   onClick={handleGenerate}
-                  disabled={pending || !amount}
+                  disabled={pending || !hasValidAmount}
                   className="w-full rounded-full bg-terracotta px-6 py-2.5 text-sm font-medium text-white transition hover:bg-terracotta-dark disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {pending
