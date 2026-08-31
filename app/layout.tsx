@@ -1,4 +1,5 @@
 import { RouteLoader } from '@/components/ui/RouteLoader'
+import { getMusicTracks } from '@/src/lib/get-music-tracks'
 import type { Metadata, Viewport } from 'next'
 import dynamic from 'next/dynamic'
 import {
@@ -76,11 +77,13 @@ export const viewport: Viewport = {
   viewportFit: 'cover',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const tracks = await getMusicTracks()
+
   return (
     <html
       lang="pt-BR"
@@ -95,7 +98,7 @@ export default function RootLayout({
         <NuqsAdapter>
           <RouteLoader />
           {children}
-          <MusicToggleButton />
+          <MusicToggleButton tracks={tracks} />
         </NuqsAdapter>
       </body>
     </html>

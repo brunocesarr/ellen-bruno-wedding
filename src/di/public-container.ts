@@ -4,6 +4,7 @@ import { SupabaseGuestsRepository } from '@/src/infrastructure/repositories/supa
 import { SupabaseInviteLinksRepository } from '@/src/infrastructure/repositories/supabase-invite-links.repository'
 import { SupabaseRsvpRequestsRepository } from '@/src/infrastructure/repositories/supabase-rsvp-requests.repository'
 import { SupabaseSiteImagesRepository } from '@/src/infrastructure/repositories/supabase-site-images.repository'
+import { SupabaseSongsRepository } from '@/src/infrastructure/repositories/supabase-songs.repository'
 import { SupabaseStorageRepository } from '@/src/infrastructure/repositories/supabase-storage.repository'
 import { createEmailService } from '@/src/infrastructure/services/nodemailer-email.service'
 import { createNotificationService } from '@/src/infrastructure/services/telegram-notification.service'
@@ -17,7 +18,9 @@ export const getPublicContainer = cache(() => {
 
   return {
     siteImagesRepo: new SupabaseSiteImagesRepository(supabase),
-    storageRepo: new SupabaseStorageRepository(supabase),
+    storageRepo: new SupabaseStorageRepository(supabase, 'wedding-images'),
+    audioStorageRepo: new SupabaseStorageRepository(supabase, 'wedding-audio'),
+    songsRepo: new SupabaseSongsRepository(supabase),
     guestsRepo: new SupabaseGuestsRepository(adminClient),
     rsvpRequestsRepo: new SupabaseRsvpRequestsRepository(adminClient),
     inviteLinksRepo: new SupabaseInviteLinksRepository(adminClient),

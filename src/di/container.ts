@@ -8,6 +8,7 @@ import { SupabasePixConfirmationsRepository } from '@/src/infrastructure/reposit
 import { SupabaseRsvpRequestsRepository } from '@/src/infrastructure/repositories/supabase-rsvp-requests.repository'
 import { SupabaseRsvpRepository } from '@/src/infrastructure/repositories/supabase-rsvp.repository'
 import { SupabaseSiteImagesRepository } from '@/src/infrastructure/repositories/supabase-site-images.repository'
+import { SupabaseSongsRepository } from '@/src/infrastructure/repositories/supabase-songs.repository'
 import { SupabaseStorageRepository } from '@/src/infrastructure/repositories/supabase-storage.repository'
 import { createEmailService } from '@/src/infrastructure/services/nodemailer-email.service'
 import { PixUtilsService } from '@/src/infrastructure/services/pix-utils.service'
@@ -23,8 +24,10 @@ export const getContainer = cache(async () => {
     giftsRepo: new SupabaseGiftsRepository(supabase),
     expensesRepo: new SupabaseExpensesRepository(supabase),
     pixRepo: new SupabasePixConfirmationsRepository(supabase),
-    storageRepo: new SupabaseStorageRepository(supabase),
+    storageRepo: new SupabaseStorageRepository(supabase, 'wedding-images'),
+    audioStorageRepo: new SupabaseStorageRepository(supabase, 'wedding-audio'),
     siteImagesRepo: new SupabaseSiteImagesRepository(supabase),
+    songsRepo: new SupabaseSongsRepository(supabase),
     authService: new SupabaseAuthService(supabase),
     pixService: new PixUtilsService(),
     guestsRepo: new SupabaseGuestsRepository(supabase),

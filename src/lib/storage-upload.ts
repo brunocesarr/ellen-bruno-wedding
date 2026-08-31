@@ -4,6 +4,7 @@ import type { IStorageRepository } from '@/src/application/repositories/storage.
 import { randomUUID } from 'crypto'
 
 const MAX_IMAGE_SIZE = 5 * 1024 * 1024
+const MAX_AUDIO_SIZE = 15 * 1024 * 1024
 
 const ALLOWED_IMAGE_TYPES = new Set([
   'image/jpeg',
@@ -11,6 +12,8 @@ const ALLOWED_IMAGE_TYPES = new Set([
   'image/png',
   'image/webp',
 ])
+
+const ALLOWED_AUDIO_TYPES = new Set(['audio/mpeg', 'audio/mp3'])
 
 function resolveExtension(file: File): string {
   const fromName = file.name.split('.').pop()?.toLowerCase()
@@ -52,6 +55,42 @@ export async function uploadImageIfPresent(
 
   return {
     imagePath: uploaded.path,
+    ok: true,
+    cleanup: async () => {
+      try {
+        await storageRepo.remove(uploaded.path)
+      } catch {}
+    },
+  }
+}
+
+export type AudioUploadResult =
+  | { ok: true; audioPath?: string; cleanup?: () => Promise<void> }
+  | { ok: false; error: string }
+
+export async function uploadAudioIfPresent(
+  storageRepo: IStorageRepository,
+  file: File | null,
+  pathPrefix: string
+): Promise<AudioUploadResult> {
+  if (!file || file.size === 0) return { ok: true, audioPath: undefined }
+
+  if (!ALLOWED_AUDIO_TYPES.has(file.type)) {
+    return { ok: false, error: 'Formato de áudio inválido. Use MP3.' }
+  }
+  if (file.size > MAX_AUDIO_SIZE) {
+    return {
+      ok: false,
+      error: 'Arquivo muito grande. Envie um áudio de até 15MB.',
+    }
+  }
+
+  const path = `${pathPrefix}/${randomUUID()}.mp3`
+  const buffer = Buffer.from(await file.arrayBuffer())
+  const uploaded = await storageRepo.upload(buffer, path, file.type)
+
+  return {
+    audioPath: uploaded.path,
     ok: true,
     cleanup: async () => {
       try {

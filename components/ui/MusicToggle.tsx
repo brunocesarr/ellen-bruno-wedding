@@ -1,6 +1,6 @@
 'use client'
 
-import { MUSIC_CATALOG } from '@/src/lib/music-catalog'
+import type { MusicTrack } from '@/src/lib/music-catalog'
 import { SkipForward, Volume2, VolumeX } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { usePathname } from 'next/navigation'
@@ -41,7 +41,11 @@ function shuffledIndices(length: number): number[] {
   return indices
 }
 
-export function MusicToggle() {
+type Props = {
+  tracks: MusicTrack[]
+}
+
+export function MusicToggle({ tracks }: Props) {
   const pathname = usePathname()
   const isAdminRoute = pathname?.startsWith('/admin') ?? false
 
@@ -96,20 +100,20 @@ export function MusicToggle() {
   const loadCurrentTrack = useCallback(() => {
     const audio = audioRef.current
     const index = orderRef.current[posRef.current]
-    const track = index !== undefined ? MUSIC_CATALOG[index] : undefined
+    const track = index !== undefined ? tracks[index] : undefined
     if (!audio || !track) return
     audio.src = track.src
     audio.load()
-  }, [])
+  }, [tracks])
 
   const advanceTrack = useCallback(() => {
     posRef.current += 1
     if (posRef.current >= orderRef.current.length) {
-      orderRef.current = shuffledIndices(MUSIC_CATALOG.length)
+      orderRef.current = shuffledIndices(tracks.length)
       posRef.current = 0
     }
     loadCurrentTrack()
-  }, [loadCurrentTrack])
+  }, [loadCurrentTrack, tracks])
 
   const attemptPlay = useCallback(async (): Promise<boolean> => {
     const audio = audioRef.current
@@ -160,7 +164,7 @@ export function MusicToggle() {
 
     if (!hasInitializedRef.current) {
       hasInitializedRef.current = true
-      orderRef.current = shuffledIndices(MUSIC_CATALOG.length)
+      orderRef.current = shuffledIndices(tracks.length)
       posRef.current = 0
       loadCurrentTrack()
     }
@@ -190,7 +194,7 @@ export function MusicToggle() {
       window.removeEventListener('pointerdown', onGesture)
       window.removeEventListener('keydown', onGesture)
     }
-  }, [isAdminRoute, attemptPlay, fadeTo, loadCurrentTrack])
+  }, [isAdminRoute, attemptPlay, fadeTo, loadCurrentTrack, tracks])
 
   return (
     <>
@@ -233,7 +237,7 @@ export function MusicToggle() {
             </motion.span>
           </motion.button>
 
-          {MUSIC_CATALOG.length > 1 && (
+          {tracks.length > 1 && (
             <motion.button
               type="button"
               onClick={skip}

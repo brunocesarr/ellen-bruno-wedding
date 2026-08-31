@@ -5,14 +5,11 @@ export type MusicTrack = {
 }
 
 /**
- * Background-music playlist for the public site. MusicToggle shuffles and
- * cycles through whatever is listed here — drop more files into
- * public/audio/ and add an entry below to grow the playlist.
+ * Played whenever no songs have been uploaded via /admin/musicas, or the
+ * lookup fails — see getMusicTracks() in get-music-tracks.ts.
  */
-export const MUSIC_CATALOG: MusicTrack[] = [
-  {
-    key: 'background-song',
-    title: 'Nossa música',
-    src: '/audio/background-song.mp3',
-  },
-]
+export const DEFAULT_MUSIC_TRACK: MusicTrack = {
+  key: 'background-song',
+  title: 'Nossa música',
+  src: '/audio/background-song.mp3',
+}

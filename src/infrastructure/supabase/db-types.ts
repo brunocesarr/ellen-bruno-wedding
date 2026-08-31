@@ -60,3 +60,7 @@ export type ExpenseInstallmentRow =
   Database['public']['Tables']['expense_installments']['Row']
 export type ExpenseInstallmentInsert =
   Database['public']['Tables']['expense_installments']['Insert']
+
+// --- Background music playlist ----------------------------------------------
+export type SongRow = Database['public']['Tables']['songs']['Row']
+export type SongInsert = Database['public']['Tables']['songs']['Insert']

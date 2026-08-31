@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Menu,
   MessageCircleHeart,
+  Music,
   Users,
   Wallet,
   X,
@@ -32,6 +33,7 @@ const NAV = [
   { href: '/admin/mensagens', label: 'Mensagens', icon: MessageCircleHeart },
   { href: '/admin/resumo', label: 'Resumo', icon: ChartBar },
   { href: '/admin/imagens', label: 'Imagens', icon: ImageIcon },
+  { href: '/admin/musicas', label: 'Músicas', icon: Music },
 ]
 
 type Props = {

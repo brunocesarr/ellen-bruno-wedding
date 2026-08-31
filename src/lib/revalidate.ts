@@ -21,6 +21,7 @@ const GROUPS = {
   ],
   inviteLinks: [['/invite/full', 'page'] as const, '/admin/solicitacoes'],
   expenses: ['/admin', '/admin/despesas'],
+  music: [['/', 'layout'] as const, '/admin/musicas'],
 } as const satisfies Record<string, readonly PathSpec[]>
 
 export type RevalidationGroup = keyof typeof GROUPS
