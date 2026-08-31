@@ -53,7 +53,7 @@ const nextConfig: NextConfig = {
           },
           {
             key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), payment=()',
+            value: 'camera=(), microphone=(), geolocation=(), payment=(self "https://*.mercadopago.com" "https://*.mercadolibre.com")',
           },
           { key: 'X-DNS-Prefetch-Control', value: 'on' },
         ],
