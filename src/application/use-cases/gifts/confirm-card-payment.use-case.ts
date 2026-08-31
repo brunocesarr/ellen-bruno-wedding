@@ -16,6 +16,9 @@ type Deps = {
   pixRepo: IPixConfirmationsRepository
   cardPaymentService: ICardPaymentService
   notificationService: INotificationService
+  /** Which rail this webhook came down — picks the idempotency lookup and
+   *  which id column the payment gets recorded under. */
+  provider: 'mercado_pago' | 'pagbank'
 }
 
 /**
@@ -48,13 +51,29 @@ export function confirmCardPaymentUseCase(d: Deps) {
   return async (paymentId: string): Promise<void> => {
     // Idempotency pre-check: a redelivered webhook for an already-processed
     // payment (approved-and-recorded, or previously untied) is a no-op.
-    const existing = await d.pixRepo.findByMpPaymentId(paymentId)
+    const existing =
+      d.provider === 'pagbank'
+        ? await d.pixRepo.findByPagbankPaymentId(paymentId)
+        : await d.pixRepo.findByMpPaymentId(paymentId)
     if (existing) return
 
     const payment = await d.cardPaymentService.getPayment(paymentId)
     if (payment.status !== 'approved') return
 
     const guestName = payment.guestName ?? 'Convidado(a)'
+    // Whichever id column matches d.provider — kept together so every
+    // pixRepo.create()/reserveConfirmed() call below stays self-consistent
+    // rather than risking one branch writing the wrong provider's column.
+    const providerIdFields =
+      d.provider === 'pagbank'
+        ? ({
+            paymentProvider: 'pagbank',
+            pagbankPaymentId: payment.id,
+          } as const)
+        : ({
+            paymentProvider: 'mercado_pago',
+            mpPaymentId: payment.id,
+          } as const)
 
     if (!payment.externalReference || !payment.giftId) {
       console.error(
@@ -66,12 +85,13 @@ export function confirmCardPaymentUseCase(d: Deps) {
         amount: payment.transactionAmount,
         confirmed: true,
         paymentMethod: 'card',
-        mpPaymentId: payment.id,
+        ...providerIdFields,
       })
       await notify(d.notificationService, () =>
         buildUntiedPaymentAlert({
           buyerName: guestName,
           amount: payment.transactionAmount,
+          provider: d.provider,
         })
       )
       return
@@ -85,7 +105,7 @@ export function confirmCardPaymentUseCase(d: Deps) {
         amount: payment.transactionAmount,
         contributionId: payment.externalReference,
         paymentMethod: 'card',
-        mpPaymentId: payment.id,
+        ...providerIdFields,
       })
 
       await notify(d.notificationService, () =>
@@ -114,7 +134,7 @@ export function confirmCardPaymentUseCase(d: Deps) {
           amount: payment.transactionAmount,
           confirmed: true,
           paymentMethod: 'card',
-          mpPaymentId: payment.id,
+          ...providerIdFields,
         })
         await notify(d.notificationService, () =>
           buildUntiedPaymentAlert({

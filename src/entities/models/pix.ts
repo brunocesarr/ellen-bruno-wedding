@@ -10,6 +10,13 @@ export const PAYMENT_METHODS = ['pix', 'card'] as const
 export const PaymentMethodSchema = z.enum(PAYMENT_METHODS)
 export type PaymentMethod = z.infer<typeof PaymentMethodSchema>
 
+// Only meaningful when paymentMethod === 'card' — which rail processed it.
+// Mercado Pago and PagBank run side by side during the transition; neither
+// is being retired here (see getCardPaymentService()).
+export const PAYMENT_PROVIDERS = ['mercado_pago', 'pagbank'] as const
+export const PaymentProviderSchema = z.enum(PAYMENT_PROVIDERS)
+export type PaymentProvider = z.infer<typeof PaymentProviderSchema>
+
 export const PixConfirmationInputSchema = z.object({
   giftId: z.string().uuid().optional(),
   guestName: z.string().min(2),
@@ -24,7 +31,9 @@ export const PixConfirmationSchema = z.object({
   amount: z.number(),
   confirmed: z.boolean(),
   paymentMethod: PaymentMethodSchema,
+  paymentProvider: PaymentProviderSchema.nullable(),
   mpPaymentId: z.string().nullable(),
+  pagbankPaymentId: z.string().nullable(),
   createdAt: z.date(),
 })
 export type PixConfirmation = z.infer<typeof PixConfirmationSchema>

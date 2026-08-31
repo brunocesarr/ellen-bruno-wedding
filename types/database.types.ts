@@ -241,7 +241,9 @@ export type Database = {
           guest_name: string
           id: string
           mp_payment_id: string | null
+          pagbank_payment_id: string | null
           payment_method: string
+          payment_provider: string | null
         }
         Insert: {
           amount: number
@@ -251,7 +253,9 @@ export type Database = {
           guest_name: string
           id?: string
           mp_payment_id?: string | null
+          pagbank_payment_id?: string | null
           payment_method?: string
+          payment_provider?: string | null
         }
         Update: {
           amount?: number
@@ -261,7 +265,9 @@ export type Database = {
           guest_name?: string
           id?: string
           mp_payment_id?: string | null
+          pagbank_payment_id?: string | null
           payment_method?: string
+          payment_provider?: string | null
         }
         Relationships: [
           {
@@ -566,7 +572,9 @@ export type Database = {
           p_message: string
           p_mp_payment_id: string
           p_name: string
+          p_pagbank_payment_id?: string
           p_payment_method: string
+          p_payment_provider?: string
         }
         Returns: {
           category: Database['public']['Enums']['gift_category'] | null

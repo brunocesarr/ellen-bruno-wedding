@@ -26,6 +26,9 @@ type Props = {
   isReserved: boolean
   reservedByName?: string | null
   reservedMessage?: string | null
+  /** Display name of whichever card provider is currently active — see
+   *  getActiveCardPaymentProvider(). */
+  cardProviderLabel: string
 }
 
 const brl = (n: number) =>
@@ -46,6 +49,7 @@ export function GiftPaymentSection({
   isReserved,
   reservedByName,
   reservedMessage,
+  cardProviderLabel,
 }: Props) {
   const isOpenAmount = kind !== 'fixed_item'
 
@@ -169,7 +173,7 @@ export function GiftPaymentSection({
               Pague com cartão
             </h2>
             <p className="mt-3 text-ink-muted">
-              Rápido e seguro, direto pelo Mercado Pago 🤍
+              Rápido e seguro, direto pelo {cardProviderLabel} 🤍
             </p>
           </header>
 
@@ -234,6 +238,7 @@ export function GiftPaymentSection({
             <CardPaymentForm
               giftId={giftId}
               amount={isOpenAmount ? amount : null}
+              providerLabel={cardProviderLabel}
             />
           )}
         </div>

@@ -2,6 +2,10 @@ import { GiftDetailHero } from '@/components/gifts/GiftDetailHero'
 import { GiftPaymentSection } from '@/components/gifts/GiftPaymentSection'
 import { getContainer } from '@/src/di/container'
 import { GiftNotFoundError } from '@/src/entities/errors/gifts'
+import {
+  CARD_PAYMENT_PROVIDER_LABELS,
+  getActiveCardPaymentProvider,
+} from '@/src/infrastructure/services/get-card-payment-service'
 import { getGiftDetailController } from '@/src/interface-adapters/controllers/gifts/get-gift-detail.controller'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
@@ -37,6 +41,8 @@ export default async function GiftDetailPage({
   }
 
   const { giftView, pix, reservation } = detail
+  const cardProviderLabel =
+    CARD_PAYMENT_PROVIDER_LABELS[getActiveCardPaymentProvider()]
 
   return (
     <main className="bg-cream">
@@ -56,6 +62,7 @@ export default async function GiftDetailPage({
         isReserved={reservation.isReserved}
         reservedByName={reservation.reservedByName}
         reservedMessage={reservation.reservedMessage}
+        cardProviderLabel={cardProviderLabel}
       />
     </main>
   )

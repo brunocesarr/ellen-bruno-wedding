@@ -34,6 +34,7 @@ function makeDeps() {
     list: vi.fn(),
     listByGiftId: vi.fn(),
     findByMpPaymentId: vi.fn().mockResolvedValue(null),
+    findByPagbankPaymentId: vi.fn().mockResolvedValue(null),
     create: vi.fn(),
     update: vi.fn(),
     deleteByGiftId: vi.fn(),
@@ -45,7 +46,13 @@ function makeDeps() {
   }
   const notificationService = { send: vi.fn().mockResolvedValue(undefined) }
 
-  return { giftsRepo, pixRepo, cardPaymentService, notificationService }
+  return {
+    giftsRepo,
+    pixRepo,
+    cardPaymentService,
+    notificationService,
+    provider: 'mercado_pago' as const,
+  }
 }
 
 describe('confirmCardPaymentUseCase', () => {
@@ -94,6 +101,7 @@ describe('confirmCardPaymentUseCase', () => {
       amount: 150,
       contributionId: 'contribution-1',
       paymentMethod: 'card',
+      paymentProvider: 'mercado_pago',
       mpPaymentId: PAYMENT_ID,
     })
   })
@@ -125,6 +133,7 @@ describe('confirmCardPaymentUseCase', () => {
       amount: 150,
       confirmed: true,
       paymentMethod: 'card',
+      paymentProvider: 'mercado_pago',
       mpPaymentId: PAYMENT_ID,
     })
   })
@@ -188,5 +197,81 @@ describe('confirmCardPaymentUseCase', () => {
     await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
 
     expect(deps.giftsRepo.reserveConfirmed).toHaveBeenCalledOnce()
+  })
+
+  describe('pagbank provider', () => {
+    function makePagbankDeps() {
+      return { ...makeDeps(), provider: 'pagbank' as const }
+    }
+
+    it('checks pagbank idempotency, not mercado pago, for a pagbank webhook', async () => {
+      const deps = makePagbankDeps()
+
+      await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
+
+      expect(deps.pixRepo.findByPagbankPaymentId).toHaveBeenCalledWith(
+        PAYMENT_ID
+      )
+      expect(deps.pixRepo.findByMpPaymentId).not.toHaveBeenCalled()
+    })
+
+    it('no-ops when already recorded under pagbank_payment_id', async () => {
+      const deps = makePagbankDeps()
+      deps.pixRepo.findByPagbankPaymentId.mockResolvedValue({
+        id: 'x',
+        giftId: GIFT_ID,
+        guestName: 'Ana',
+        amount: 150,
+        confirmed: true,
+        paymentMethod: 'card',
+        paymentProvider: 'pagbank',
+        mpPaymentId: null,
+        pagbankPaymentId: PAYMENT_ID,
+        createdAt: new Date(),
+      })
+
+      await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
+
+      expect(deps.cardPaymentService.getPayment).not.toHaveBeenCalled()
+      expect(deps.giftsRepo.reserveConfirmed).not.toHaveBeenCalled()
+    })
+
+    it('records the confirmed reservation under pagbankPaymentId, not mpPaymentId', async () => {
+      const deps = makePagbankDeps()
+
+      await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
+
+      expect(deps.giftsRepo.reserveConfirmed).toHaveBeenCalledWith({
+        id: GIFT_ID,
+        name: 'Ana Souza',
+        message: undefined,
+        amount: 150,
+        contributionId: 'contribution-1',
+        paymentMethod: 'card',
+        paymentProvider: 'pagbank',
+        pagbankPaymentId: PAYMENT_ID,
+      })
+    })
+
+    it('mentions PagBank in the untied-payment alert', async () => {
+      const deps = makePagbankDeps()
+      deps.cardPaymentService.getPayment.mockResolvedValue(
+        payment({ giftId: null, externalReference: null })
+      )
+
+      await confirmCardPaymentUseCase(deps as never)(PAYMENT_ID)
+
+      expect(deps.pixRepo.create).toHaveBeenCalledWith({
+        guestName: 'Ana Souza',
+        amount: 150,
+        confirmed: true,
+        paymentMethod: 'card',
+        paymentProvider: 'pagbank',
+        pagbankPaymentId: PAYMENT_ID,
+      })
+      expect(deps.notificationService.send).toHaveBeenCalledWith(
+        expect.stringContaining('PagBank')
+      )
+    })
   })
 })

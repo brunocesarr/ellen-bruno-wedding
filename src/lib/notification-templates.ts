@@ -86,11 +86,18 @@ export function buildGiftPaymentConfirmedAlert(params: {
  * The payment came in but couldn't be tied to a gift (it was deleted, or lost
  * a race with another payment) — needs a human to reconcile it manually.
  */
+const CARD_PROVIDER_LABEL: Record<'mercado_pago' | 'pagbank', string> = {
+  mercado_pago: 'Mercado Pago',
+  pagbank: 'PagBank',
+}
+
 export function buildUntiedPaymentAlert(params: {
   buyerName: string
   amount: number
+  provider?: 'mercado_pago' | 'pagbank'
 }): string {
-  const { buyerName, amount } = params
+  const { buyerName, amount, provider } = params
+  const providerLabel = provider ? CARD_PROVIDER_LABEL[provider] : null
 
   return [
     '⚠️ <b>Pagamento recebido sem presente vinculado</b>',
@@ -98,7 +105,9 @@ export function buildUntiedPaymentAlert(params: {
     `👤 ${escapeHtml(buyerName)}`,
     `💰 ${formatCurrencyBRL(amount)}`,
     '',
-    'Verifique e reembolse pelo painel do Mercado Pago se necessário.',
+    providerLabel
+      ? `Verifique e reembolse pelo painel do ${providerLabel} se necessário.`
+      : 'Verifique e reembolse pelo painel do provedor de pagamento se necessário.',
     `Ver no painel: ${siteUrl()}/admin/resumo`,
   ].join('\n')
 }

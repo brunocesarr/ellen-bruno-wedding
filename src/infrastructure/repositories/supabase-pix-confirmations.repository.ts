@@ -18,7 +18,10 @@ const mapRow = (r: PixConfirmationRow): PixConfirmation => ({
   confirmed: r.confirmed ?? false,
   paymentMethod:
     (r.payment_method as PixConfirmation['paymentMethod']) ?? 'pix',
+  paymentProvider:
+    (r.payment_provider as PixConfirmation['paymentProvider']) ?? null,
   mpPaymentId: r.mp_payment_id ?? null,
+  pagbankPaymentId: r.pagbank_payment_id ?? null,
   createdAt: new Date(r.created_at ?? Date.now()),
 })
 
@@ -48,7 +51,9 @@ export class SupabasePixConfirmationsRepository implements IPixConfirmationsRepo
     input: PixConfirmationInput & {
       confirmed?: boolean
       paymentMethod?: 'pix' | 'card'
+      paymentProvider?: 'mercado_pago' | 'pagbank'
       mpPaymentId?: string
+      pagbankPaymentId?: string
     }
   ): Promise<PixConfirmation> {
     const payload = {
@@ -57,7 +62,9 @@ export class SupabasePixConfirmationsRepository implements IPixConfirmationsRepo
       amount: input.amount,
       confirmed: input.confirmed ?? false,
       payment_method: input.paymentMethod ?? 'pix',
+      payment_provider: input.paymentProvider ?? null,
       mp_payment_id: input.mpPaymentId ?? null,
+      pagbank_payment_id: input.pagbankPaymentId ?? null,
     } satisfies PixConfirmationInsert
 
     const { data, error } = await this.client
@@ -76,6 +83,18 @@ export class SupabasePixConfirmationsRepository implements IPixConfirmationsRepo
       .from('pix_confirmations')
       .select('*')
       .eq('mp_payment_id', mpPaymentId)
+      .maybeSingle()
+    if (error) throw error
+    return data ? mapRow(data) : null
+  }
+
+  async findByPagbankPaymentId(
+    pagbankPaymentId: string
+  ): Promise<PixConfirmation | null> {
+    const { data, error } = await this.client
+      .from('pix_confirmations')
+      .select('*')
+      .eq('pagbank_payment_id', pagbankPaymentId)
       .maybeSingle()
     if (error) throw error
     return data ? mapRow(data) : null

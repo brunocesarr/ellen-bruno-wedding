@@ -362,6 +362,12 @@ changes.
 matters to disambiguate an 11-digit key, which is otherwise assumed CPF),
 `PIX_MERCHANT_NAME`, `PIX_MERCHANT_CITY`, `NEXT_PUBLIC_SITE_URL`.
 
+Card payments: `MERCADO_PAGO_ACCESS_TOKEN`, `MERCADO_PAGO_WEBHOOK_SECRET` (Mercado
+Pago) and `PAGBANK_TOKEN`, `PAGBANK_ENVIRONMENT` (optional — `sandbox`/
+`production`, defaults to `sandbox`) for PagBank. `CARD_PAYMENT_PROVIDER`
+(optional — `mercado_pago`/`pagbank`, defaults to `mercado_pago`) picks which
+one new checkouts are created with — see the Card payments section below.
+
 Email is sent via Gmail SMTP + OAuth2
 (`src/infrastructure/services/nodemailer-email.service.ts`), not plain
 credentials: `GMAIL_USER`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`,
@@ -440,3 +446,38 @@ duplicate-submit story solved first.
 calls either one. If you need "list untied PIX" for the admin dashboard, this
 is the use case to wire in — check it still matches `IPixConfirmationsRepository`
 before assuming it's ready to use as-is.
+
+## Card payments (Mercado Pago / PagBank)
+
+Two providers run side by side behind `ICardPaymentService`
+(`src/application/services/card-payment.service.interface.ts`):
+`MercadoPagoService` and `PagBankService`
+(`src/infrastructure/services/*.service.ts`). Neither is being retired —
+`getCardPaymentService()` (`src/infrastructure/services/get-card-payment-service.ts`)
+picks which one **new** checkouts are created with, based on
+`CARD_PAYMENT_PROVIDER` (defaults to `mercado_pago`). Both providers' webhook
+routes (`app/api/mercado-pago/webhook`, `app/api/pagbank/webhook`) stay live
+regardless of the flag, since a checkout already created under the other
+provider still needs its webhook processed.
+
+`confirmCardPaymentUseCase` takes an explicit `provider` dependency (set by
+whichever webhook route calls it) that picks the idempotency lookup
+(`findByMpPaymentId` vs `findByPagbankPaymentId`) and which ledger column the
+payment id is written to. `pix_confirmations` carries both `mp_payment_id`
+and `pagbank_payment_id` as separate nullable columns (plus a
+`payment_provider` discriminator) rather than one shared column — additive,
+so Mercado Pago's existing rows/behavior are untouched.
+
+PagBank's webhook signature scheme differs from Mercado Pago's: it hashes the
+**raw, unparsed** request body (`SHA256("${token}-${rawBody}")`, compared
+against `x-authenticity-token`), so `app/api/pagbank/webhook/route.ts` calls
+`req.text()` before any JSON parsing — reordering that to parse first breaks
+every signature check.
+
+`PagBankService`'s field mapping (metadata round-trip, whether
+`GET /checkouts/{id}` actually returns a `charges` array) is inferred from
+PagBank's docs, not yet confirmed against a real sandbox response — see the
+`TODO(pagbank)` comments in `pagbank.service.ts` before trusting it in
+production. Notably, the guest's optional gift message has no field to
+round-trip through PagBank's Checkout API the way Mercado Pago's `metadata`
+does — it comes back `null` from `PagBankService.getPayment()` today.

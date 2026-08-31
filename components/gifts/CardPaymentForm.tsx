@@ -8,10 +8,14 @@ import { AnimatedButton } from '../ui/AnimatedButton'
 export function CardPaymentForm({
   giftId,
   amount,
+  providerLabel,
 }: {
   giftId: string
   /** Set for open_item / fund — the amount the guest chose above. */
   amount: string | null
+  /** Display name of whichever provider is currently active — see
+   *  getActiveCardPaymentProvider(). */
+  providerLabel: string
 }) {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -113,7 +117,7 @@ export function CardPaymentForm({
       </AnimatedButton>
 
       <p className="text-center text-xs text-ink-muted">
-        Você será redirecionado ao Mercado Pago para concluir o pagamento com
+        Você será redirecionado ao {providerLabel} para concluir o pagamento com
         segurança 🔒
       </p>
     </form>

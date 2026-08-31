@@ -21,8 +21,10 @@ export type ReserveGiftConfirmedParams = {
   amount: number
   contributionId: string
   paymentMethod: 'card'
-  mpPaymentId: string
-}
+} & (
+  | { paymentProvider: 'mercado_pago'; mpPaymentId: string }
+  | { paymentProvider: 'pagbank'; pagbankPaymentId: string }
+)
 
 export interface IGiftsRepository {
   list(): Promise<Gift[]>

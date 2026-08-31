@@ -62,6 +62,7 @@ export async function POST(req: Request) {
       pixRepo,
       cardPaymentService,
       notificationService,
+      provider: 'mercado_pago',
     })(String(body.data.id))
   } catch (error) {
     console.error('[mercado-pago webhook] processing failed', error)

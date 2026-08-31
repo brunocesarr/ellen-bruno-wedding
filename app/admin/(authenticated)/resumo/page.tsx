@@ -219,7 +219,7 @@ export default async function ResumoPage() {
       {untiedPayments.length > 0 && (
         <SectionCard
           title="⚠️ Pagamentos sem presente vinculado"
-          description="Confirmados, mas o presente já não estava mais disponível quando o pagamento chegou. Verifique e reembolse pelo painel do Mercado Pago se necessário."
+          description="Confirmados, mas o presente já não estava mais disponível quando o pagamento chegou. Verifique e reembolse pelo painel do provedor correspondente (Mercado Pago ou PagBank) se necessário."
         >
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
@@ -228,7 +228,8 @@ export default async function ResumoPage() {
                   <th className="py-2 pr-4 font-medium">Convidado</th>
                   <th className="py-2 pr-4 font-medium">Valor</th>
                   <th className="py-2 pr-4 font-medium">Método</th>
-                  <th className="py-2 pr-4 font-medium">ID Mercado Pago</th>
+                  <th className="py-2 pr-4 font-medium">Provedor</th>
+                  <th className="py-2 pr-4 font-medium">ID do pagamento</th>
                   <th className="py-2 font-medium">Data</th>
                 </tr>
               </thead>
@@ -238,8 +239,15 @@ export default async function ResumoPage() {
                     <td className="py-2 pr-4">{p.guestName}</td>
                     <td className="py-2 pr-4">{formatCurrencyBRL(p.amount)}</td>
                     <td className="py-2 pr-4 uppercase">{p.paymentMethod}</td>
+                    <td className="py-2 pr-4">
+                      {p.paymentProvider === 'pagbank'
+                        ? 'PagBank'
+                        : p.paymentProvider === 'mercado_pago'
+                          ? 'Mercado Pago'
+                          : '—'}
+                    </td>
                     <td className="py-2 pr-4 font-mono text-xs">
-                      {p.mpPaymentId ?? '—'}
+                      {p.mpPaymentId ?? p.pagbankPaymentId ?? '—'}
                     </td>
                     <td className="py-2">
                       {p.createdAt.toLocaleDateString('pt-BR')}

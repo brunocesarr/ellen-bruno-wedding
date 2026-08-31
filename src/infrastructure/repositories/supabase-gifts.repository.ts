@@ -123,7 +123,11 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
       p_amount: p.amount,
       p_contribution_id: p.contributionId,
       p_payment_method: p.paymentMethod,
-      p_mp_payment_id: p.mpPaymentId,
+      p_payment_provider: p.paymentProvider,
+      p_mp_payment_id:
+        p.paymentProvider === 'mercado_pago' ? p.mpPaymentId : null,
+      p_pagbank_payment_id:
+        p.paymentProvider === 'pagbank' ? p.pagbankPaymentId : null,
     } satisfies ReserveGiftPaidArgs
 
     const { data, error } = await this.client.rpc('reserve_gift_paid', args)
