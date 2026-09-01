@@ -16,7 +16,8 @@ const nextConfig: NextConfig = {
       '@radix-ui/react-toast',
       'react-hook-form',
     ],
-    serverActions: { bodySizeLimit: '5mb' },
+    proxyClientMaxBodySize: '20mb',
+    serverActions: { bodySizeLimit: '20mb' },
   },
 
   images: {
