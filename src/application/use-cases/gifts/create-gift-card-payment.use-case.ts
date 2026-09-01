@@ -2,6 +2,7 @@ import type { IGiftsRepository } from '@/src/application/repositories/gifts.repo
 import type { ICardPaymentService } from '@/src/application/services/card-payment.service.interface'
 import { ValidationError } from '@/src/entities/errors/common'
 import {
+  CardPaymentUnavailableError,
   GiftAlreadyReservedError,
   GiftAmountRequiredError,
   GiftAmountTooLowError,
@@ -14,6 +15,10 @@ import { z } from 'zod'
 type Deps = {
   giftsRepo: IGiftsRepository
   cardPaymentService: ICardPaymentService
+  /** See isCardPaymentAvailable() in get-card-payment-service.ts — injected
+   *  rather than imported directly so this use case depends only on a
+   *  function shape, not on infrastructure. */
+  isCardPaymentAvailable: (amount: number | null) => boolean
 }
 
 /**
@@ -46,6 +51,10 @@ export function createGiftCardPaymentUseCase(d: Deps) {
         throw new GiftAmountTooLowError(gift.minAmount)
       }
       chargeAmount = amount
+    }
+
+    if (!d.isCardPaymentAvailable(chargeAmount)) {
+      throw new CardPaymentUnavailableError()
     }
 
     const contributionId = randomUUID()

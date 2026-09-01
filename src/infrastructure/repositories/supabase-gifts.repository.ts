@@ -49,6 +49,7 @@ const mapRow = (r: GiftTotalsRow): Gift => ({
   minAmount: r.min_amount == null ? null : num(r.min_amount),
   suggestedAmounts: (r.suggested_amounts ?? []).map((a) => num(a)),
   goalAmount: r.goal_amount == null ? null : num(r.goal_amount),
+  paymentLink: r.payment_link ?? null,
   confirmedTotal: num(r.confirmed_total),
   pledgedTotal: num(r.pledged_total),
   contributorCount: num(r.contributor_count),
@@ -162,6 +163,7 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
       min_amount: isFixed ? null : (data.minAmount ?? null),
       suggested_amounts: isFixed ? [] : data.suggestedAmounts,
       goal_amount: data.kind === 'fund' ? (data.goalAmount ?? null) : null,
+      payment_link: isFixed ? (data.paymentLink ?? null) : null,
     } satisfies GiftInsert
 
     const { data: row, error } = await this.client
@@ -202,6 +204,7 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
       payload.suggested_amounts = isFixed ? [] : (rest.suggestedAmounts ?? [])
       payload.goal_amount =
         rest.kind === 'fund' ? (rest.goalAmount ?? null) : null
+      payload.payment_link = isFixed ? (rest.paymentLink ?? null) : null
     }
 
     const { error } = await this.client
@@ -218,5 +221,26 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
   async delete(id: string): Promise<void> {
     const { error } = await this.client.from('gifts').delete().eq('id', id)
     if (error) throw mapSentinel(error.message ?? '') ?? error
+  }
+
+  async markReservedManually(p: {
+    id: string
+    reservedByName: string
+  }): Promise<Gift> {
+    const payload = {
+      is_reserved: true,
+      reserved_by_name: p.reservedByName,
+      reserved_at: new Date().toISOString(),
+    } satisfies GiftUpdate
+
+    const { error } = await this.client
+      .from('gifts')
+      .update(payload)
+      .eq('id', p.id)
+    if (error) throw mapSentinel(error.message ?? '') ?? error
+
+    const updated = await this.getById(p.id)
+    if (!updated) throw new GiftNotFoundError()
+    return updated
   }
 }

@@ -367,6 +367,10 @@ Pago) and `PAGBANK_TOKEN`, `PAGBANK_ENVIRONMENT` (optional — `sandbox`/
 `production`, defaults to `sandbox`) for PagBank. `CARD_PAYMENT_PROVIDER`
 (optional — `mercado_pago`/`pagbank`, defaults to `mercado_pago`) picks which
 one new checkouts are created with — see the Card payments section below.
+`ENABLE_CARD_PAYMENT_TYPE` (optional — `'true'` to enable, anything else/unset
+disables) is the master feature flag for the card payment option; see
+`isCardPaymentFeatureEnabled()` / `isCardPaymentAvailable()` in
+`get-card-payment-service.ts`.
 
 Email is sent via Gmail SMTP + OAuth2
 (`src/infrastructure/services/nodemailer-email.service.ts`), not plain
@@ -378,9 +382,9 @@ re-fetching an OAuth access token from Google before every send. If `EMAIL_FROM`
 doesn't resolve to the same address as `GMAIL_USER`, it logs a DMARC-alignment
 warning but still sends.
 
-No `.env.example` is committed (`.gitignore` excludes all `.env*`) despite the
-README referencing one — ask the user for values rather than assuming the file
-exists.
+`.env.example` lists every var name (no values) and is committed via an
+explicit `!.env.example` negation in `.gitignore` (which otherwise excludes
+all `.env*`) — keep it in sync when adding/removing an env var.
 
 Admin alert for new RSVP requests is sent via a Telegram bot
 (`src/infrastructure/services/telegram-notification.service.ts`):
@@ -481,3 +485,24 @@ PagBank's docs, not yet confirmed against a real sandbox response — see the
 production. Notably, the guest's optional gift message has no field to
 round-trip through PagBank's Checkout API the way Mercado Pago's `metadata`
 does — it comes back `null` from `PagBankService.getPayment()` today.
+
+**Card payment is gated by a flag and a minimum amount.**
+`isCardPaymentFeatureEnabled()` reads `ENABLE_CARD_PAYMENT_TYPE`;
+`isCardPaymentAvailable(amount)` additionally requires `amount >
+MIN_CARD_PAYMENT_AMOUNT` (`src/lib/constants.ts`, currently R$10). Both the UI
+(`GiftPaymentSection`, which greys out the Cartão tab with a hint rather than
+hiding it) and `createGiftCardPaymentUseCase` (injected as
+`isCardPaymentAvailable` — a use case must not import infrastructure
+directly) enforce this, so the checkout action can't be reached below the
+threshold or with the flag off even by calling it directly.
+
+**`gifts.payment_link`** (fixed_item only — CHECK-constrained, see
+`gifts_payment_link_kind_valid`) lets an admin attach an external checkout
+URL to a specific gift. When set, the guest is redirected straight there
+instead of through `CardPaymentForm`/the configured provider. This is a
+one-way door with no webhook: the gift stays unreserved until an admin uses
+the "Marcar como pago" action in `GiftsTable` (`markGiftPaidManuallyAction` →
+`markGiftPaidManuallyUseCase` → `giftsRepo.markReservedManually`), which
+writes `is_reserved`/`reserved_by_name`/`reserved_at` directly — bypassing the
+`reserve_gift`/`reserve_gift_paid` RPCs and their `pix_confirmations` ledger
+row entirely, since there is no payment event to record.

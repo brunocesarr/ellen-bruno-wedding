@@ -1,5 +1,6 @@
 import { ValidationError } from '@/src/entities/errors/common'
 import {
+  CardPaymentUnavailableError,
   GiftAlreadyReservedError,
   GiftAmountRequiredError,
   GiftAmountTooLowError,
@@ -27,6 +28,7 @@ const gift = (overrides: Partial<Gift> = {}): Gift => ({
   minAmount: null,
   suggestedAmounts: [],
   goalAmount: null,
+  paymentLink: null,
   confirmedTotal: 0,
   pledgedTotal: 0,
   contributorCount: 0,
@@ -53,12 +55,15 @@ const cardPaymentService = () => ({
 
 const validInput = { giftId: ID, name: 'Ana Souza', email: 'ana@example.com' }
 
+const isCardPaymentAvailable = () => true
+
 describe('createGiftCardPaymentUseCase', () => {
   it('rejects a malformed gift id', async () => {
     await expect(
       createGiftCardPaymentUseCase({
         giftsRepo: giftsRepo() as never,
         cardPaymentService: cardPaymentService(),
+        isCardPaymentAvailable,
       })({ giftId: 'nope', name: 'Ana' })
     ).rejects.toBeInstanceOf(ValidationError)
   })
@@ -71,6 +76,7 @@ describe('createGiftCardPaymentUseCase', () => {
       createGiftCardPaymentUseCase({
         giftsRepo: repo as never,
         cardPaymentService: cardPaymentService(),
+        isCardPaymentAvailable,
       })(validInput)
     ).rejects.toBeInstanceOf(GiftNotFoundError)
   })
@@ -80,6 +86,7 @@ describe('createGiftCardPaymentUseCase', () => {
       createGiftCardPaymentUseCase({
         giftsRepo: giftsRepo({ isReserved: true }) as never,
         cardPaymentService: cardPaymentService(),
+        isCardPaymentAvailable,
       })(validInput)
     ).rejects.toBeInstanceOf(GiftAlreadyReservedError)
   })
@@ -96,6 +103,7 @@ describe('createGiftCardPaymentUseCase', () => {
     await createGiftCardPaymentUseCase({
       giftsRepo: repo as never,
       cardPaymentService: service,
+      isCardPaymentAvailable,
     })({ ...validInput, amount: 100 })
 
     expect(service.createPreference).toHaveBeenCalledOnce()
@@ -108,6 +116,7 @@ describe('createGiftCardPaymentUseCase', () => {
     await createGiftCardPaymentUseCase({
       giftsRepo: repo as never,
       cardPaymentService: service,
+      isCardPaymentAvailable,
     })({ ...validInput, amount: 1 })
 
     expect(service.createPreference).toHaveBeenCalledWith(
@@ -120,6 +129,7 @@ describe('createGiftCardPaymentUseCase', () => {
       createGiftCardPaymentUseCase({
         giftsRepo: giftsRepo({ kind: 'open_item', price: null }) as never,
         cardPaymentService: cardPaymentService(),
+        isCardPaymentAvailable,
       })(validInput)
     ).rejects.toBeInstanceOf(GiftAmountRequiredError)
   })
@@ -133,6 +143,7 @@ describe('createGiftCardPaymentUseCase', () => {
           minAmount: 50,
         }) as never,
         cardPaymentService: cardPaymentService(),
+        isCardPaymentAvailable,
       })({ ...validInput, amount: 10 })
     ).rejects.toBeInstanceOf(GiftAmountTooLowError)
   })
@@ -143,6 +154,7 @@ describe('createGiftCardPaymentUseCase', () => {
     await createGiftCardPaymentUseCase({
       giftsRepo: giftsRepo() as never,
       cardPaymentService: service,
+      isCardPaymentAvailable,
     })(validInput)
 
     expect(service.createPreference).toHaveBeenCalledWith(
@@ -156,6 +168,7 @@ describe('createGiftCardPaymentUseCase', () => {
     await createGiftCardPaymentUseCase({
       giftsRepo: giftsRepo() as never,
       cardPaymentService: service,
+      isCardPaymentAvailable,
     })(validInput)
 
     expect(service.createPreference.mock.calls[0]?.[0].contributionId).toMatch(
@@ -168,10 +181,33 @@ describe('createGiftCardPaymentUseCase', () => {
     const result = await createGiftCardPaymentUseCase({
       giftsRepo: repo as never,
       cardPaymentService: cardPaymentService(),
+      isCardPaymentAvailable,
     })(validInput)
 
     expect(result).toEqual({ checkoutUrl: 'https://mp.example/checkout/abc' })
     expect(repo.reserve).not.toHaveBeenCalled()
     expect(repo.reserveConfirmed).not.toHaveBeenCalled()
+  })
+
+  it('throws CardPaymentUnavailableError when the flag/threshold check fails', async () => {
+    await expect(
+      createGiftCardPaymentUseCase({
+        giftsRepo: giftsRepo() as never,
+        cardPaymentService: cardPaymentService(),
+        isCardPaymentAvailable: () => false,
+      })(validInput)
+    ).rejects.toBeInstanceOf(CardPaymentUnavailableError)
+  })
+
+  it('passes the resolved charge amount (not the raw request) to the eligibility check', async () => {
+    const check = vi.fn().mockReturnValue(true)
+
+    await createGiftCardPaymentUseCase({
+      giftsRepo: giftsRepo({ price: 350 }) as never,
+      cardPaymentService: cardPaymentService(),
+      isCardPaymentAvailable: check,
+    })({ ...validInput, amount: 1 })
+
+    expect(check).toHaveBeenCalledWith(350)
   })
 })

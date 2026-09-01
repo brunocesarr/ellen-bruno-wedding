@@ -91,6 +91,7 @@ export type Database = {
           kind: Database['public']['Enums']['gift_kind']
           min_amount: number | null
           name: string
+          payment_link: string | null
           price: number | null
           reserved_at: string | null
           reserved_by_email: string | null
@@ -109,6 +110,7 @@ export type Database = {
           kind?: Database['public']['Enums']['gift_kind']
           min_amount?: number | null
           name: string
+          payment_link?: string | null
           price?: number | null
           reserved_at?: string | null
           reserved_by_email?: string | null
@@ -127,6 +129,7 @@ export type Database = {
           kind?: Database['public']['Enums']['gift_kind']
           min_amount?: number | null
           name?: string
+          payment_link?: string | null
           price?: number | null
           reserved_at?: string | null
           reserved_by_email?: string | null
@@ -468,6 +471,7 @@ export type Database = {
           kind: Database['public']['Enums']['gift_kind'] | null
           min_amount: number | null
           name: string | null
+          payment_link: string | null
           pledged_total: number | null
           price: number | null
           reserved_at: string | null
@@ -549,6 +553,7 @@ export type Database = {
           kind: Database['public']['Enums']['gift_kind'] | null
           min_amount: number | null
           name: string | null
+          payment_link: string | null
           pledged_total: number | null
           price: number | null
           reserved_at: string | null
@@ -589,6 +594,7 @@ export type Database = {
           kind: Database['public']['Enums']['gift_kind'] | null
           min_amount: number | null
           name: string | null
+          payment_link: string | null
           pledged_total: number | null
           price: number | null
           reserved_at: string | null

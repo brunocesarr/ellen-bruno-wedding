@@ -44,6 +44,7 @@ export const GiftSchema = z.object({
   minAmount: z.number().positive().nullable(),
   suggestedAmounts: z.array(z.number().positive()),
   goalAmount: z.number().positive().nullable(),
+  paymentLink: z.string().url().nullable(), // fixed_item only
   confirmedTotal: z.number(),
   pledgedTotal: z.number(),
   contributorCount: z.number().int(),
@@ -64,6 +65,7 @@ const GiftInputBase = z.object({
   minAmount: money().optional(),
   suggestedAmounts: z.array(money()).max(4).default([]),
   goalAmount: money(1_000_000).optional(),
+  paymentLink: z.string().url('Informe uma URL válida').optional(),
 })
 
 /**
@@ -90,12 +92,19 @@ const kindRules = (v: z.infer<typeof GiftInputBase>, ctx: z.RefinementCtx) => {
         path: ['suggestedAmounts'],
         message: 'Não se aplica a preço fixo',
       })
-  } else if (v.price != null) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['price'],
-      message: 'Remova o preço fixo',
-    })
+  } else {
+    if (v.price != null)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['price'],
+        message: 'Remova o preço fixo',
+      })
+    if (v.paymentLink != null)
+      ctx.addIssue({
+        code: 'custom',
+        path: ['paymentLink'],
+        message: 'Link de pagamento só se aplica a preço fixo',
+      })
   }
 
   if (v.kind !== 'fund' && v.goalAmount != null)

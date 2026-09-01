@@ -5,6 +5,7 @@ import { GiftNotFoundError } from '@/src/entities/errors/gifts'
 import {
   CARD_PAYMENT_PROVIDER_LABELS,
   getActiveCardPaymentProvider,
+  isCardPaymentFeatureEnabled,
 } from '@/src/infrastructure/services/get-card-payment-service'
 import { getGiftDetailController } from '@/src/interface-adapters/controllers/gifts/get-gift-detail.controller'
 import type { Metadata } from 'next'
@@ -43,6 +44,7 @@ export default async function GiftDetailPage({
   const { giftView, pix, reservation } = detail
   const cardProviderLabel =
     CARD_PAYMENT_PROVIDER_LABELS[getActiveCardPaymentProvider()]
+  const cardPaymentFeatureEnabled = isCardPaymentFeatureEnabled()
 
   return (
     <main className="bg-cream">
@@ -50,6 +52,7 @@ export default async function GiftDetailPage({
       <GiftPaymentSection
         giftId={reservation.giftId}
         kind={giftView.kind}
+        price={giftView.price}
         minAmount={giftView.minAmount}
         suggestedAmounts={giftView.suggestedAmounts}
         goalAmount={giftView.goalAmount}
@@ -63,6 +66,8 @@ export default async function GiftDetailPage({
         reservedByName={reservation.reservedByName}
         reservedMessage={reservation.reservedMessage}
         cardProviderLabel={cardProviderLabel}
+        cardPaymentFeatureEnabled={cardPaymentFeatureEnabled}
+        paymentLink={giftView.paymentLink}
       />
     </main>
   )

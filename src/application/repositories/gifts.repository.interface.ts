@@ -42,4 +42,14 @@ export interface IGiftsRepository {
   create(data: CreateGiftInput): Promise<Gift>
   update(data: UpdateGiftInput): Promise<Gift>
   delete(id: string): Promise<void>
+  /**
+   * Admin-only: directly flips is_reserved without the reserve_gift RPC or a
+   * pix_confirmations ledger row. For gifts paid through an external
+   * payment_link, where no webhook ever confirms the payment — the admin is
+   * the one reconciling it after seeing the payment land elsewhere.
+   */
+  markReservedManually(params: {
+    id: string
+    reservedByName: string
+  }): Promise<Gift>
 }

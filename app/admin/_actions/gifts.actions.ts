@@ -8,6 +8,7 @@ import {
   deleteGiftController,
   updateGiftController,
 } from '@/src/interface-adapters/controllers/gifts/manage-gift.controller'
+import { markGiftPaidManuallyController } from '@/src/interface-adapters/controllers/gifts/mark-gift-paid.controller'
 import { getFile, getOptionalString } from '@/src/lib/form-data'
 import { revalidateGroup } from '@/src/lib/revalidate'
 import type { ActionResult } from '@/src/lib/server-action-result'
@@ -66,6 +67,9 @@ function readGiftFields(formData: FormData) {
     goalAmount:
       kind === 'fund' ? getOptionalString(formData, 'goalAmount') : undefined,
     suggestedAmounts: isFixed ? [] : parseSuggested(formData),
+    paymentLink: isFixed
+      ? getOptionalString(formData, 'paymentLink')
+      : undefined,
   }
 }
 
@@ -131,4 +135,13 @@ export async function deleteGiftAction(id: string) {
 
 export async function listGiftsAction() {
   return listGiftsController()
+}
+
+export async function markGiftPaidManuallyAction(
+  id: string,
+  reservedByName: string
+) {
+  const result = await markGiftPaidManuallyController({ id, reservedByName })
+  if (result.ok) revalidateGroup('gifts')
+  return result
 }

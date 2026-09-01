@@ -34,6 +34,12 @@ export const WEDDING_DETAILS: WeddingDetails = {
   ],
 }
 
+// Card payment is gated behind this minimum — small charges eat
+// disproportionately into processor fees. Client-safe (no server secrets),
+// unlike get-card-payment-service.ts, so gift payment UI can import it
+// directly to compute Cartão-tab eligibility.
+export const MIN_CARD_PAYMENT_AMOUNT = 10 // reais
+
 export const SECTION_IDS = {
   hero: 'hero',
   monogram: 'monogram',

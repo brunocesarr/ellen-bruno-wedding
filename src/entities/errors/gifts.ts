@@ -38,3 +38,9 @@ export class GiftHasContributionsError extends Error {
     this.name = 'GiftHasContributionsError'
   }
 }
+export class CardPaymentUnavailableError extends Error {
+  constructor() {
+    super('Pagamento por cartão indisponível para este valor.')
+    this.name = 'CardPaymentUnavailableError'
+  }
+}

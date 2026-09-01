@@ -1,9 +1,18 @@
 'use client'
 
-import { deleteGiftAction } from '@/app/admin/_actions/gifts.actions'
+import {
+  deleteGiftAction,
+  markGiftPaidManuallyAction,
+} from '@/app/admin/_actions/gifts.actions'
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
-import { Gift as GiftIcon, Pencil, Search, Trash2 } from 'lucide-react'
+import {
+  CheckCircle2,
+  Gift as GiftIcon,
+  Pencil,
+  Search,
+  Trash2,
+} from 'lucide-react'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { useMemo, useState, useTransition } from 'react'
@@ -21,6 +30,11 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
   const [pending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
 
+  const [paidTarget, setPaidTarget] = useState<GiftViewModel | null>(null)
+  const [paidName, setPaidName] = useState('')
+  const [paidPending, startPaidTransition] = useTransition()
+  const [paidError, setPaidError] = useState<string | null>(null)
+
   const closeDialog = () => {
     if (pending) return
     setTarget(null)
@@ -37,6 +51,37 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
       router.refresh()
     })
   }
+
+  const closePaidDialog = () => {
+    if (paidPending) return
+    setPaidTarget(null)
+    setPaidName('')
+    setPaidError(null)
+  }
+
+  const confirmMarkPaid = () => {
+    if (!paidTarget) return
+    if (!paidName.trim()) {
+      setPaidError('Informe quem pagou')
+      return
+    }
+    setPaidError(null)
+    startPaidTransition(async () => {
+      const res = await markGiftPaidManuallyAction(
+        paidTarget.id,
+        paidName.trim()
+      )
+      if (!res.ok) return setPaidError(res.error)
+      setPaidTarget(null)
+      setPaidName('')
+      router.refresh()
+    })
+  }
+
+  // Only meaningful for a fixed_item gift with its own payment_link — the
+  // guest is redirected off-site there, so no webhook ever confirms it.
+  const canMarkPaidManually = (g: GiftViewModel) =>
+    g.kind === 'fixed_item' && Boolean(g.paymentLink) && g.status === 'pending'
 
   const filtered = useMemo(() => {
     return gifts.filter((g) => {
@@ -136,6 +181,16 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
+                    {canMarkPaidManually(g) && (
+                      <button
+                        onClick={() => setPaidTarget(g)}
+                        className="rounded-lg p-2 text-emerald-600 hover:bg-emerald-50"
+                        aria-label="Marcar como pago"
+                        title="Marcar como pago"
+                      >
+                        <CheckCircle2 className="h-4 w-4" />
+                      </button>
+                    )}
                     <GiftFormDialog
                       gift={g}
                       trigger={
@@ -195,7 +250,15 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
                 )}
               </div>
             </div>
-            <div className="mt-3 flex justify-end gap-2">
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
+              {canMarkPaidManually(g) && (
+                <button
+                  onClick={() => setPaidTarget(g)}
+                  className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-3 py-1.5 text-sm text-emerald-700"
+                >
+                  <CheckCircle2 className="h-3.5 w-3.5" /> Marcar como pago
+                </button>
+              )}
               <GiftFormDialog
                 gift={g}
                 trigger={
@@ -235,6 +298,46 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
         pendingLabel="Removendo..."
         cancelLabel="Cancelar"
         onConfirm={confirmDelete}
+      />
+
+      <ConfirmDialog
+        open={paidTarget !== null}
+        onOpenChange={(open) => (open ? null : closePaidDialog())}
+        tone="primary"
+        pending={paidPending}
+        error={paidError}
+        title="Marcar como pago?"
+        description={
+          paidTarget ? (
+            <div className="space-y-3">
+              <p>
+                Use isto quando o convidado pagou pelo link de pagamento de{' '}
+                <strong className="text-stone-800">{paidTarget.name}</strong> —
+                não há confirmação automática para esse fluxo.
+              </p>
+              <div>
+                <label
+                  htmlFor="paid-by-name"
+                  className="mb-1 block text-xs font-medium text-stone-600"
+                >
+                  Quem pagou
+                </label>
+                <input
+                  id="paid-by-name"
+                  value={paidName}
+                  onChange={(e) => setPaidName(e.target.value)}
+                  disabled={paidPending}
+                  placeholder="Nome do convidado"
+                  className="w-full rounded-lg border border-stone-300 px-3 py-2 text-sm outline-none focus:border-emerald-600"
+                />
+              </div>
+            </div>
+          ) : null
+        }
+        confirmLabel="Marcar como pago"
+        pendingLabel="Salvando..."
+        cancelLabel="Cancelar"
+        onConfirm={confirmMarkPaid}
       />
     </div>
   )

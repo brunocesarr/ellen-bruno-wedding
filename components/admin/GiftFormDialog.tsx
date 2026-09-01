@@ -424,6 +424,29 @@ export function GiftFormDialog({ trigger, gift }: Props) {
                 </Field>
               )}
 
+              {kind === 'fixed_item' && (
+                <div className="sm:col-span-2">
+                  <Field
+                    label="Link de pagamento — opcional"
+                    error={fieldError('paymentLink')}
+                  >
+                    <input
+                      name="paymentLink"
+                      type="url"
+                      defaultValue={gift?.paymentLink ?? ''}
+                      placeholder="https://..."
+                      disabled={isPending}
+                      className={inputClassName}
+                    />
+                  </Field>
+
+                  <p className="mt-1 text-[11px] text-stone-400">
+                    Se preenchido, o convidado é levado direto a este link ao
+                    pagar com cartão, em vez de usar o checkout padrão.
+                  </p>
+                </div>
+              )}
+
               {kind === 'fund' && (
                 <Field
                   label="Meta (R$) — opcional"

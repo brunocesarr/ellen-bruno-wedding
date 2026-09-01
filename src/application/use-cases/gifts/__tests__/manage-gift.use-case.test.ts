@@ -70,6 +70,19 @@ describe('createGiftUseCase — fixed_item', () => {
       })
     ).rejects.toBeInstanceOf(ValidationError)
   })
+
+  it('accepts a payment link', async () => {
+    const d = deps()
+    await createGiftUseCase(d as never)({
+      ...base,
+      kind: 'fixed_item',
+      price: '100',
+      paymentLink: 'https://pay.example/abc',
+    })
+    expect(d.giftsRepo.create).toHaveBeenCalledWith(
+      expect.objectContaining({ paymentLink: 'https://pay.example/abc' })
+    )
+  })
 })
 
 describe('createGiftUseCase — open_item', () => {

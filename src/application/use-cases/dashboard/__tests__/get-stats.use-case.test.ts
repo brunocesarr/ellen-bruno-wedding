@@ -22,6 +22,7 @@ const gift = (overrides: Partial<Gift> = {}): Gift => ({
   minAmount: null,
   suggestedAmounts: [],
   goalAmount: null,
+  paymentLink: null,
   confirmedTotal: 0,
   pledgedTotal: 0,
   contributorCount: 0,

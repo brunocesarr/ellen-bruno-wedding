@@ -22,6 +22,7 @@ export type GiftViewModel = {
   minAmount: number | null
   suggestedAmounts: number[]
   goalAmount: number | null
+  paymentLink: string | null
   confirmedTotal: number
   pledgedTotal: number
   contributorCount: number
@@ -70,6 +71,7 @@ export function toGiftViewModel(
     minAmount: g.minAmount,
     suggestedAmounts: g.suggestedAmounts,
     goalAmount: g.goalAmount,
+    paymentLink: g.paymentLink,
     confirmedTotal: g.confirmedTotal,
     pledgedTotal: g.pledgedTotal,
     contributorCount: g.contributorCount,

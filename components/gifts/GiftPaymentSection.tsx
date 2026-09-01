@@ -2,6 +2,7 @@
 
 import { generateGiftPixAction } from '@/app/(public)/_actions/gifts.actions'
 import type { GiftKind } from '@/src/entities/models/gift'
+import { MIN_CARD_PAYMENT_AMOUNT } from '@/src/lib/constants'
 import { motion } from 'motion/react'
 import Link from 'next/link'
 import { useState, useTransition } from 'react'
@@ -14,6 +15,8 @@ type PaymentMethod = 'pix' | 'card'
 type Props = {
   giftId: string
   kind: GiftKind
+  /** Only set for fixed_item — open_item/fund amounts are chosen by the guest. */
+  price: number | null
   minAmount: number | null
   suggestedAmounts: number[]
   goalAmount: number | null
@@ -29,6 +32,11 @@ type Props = {
   /** Display name of whichever card provider is currently active — see
    *  getActiveCardPaymentProvider(). */
   cardProviderLabel: string
+  /** See isCardPaymentFeatureEnabled() — the ENABLE_CARD_PAYMENT_TYPE flag. */
+  cardPaymentFeatureEnabled: boolean
+  /** Admin-set external checkout link (fixed_item only). When set, the guest
+   *  is redirected there instead of the CardPaymentForm/provider checkout. */
+  paymentLink: string | null
 }
 
 const brl = (n: number) =>
@@ -37,6 +45,7 @@ const brl = (n: number) =>
 export function GiftPaymentSection({
   giftId,
   kind,
+  price,
   minAmount,
   suggestedAmounts,
   goalAmount,
@@ -50,6 +59,8 @@ export function GiftPaymentSection({
   reservedByName,
   reservedMessage,
   cardProviderLabel,
+  cardPaymentFeatureEnabled,
+  paymentLink,
 }: Props) {
   const isOpenAmount = kind !== 'fixed_item'
 
@@ -70,6 +81,15 @@ export function GiftPaymentSection({
   // > 0 rather than truthiness — rejects "," or other unparseable input too.
   const chargeAmount = Number(amount.replace(',', '.'))
   const hasValidAmount = Number.isFinite(chargeAmount) && chargeAmount > 0
+
+  // Fixed_item's charge amount is the gift's own price; open_item/fund only
+  // know it once the guest types one in, so eligibility can only be checked
+  // once `amount` is non-empty and above the threshold.
+  const cardChargeAmount = isOpenAmount ? chargeAmount : (price ?? 0)
+  const hasQualifyingAmount = isOpenAmount
+    ? hasValidAmount && cardChargeAmount > MIN_CARD_PAYMENT_AMOUNT
+    : cardChargeAmount > MIN_CARD_PAYMENT_AMOUNT
+  const cardAvailableNow = cardPaymentFeatureEnabled && hasQualifyingAmount
 
   function handleAmountChange(next: string) {
     setAmount(next)
@@ -138,34 +158,46 @@ export function GiftPaymentSection({
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-16">
-      <div className="mb-10 flex justify-center">
-        <div className="inline-flex rounded-full border border-stone-200 bg-white p-1 shadow-sm">
-          <button
-            type="button"
-            onClick={() => setMethod('pix')}
-            className={`rounded-full px-5 py-2 text-sm font-medium transition ${
-              method === 'pix'
-                ? 'bg-terracotta text-white'
-                : 'text-ink-muted hover:text-ink'
-            }`}
-          >
-            Pix
-          </button>
-          <button
-            type="button"
-            onClick={() => setMethod('card')}
-            className={`rounded-full px-5 py-2 text-sm font-medium transition ${
-              method === 'card'
-                ? 'bg-terracotta text-white'
-                : 'text-ink-muted hover:text-ink'
-            }`}
-          >
-            Cartão
-          </button>
-        </div>
-      </div>
+      {cardPaymentFeatureEnabled && (
+        <div className="mb-10 flex flex-col items-center gap-2">
+          <div className="inline-flex rounded-full border border-stone-200 bg-white p-1 shadow-sm">
+            <button
+              type="button"
+              onClick={() => setMethod('pix')}
+              className={`rounded-full px-5 py-2 text-sm font-medium transition ${
+                method === 'pix'
+                  ? 'bg-terracotta text-white'
+                  : 'text-ink-muted hover:text-ink'
+              }`}
+            >
+              Pix
+            </button>
+            <button
+              type="button"
+              onClick={() => cardAvailableNow && setMethod('card')}
+              disabled={!cardAvailableNow}
+              className={`rounded-full px-5 py-2 text-sm font-medium transition ${
+                method === 'card'
+                  ? 'bg-terracotta text-white'
+                  : cardAvailableNow
+                    ? 'text-ink-muted hover:text-ink'
+                    : 'cursor-not-allowed text-ink-muted/40'
+              }`}
+            >
+              Cartão
+            </button>
+          </div>
 
-      {method === 'card' ? (
+          {!cardAvailableNow && (
+            <p className="text-xs text-ink-muted">
+              Pagamento por cartão disponível para valores acima de{' '}
+              {brl(MIN_CARD_PAYMENT_AMOUNT)}
+            </p>
+          )}
+        </div>
+      )}
+
+      {method === 'card' && cardPaymentFeatureEnabled ? (
         <div className="mx-auto max-w-xl">
           <header className="mb-8 text-center">
             <p className="eyebrow">Pagamento</p>
@@ -173,7 +205,9 @@ export function GiftPaymentSection({
               Pague com cartão
             </h2>
             <p className="mt-3 text-ink-muted">
-              Rápido e seguro, direto pelo {cardProviderLabel} 🤍
+              {paymentLink
+                ? 'Rápido e seguro 🤍'
+                : `Rápido e seguro, direto pelo ${cardProviderLabel} 🤍`}
             </p>
           </header>
 
@@ -230,9 +264,26 @@ export function GiftPaymentSection({
             </div>
           )}
 
-          {isOpenAmount && amount === '' ? (
+          {isOpenAmount && !hasQualifyingAmount ? (
             <div className="rounded-2xl border border-dashed border-stone-200 p-10 text-center text-sm text-ink-muted">
-              Escolha um valor acima para continuar 🤍
+              {amount === ''
+                ? 'Escolha um valor acima para continuar 🤍'
+                : `Pagamento por cartão disponível para valores acima de ${brl(MIN_CARD_PAYMENT_AMOUNT)} 🤍`}
+            </div>
+          ) : paymentLink ? (
+            <div className="space-y-6 rounded-3xl bg-white p-6 text-center shadow-sm md:p-8">
+              <p className="text-sm text-ink-muted">
+                Você será redirecionado para concluir o pagamento com segurança
+                🔒
+              </p>
+              <a
+                href={paymentLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-primary inline-flex items-center justify-center gap-2"
+              >
+                Pagar com cartão 💳
+              </a>
             </div>
           ) : (
             <CardPaymentForm
