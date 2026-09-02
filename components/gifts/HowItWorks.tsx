@@ -1,5 +1,5 @@
 import { Reveal, RevealItem, RevealStagger } from '@/components/ui/Reveal'
-import { Gift, Heart, QrCode, ShieldCheck } from 'lucide-react'
+import { Gift, HandCoins, Heart, ShieldCheck } from 'lucide-react'
 
 const STEPS = [
   {
@@ -8,9 +8,10 @@ const STEPS = [
     description: 'Veja a lista e selecione o que mais combina com você.',
   },
   {
-    icon: QrCode,
-    title: 'Pague pelo Pix',
-    description: 'Use o QR Code ou copie o código. Simples, rápido e seguro.',
+    icon: HandCoins,
+    title: 'Pague pelo Pix ou Link de Pagamento',
+    description:
+      'Use o QR Code ou copie o código ou Link de Pagamento PagSeguro. Simples, rápido e seguro.',
   },
   {
     icon: ShieldCheck,

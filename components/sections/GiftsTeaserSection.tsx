@@ -47,7 +47,11 @@ export async function GiftsTeaserSection({ token }: Props) {
                 contribuir com algo que celebre o início da nossa nova vida
                 juntos, preparamos esta lista com muito carinho. Pague de forma
                 simples e segura via{' '}
-                <strong className="text-amber-800">Pix</strong>.
+                <strong className="text-amber-800">Pix</strong> ou via{' '}
+                <strong className="text-amber-800">
+                  Link de Pagamento PagSeguro
+                </strong>
+                .
               </p>
 
               <div className="mt-8 flex flex-wrap gap-3">
