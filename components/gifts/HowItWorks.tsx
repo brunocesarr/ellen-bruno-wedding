@@ -9,9 +9,9 @@ const STEPS = [
   },
   {
     icon: HandCoins,
-    title: 'Pague pelo Pix ou Link de Pagamento',
+    title: 'Pague pelo Pix ou Cartão de Crédito',
     description:
-      'Use o QR Code ou copie o código ou Link de Pagamento PagSeguro. Simples, rápido e seguro.',
+      'Use o QR Code ou copie o código ou Cartão de Crédito. Simples, rápido e seguro.',
   },
   {
     icon: ShieldCheck,

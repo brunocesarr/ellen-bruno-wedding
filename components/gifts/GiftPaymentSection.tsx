@@ -158,7 +158,7 @@ export function GiftPaymentSection({
 
   return (
     <section className="mx-auto max-w-7xl px-6 py-16">
-      {cardPaymentFeatureEnabled && (
+      {cardPaymentFeatureEnabled && cardAvailableNow && (
         <div className="mb-10 flex flex-col items-center gap-2">
           <div className="inline-flex rounded-full border border-stone-200 bg-white p-1 shadow-sm">
             <button
@@ -188,10 +188,9 @@ export function GiftPaymentSection({
             </button>
           </div>
 
-          {!cardAvailableNow && (
+          {method === 'card' && (
             <p className="text-xs text-ink-muted">
-              Pagamento por cartão disponível para valores acima de{' '}
-              {brl(MIN_CARD_PAYMENT_AMOUNT)}
+              Pagamento por cartão disponível.
             </p>
           )}
         </div>

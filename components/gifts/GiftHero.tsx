@@ -64,7 +64,10 @@ export function GiftHero({ couplePhoto, emotionPhoto, foreverPhoto }: Props) {
             contribuir com algo que celebre o início da nossa nova vida juntos,
             preparamos esta lista com muito carinho. Pague de forma simples e
             segura via <strong className="text-ink">Pix</strong> ou via{' '}
-            <strong className="text-ink">Link de Pagamento PagSeguro</strong>.
+            <strong className="text-ink">
+              Cartão de Crédito - Link de Pagamento PagSeguro
+            </strong>
+            .
           </motion.p>
           <motion.div
             variants={fadeInUp}

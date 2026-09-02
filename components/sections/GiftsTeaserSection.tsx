@@ -49,7 +49,7 @@ export async function GiftsTeaserSection({ token }: Props) {
                 simples e segura via{' '}
                 <strong className="text-amber-800">Pix</strong> ou via{' '}
                 <strong className="text-amber-800">
-                  Link de Pagamento PagSeguro
+                  Cartão de Crédito - Link de Pagamento PagSeguro
                 </strong>
                 .
               </p>
