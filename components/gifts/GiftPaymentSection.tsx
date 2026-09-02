@@ -240,24 +240,29 @@ export function GiftPaymentSection({
               </div>
 
               {suggestedAmounts.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {suggestedAmounts.map((suggestion) => (
-                    <button
-                      key={suggestion}
-                      type="button"
-                      onClick={() => handleAmountChange(String(suggestion))}
-                      className={`
-                        rounded-full border px-4 py-1.5 text-sm transition
-                        ${
-                          amount === String(suggestion)
-                            ? 'border-terracotta bg-terracotta/10 text-terracotta-dark'
-                            : 'border-stone-200 text-ink-muted hover:border-terracotta/40'
-                        }
-                      `}
-                    >
-                      {brl(suggestion)}
-                    </button>
-                  ))}
+                <div>
+                  <p className="mb-1.5 block text-sm font-medium text-ink">
+                    Sugestões:
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {suggestedAmounts.map((suggestion) => (
+                      <button
+                        key={suggestion}
+                        type="button"
+                        onClick={() => handleAmountChange(String(suggestion))}
+                        className={`
+                          rounded-full border px-4 py-1.5 text-sm transition
+                          ${
+                            amount === String(suggestion)
+                              ? 'border-terracotta bg-terracotta/10 text-terracotta-dark'
+                              : 'border-stone-200 text-ink-muted hover:border-terracotta/40'
+                          }
+                        `}
+                      >
+                        {brl(suggestion)}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
