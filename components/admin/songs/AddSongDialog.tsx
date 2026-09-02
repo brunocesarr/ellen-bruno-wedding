@@ -1,6 +1,7 @@
 'use client'
 
 import { createSongAction } from '@/app/admin/_actions/songs.actions'
+import { createSupabaseBrowserClient } from '@/src/infrastructure/supabase/client'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Loader2, Music, Plus, X } from 'lucide-react'
 import type { ChangeEvent } from 'react'
@@ -10,6 +11,23 @@ const ALLOWED_AUDIO_TYPES = ['audio/mpeg', 'audio/mp3']
 const MAX_AUDIO_SIZE = 15 * 1024 * 1024
 
 type CreateSongState = Awaited<ReturnType<typeof createSongAction>> | null
+
+// Uploads go straight from the browser to Supabase Storage instead of
+// through the createSongAction Server Action — Netlify Functions cap
+// synchronous request bodies at 6MB, well under what an MP3 needs.
+async function uploadAudio(
+  file: File
+): Promise<{ ok: true; path: string } | { ok: false; error: string }> {
+  const path = `songs/${crypto.randomUUID()}.mp3`
+  const { error } = await createSupabaseBrowserClient()
+    .storage.from('wedding-audio')
+    .upload(path, file, { contentType: file.type })
+
+  if (error) {
+    return { ok: false, error: 'Falha ao enviar o áudio. Tente novamente.' }
+  }
+  return { ok: true, path }
+}
 
 export function AddSongDialog() {
   const [open, setOpen] = useState(false)
@@ -21,11 +39,26 @@ export function AddSongDialog() {
     previousState: CreateSongState,
     formData: FormData
   ): Promise<CreateSongState> => {
+    const file = formData.get('audio')
+    if (!(file instanceof File) || file.size === 0) {
+      return { ok: false as const, error: 'Selecione um arquivo de áudio.' }
+    }
+
+    const upload = await uploadAudio(file)
+    if (!upload.ok) return upload
+
+    formData.delete('audio')
+    formData.set('audioPath', upload.path)
+
     const result = await createSongAction(previousState, formData)
     if (result.ok) {
       formRef.current?.reset()
       setFileError(null)
       setOpen(false)
+    } else {
+      await createSupabaseBrowserClient()
+        .storage.from('wedding-audio')
+        .remove([upload.path])
     }
     return result
   }
