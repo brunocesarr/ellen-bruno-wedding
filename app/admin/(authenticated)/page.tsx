@@ -6,7 +6,13 @@ import { DonutChart } from '@/components/admin/charts/DonutChart'
 import { ReservationsChart } from '@/components/admin/charts/ReservationsChart'
 import { formatCurrencyBRL, formatRelativeTime } from '@/src/lib/format'
 import { unwrapForPage } from '@/src/lib/server-action-result'
-import { Gift, HeartHandshake, MessageCircleHeart, Wallet } from 'lucide-react'
+import {
+  Bell,
+  Gift,
+  HeartHandshake,
+  MessageCircleHeart,
+  Wallet,
+} from 'lucide-react'
 import Link from 'next/link'
 import { getDashboardStatsAction } from '../_actions/dashboard.actions'
 
@@ -27,6 +33,28 @@ export default async function AdminDashboard() {
             convidados.
           </p>
         </header>
+
+        {stats.requestsSummary.pending > 0 && (
+          <Link
+            href="/admin/solicitacoes"
+            className="flex items-center justify-between gap-4 rounded-2xl border border-amber-200 bg-amber-50 px-5 py-4 text-sm text-amber-800 transition hover:bg-amber-100"
+          >
+            <span className="flex items-center gap-3">
+              <Bell className="h-4 w-4 flex-shrink-0" />
+              <span>
+                <strong className="font-semibold">
+                  {stats.requestsSummary.pending}
+                </strong>{' '}
+                {stats.requestsSummary.pending === 1
+                  ? 'solicitação de convite aguardando aprovação'
+                  : 'solicitações de convite aguardando aprovação'}
+              </span>
+            </span>
+            <span className="flex-shrink-0 font-medium underline-offset-2 hover:underline">
+              Revisar →
+            </span>
+          </Link>
+        )}
 
         <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           <StatCard
@@ -61,15 +89,38 @@ export default async function AdminDashboard() {
           />
         </div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <SectionCard
-            className="lg:col-span-2"
-            title="Reservas ao longo do tempo"
-            description="Últimos 30 dias"
-          >
-            <ReservationsChart data={stats.timeline} />
-          </SectionCard>
+        <SectionCard
+          title="Financeiro"
+          description="Recebido, despesas pagas e saldo atual"
+        >
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <StatCard
+              label="Recebido"
+              value={formatCurrencyBRL(stats.totalReceived)}
+              accent="emerald"
+            />
+            <StatCard
+              label="Despesas pagas"
+              value={formatCurrencyBRL(stats.totalExpensesPaid)}
+              hint={`de ${formatCurrencyBRL(stats.totalExpenses)} previstos`}
+              accent="rose"
+            />
+            <StatCard
+              label="Saldo"
+              value={formatCurrencyBRL(stats.netBalance)}
+              accent={stats.netBalance >= 0 ? 'emerald' : 'rose'}
+            />
+          </div>
+        </SectionCard>
 
+        <SectionCard
+          title="Reservas ao longo do tempo"
+          description="Últimos 30 dias"
+        >
+          <ReservationsChart data={stats.timeline} />
+        </SectionCard>
+
+        <div className="grid gap-6 lg:grid-cols-2">
           <SectionCard
             title="Status dos presentes"
             description="Distribuição atual"
@@ -90,6 +141,31 @@ export default async function AdminDashboard() {
                   label: 'Agradecidos',
                   value: stats.byStatus.thanked,
                   color: '#a8763e',
+                },
+              ]}
+            />
+          </SectionCard>
+
+          <SectionCard
+            title="Confirmações de presença"
+            description="Distribuição por status"
+          >
+            <DonutChart
+              data={[
+                {
+                  label: 'Confirmados',
+                  value: stats.confirmedCount,
+                  color: '#65a37e',
+                },
+                {
+                  label: 'Pendentes',
+                  value: stats.pendingCount,
+                  color: '#d4a574',
+                },
+                {
+                  label: 'Recusados',
+                  value: stats.declinedCount,
+                  color: '#c97168',
                 },
               ]}
             />
