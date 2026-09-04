@@ -201,6 +201,7 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
             <PartyCard
               key={party.partyId}
               party={party}
+              allGuests={list}
               copiedToken={copiedToken}
               onCopyInvite={handleCopyInvite}
               onRequestDelete={deletion.request}

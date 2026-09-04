@@ -7,7 +7,8 @@ import {
   fullName,
   type GuestListCallbacks,
 } from '@/src/lib/guests'
-import { Copy, Link as LinkIcon, Pencil, Trash2 } from 'lucide-react'
+import { Copy, Link as LinkIcon, Pencil, Trash2, Users } from 'lucide-react'
+import { MoveGuestDialog } from './MoveGuestDialog'
 import { NotesIndicator } from './NotesIndicator'
 
 type Props = { guest: Guest; isHead: boolean } & GuestListCallbacks
@@ -15,6 +16,7 @@ type Props = { guest: Guest; isHead: boolean } & GuestListCallbacks
 export function GuestMobileCard({
   guest,
   isHead,
+  allGuests,
   copiedToken,
   onCopyInvite,
   onRequestDelete,
@@ -66,6 +68,19 @@ export function GuestMobileCard({
               className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"
             >
               <Pencil className="h-3.5 w-3.5" /> Editar
+            </button>
+          }
+        />
+        <MoveGuestDialog
+          guest={guest}
+          allGuests={allGuests}
+          onMoved={onSaved}
+          trigger={
+            <button
+              type="button"
+              className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"
+            >
+              <Users className="h-3.5 w-3.5" /> Mover
             </button>
           }
         />

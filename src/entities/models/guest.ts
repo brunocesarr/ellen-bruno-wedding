@@ -57,6 +57,12 @@ export type ConfirmAttendanceInput = z.infer<
   typeof ConfirmAttendanceInputSchema
 >
 
+export const AssignGuestPartyInputSchema = z.object({
+  guestId: z.string().uuid(),
+  targetGuestId: z.string().uuid(),
+})
+export type AssignGuestPartyInput = z.infer<typeof AssignGuestPartyInputSchema>
+
 export const RenameGuestNamesInputSchema = z.object({
   inviteToken: z.string().uuid('Convite inválido'),
 

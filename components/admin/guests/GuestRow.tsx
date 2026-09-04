@@ -6,7 +6,8 @@ import {
   fullName,
   type GuestListCallbacks,
 } from '@/src/lib/guests'
-import { Copy, Link as LinkIcon, Pencil, Trash2 } from 'lucide-react'
+import { Copy, Link as LinkIcon, Pencil, Trash2, Users } from 'lucide-react'
+import { MoveGuestDialog } from './MoveGuestDialog'
 import { NotesIndicator } from './NotesIndicator'
 
 type Props = { guest: Guest; isHead?: boolean } & GuestListCallbacks
@@ -14,6 +15,7 @@ type Props = { guest: Guest; isHead?: boolean } & GuestListCallbacks
 export function GuestRow({
   guest,
   isHead,
+  allGuests,
   copiedToken,
   onCopyInvite,
   onRequestDelete,
@@ -78,6 +80,21 @@ export function GuestRow({
                 aria-label="Editar"
               >
                 <Pencil className="h-4 w-4" />
+              </button>
+            }
+          />
+          <MoveGuestDialog
+            guest={guest}
+            allGuests={allGuests}
+            onMoved={onSaved}
+            trigger={
+              <button
+                type="button"
+                className="rounded-lg p-2 text-stone-500 hover:bg-stone-100"
+                aria-label="Mover para outro grupo"
+                title="Mover para outro grupo"
+              >
+                <Users className="h-4 w-4" />
               </button>
             }
           />

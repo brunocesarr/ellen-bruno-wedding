@@ -5,6 +5,7 @@ export type StatusFilter = 'all' | GuestStatus
 export type Party = { partyId: string; members: NonEmptyArray<Guest> }
 
 export type GuestListCallbacks = {
+  allGuests: Guest[]
   copiedToken: string | null
   onCopyInvite: (token: string) => void
   onRequestDelete: (guest: Guest) => void

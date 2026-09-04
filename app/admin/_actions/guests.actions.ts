@@ -1,5 +1,6 @@
 'use server'
 
+import { assignGuestPartyController } from '@/src/interface-adapters/controllers/guests/assign-guest-party.controller'
 import { createGuestController } from '@/src/interface-adapters/controllers/guests/create-guest.controller'
 import { deleteGuestController } from '@/src/interface-adapters/controllers/guests/delete-guest.controller'
 import { listGuestsController } from '@/src/interface-adapters/controllers/guests/list-guests.controller'
@@ -19,6 +20,12 @@ export async function createGuestAction(input: unknown) {
 
 export async function updateGuestAction(input: unknown) {
   const res = await updateGuestController(input)
+  if (res.ok) revalidateGroup('guests')
+  return res
+}
+
+export async function assignGuestPartyAction(input: unknown) {
+  const res = await assignGuestPartyController(input)
   if (res.ok) revalidateGroup('guests')
   return res
 }

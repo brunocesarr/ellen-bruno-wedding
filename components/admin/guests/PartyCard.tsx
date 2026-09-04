@@ -9,6 +9,7 @@ type Props = { party: Party } & GuestListCallbacks
 
 function PartyCardBase({
   party,
+  allGuests,
   copiedToken,
   onCopyInvite,
   onRequestDelete,
@@ -78,6 +79,7 @@ function PartyCardBase({
             <GuestRow
               guest={head}
               isHead
+              allGuests={allGuests}
               copiedToken={copiedToken}
               onCopyInvite={onCopyInvite}
               onRequestDelete={onRequestDelete}
@@ -87,6 +89,7 @@ function PartyCardBase({
               <GuestRow
                 key={g.id}
                 guest={g}
+                allGuests={allGuests}
                 copiedToken={copiedToken}
                 onCopyInvite={onCopyInvite}
                 onRequestDelete={onRequestDelete}
@@ -103,6 +106,7 @@ function PartyCardBase({
             key={g.id}
             guest={g}
             isHead={g.id === head.id}
+            allGuests={allGuests}
             copiedToken={copiedToken}
             onCopyInvite={onCopyInvite}
             onRequestDelete={onRequestDelete}
