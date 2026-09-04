@@ -1,6 +1,7 @@
 'use server'
 import { createGiftCardPaymentController } from '@/src/interface-adapters/controllers/gifts/create-gift-card-payment.controller'
 import { generateGiftPixController } from '@/src/interface-adapters/controllers/gifts/generate-gift-pix.controller'
+import { incrementGiftViewController } from '@/src/interface-adapters/controllers/gifts/increment-gift-view.controller'
 import { reserveGiftController } from '@/src/interface-adapters/controllers/gifts/reserve-gift.controller'
 import { getOptionalString, getString } from '@/src/lib/form-data'
 import { revalidateGroup } from '@/src/lib/revalidate'
@@ -45,4 +46,9 @@ export async function createGiftCardPaymentAction(input: {
   amount?: string
 }) {
   return createGiftCardPaymentController(input)
+}
+
+/** Best-effort view counter. Schedule with `after()`; never await in render. */
+export async function incrementGiftViewAction(giftId: string) {
+  return incrementGiftViewController(giftId)
 }

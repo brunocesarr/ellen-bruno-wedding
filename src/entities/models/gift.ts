@@ -47,6 +47,7 @@ export const GiftSchema = z.object({
   confirmedTotal: z.number(),
   pledgedTotal: z.number(),
   contributorCount: z.number().int(),
+  viewCount: z.number().int(),
 })
 export type Gift = z.infer<typeof GiftSchema>
 

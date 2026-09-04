@@ -52,6 +52,7 @@ const mapRow = (r: GiftTotalsRow): Gift => ({
   confirmedTotal: num(r.confirmed_total),
   pledgedTotal: num(r.pledged_total),
   contributorCount: num(r.contributor_count),
+  viewCount: num(r.view_count),
 })
 
 // Follows the existing error.message.includes(...) convention.
@@ -241,5 +242,12 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
     const updated = await this.getById(p.id)
     if (!updated) throw new GiftNotFoundError()
     return updated
+  }
+
+  async incrementView(id: string): Promise<void> {
+    const { error } = await this.client.rpc('increment_gift_view', {
+      p_gift_id: id,
+    })
+    if (error) throw error
   }
 }

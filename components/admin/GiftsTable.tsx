@@ -8,6 +8,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog'
 import { GiftViewModel } from '@/src/interface-adapters/view-models/gift.view-model'
 import {
   CheckCircle2,
+  Eye,
   Gift as GiftIcon,
   Pencil,
   Search,
@@ -138,6 +139,7 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
               <th className="px-4 py-3 font-medium">Valor</th>
               <th className="px-4 py-3 font-medium">Reservado por</th>
               <th className="px-4 py-3 font-medium">Status</th>
+              <th className="px-4 py-3 font-medium">Visualizações</th>
               <th className="px-4 py-3 text-right font-medium">Ações</th>
             </tr>
           </thead>
@@ -178,6 +180,9 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
                 </td>
                 <td className="px-4 py-3">
                   <StatusPill status={g.status} />
+                </td>
+                <td className="px-4 py-3 tabular-nums text-stone-600">
+                  {g.viewCount}
                 </td>
                 <td className="px-4 py-3">
                   <div className="flex justify-end gap-2">
@@ -248,6 +253,9 @@ export function GiftsTable({ gifts }: { gifts: GiftViewModel[] }) {
                     por {g.reservedBy}
                   </p>
                 )}
+                <p className="mt-1 flex items-center gap-1 text-xs text-stone-500">
+                  <Eye className="h-3 w-3" /> {g.viewCount} visualizações
+                </p>
               </div>
             </div>
             <div className="mt-3 flex flex-wrap justify-end gap-2">

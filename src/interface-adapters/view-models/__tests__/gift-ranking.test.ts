@@ -30,6 +30,7 @@ const gift = (over: Partial<GiftViewModel>): GiftViewModel =>
     contributorCount: 0,
     progressPct: null,
     amountLabel: 'R$ 100,00',
+    viewCount: 0,
     ...over,
   }) as GiftViewModel
 

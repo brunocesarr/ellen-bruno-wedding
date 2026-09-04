@@ -52,4 +52,6 @@ export interface IGiftsRepository {
     id: string
     reservedByName: string
   }): Promise<Gift>
+  /** Best-effort view counter for the public gift detail page. */
+  incrementView(id: string): Promise<void>
 }

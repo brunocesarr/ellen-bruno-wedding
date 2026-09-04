@@ -1,3 +1,4 @@
+import { incrementGiftViewAction } from '@/app/(public)/_actions/gifts.actions'
 import { GiftDetailHero } from '@/components/gifts/GiftDetailHero'
 import { GiftPaymentSection } from '@/components/gifts/GiftPaymentSection'
 import { getContainer } from '@/src/di/container'
@@ -10,6 +11,7 @@ import {
 import { getGiftDetailController } from '@/src/interface-adapters/controllers/gifts/get-gift-detail.controller'
 import type { Metadata } from 'next'
 import { notFound } from 'next/navigation'
+import { after } from 'next/server'
 
 export async function generateMetadata({
   params,
@@ -42,6 +44,11 @@ export default async function GiftDetailPage({
   }
 
   const { giftView, pix, reservation } = detail
+
+  after(async () => {
+    await incrementGiftViewAction(giftView.id)
+  })
+
   const cardProviderLabel =
     CARD_PAYMENT_PROVIDER_LABELS[getActiveCardPaymentProvider()]
   const cardPaymentFeatureEnabled = isCardPaymentFeatureEnabled()

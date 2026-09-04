@@ -27,6 +27,7 @@ export type GiftViewModel = {
   contributorCount: number
   progressPct: number | null
   amountLabel: string
+  viewCount: number
 }
 
 const brl = (n: number) =>
@@ -78,5 +79,6 @@ export function toGiftViewModel(
         ? Math.min(100, Math.round((g.confirmedTotal / g.goalAmount) * 100))
         : null,
     amountLabel,
+    viewCount: g.viewCount,
   }
 }

@@ -29,6 +29,7 @@ const gift = (overrides: Partial<Gift> = {}): Gift => ({
   confirmedTotal: 0,
   pledgedTotal: 0,
   contributorCount: 0,
+  viewCount: 0,
   ...overrides,
 })
 

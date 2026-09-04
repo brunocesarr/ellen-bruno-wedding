@@ -94,10 +94,10 @@ export type Database = {
           payment_link: string | null
           price: number | null
           reserved_at: string | null
-          reserved_by_email: string | null
           reserved_by_name: string | null
           reserved_message: string | null
           suggested_amounts: number[]
+          view_count: number
         }
         Insert: {
           category?: Database['public']['Enums']['gift_category']
@@ -113,10 +113,10 @@ export type Database = {
           payment_link?: string | null
           price?: number | null
           reserved_at?: string | null
-          reserved_by_email?: string | null
           reserved_by_name?: string | null
           reserved_message?: string | null
           suggested_amounts?: number[]
+          view_count?: number
         }
         Update: {
           category?: Database['public']['Enums']['gift_category']
@@ -132,10 +132,10 @@ export type Database = {
           payment_link?: string | null
           price?: number | null
           reserved_at?: string | null
-          reserved_by_email?: string | null
           reserved_by_name?: string | null
           reserved_message?: string | null
           suggested_amounts?: number[]
+          view_count?: number
         }
         Relationships: []
       }
@@ -475,10 +475,10 @@ export type Database = {
           pledged_total: number | null
           price: number | null
           reserved_at: string | null
-          reserved_by_email: string | null
           reserved_by_name: string | null
           reserved_message: string | null
           suggested_amounts: number[] | null
+          view_count: number | null
         }
         Relationships: []
       }
@@ -508,6 +508,7 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      increment_gift_view: { Args: { p_gift_id: string }; Returns: undefined }
       record_rsvp_notification: {
         Args: { p_error?: string; p_ok: boolean; p_request_id: string }
         Returns: {
@@ -557,10 +558,10 @@ export type Database = {
           pledged_total: number | null
           price: number | null
           reserved_at: string | null
-          reserved_by_email: string | null
           reserved_by_name: string | null
           reserved_message: string | null
           suggested_amounts: number[] | null
+          view_count: number | null
         }[]
         SetofOptions: {
           from: '*'
@@ -598,10 +599,10 @@ export type Database = {
           pledged_total: number | null
           price: number | null
           reserved_at: string | null
-          reserved_by_email: string | null
           reserved_by_name: string | null
           reserved_message: string | null
           suggested_amounts: number[] | null
+          view_count: number | null
         }[]
         SetofOptions: {
           from: '*'
