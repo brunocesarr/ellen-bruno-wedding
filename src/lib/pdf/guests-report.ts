@@ -4,10 +4,7 @@ import type { Guest, GuestStatus } from '@/src/entities/models/guest'
 import { fullName, STATUS_LABEL } from '@/src/lib/guests'
 import { renderReportPdf, type ReportColumn } from './report-document'
 
-const columns: ReportColumn[] = [
-  { header: 'Nome', width: '60%' },
-  { header: 'Observações', width: '40%' },
-]
+const columns: ReportColumn[] = [{ header: 'Nome', width: '100%' }]
 
 // Confirmado → Pendente → Não vai, matching the order used across the admin.
 const STATUS_ORDER: GuestStatus[] = ['going', 'pending', 'not_going']
@@ -31,7 +28,7 @@ export async function renderGuestsReportPdf(
 
     return {
       heading: `${STATUS_LABEL[status]} (${members.length})`,
-      rows: members.map((g) => [fullName(g), g.notes ?? '—']),
+      rows: members.map((g) => [fullName(g)]),
     }
   })
 
