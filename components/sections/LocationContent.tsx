@@ -1,5 +1,6 @@
 'use client'
 
+import { AddToCalendarButton } from '@/components/invite/AddToCalendarButton'
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { SmartImage } from '@/components/ui/SmartImage'
 import { WEDDING_DETAILS } from '@/src/lib/constants'
@@ -46,36 +47,40 @@ export function LocationContent({ venue }: { venue: ResolvedSiteImage }) {
           <p className="font-body text-sm text-warm-gray">{location.city}</p>
         </motion.div>
 
-        {location.mapUrl && (
-          <motion.a
-            href={location.mapUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="mt-4 inline-flex items-center gap-1.5 font-body text-xs font-medium uppercase tracking-wider text-dusty-blue-dark transition-colors hover:text-dusty-blue"
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-          >
-            <svg
-              className="h-3.5 w-3.5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-              strokeWidth={2}
+        <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1">
+          {location.mapUrl && (
+            <motion.a
+              href={location.mapUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-4 inline-flex items-center gap-1.5 font-body text-xs font-medium uppercase tracking-wider text-dusty-blue-dark transition-colors hover:text-dusty-blue"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-              />
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-              />
-            </svg>
-            Ver no mapa
-          </motion.a>
-        )}
+              <svg
+                className="h-3.5 w-3.5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                strokeWidth={2}
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                />
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                />
+              </svg>
+              Ver no mapa
+            </motion.a>
+          )}
+
+          <AddToCalendarButton />
+        </div>
       </div>
 
       <motion.div
