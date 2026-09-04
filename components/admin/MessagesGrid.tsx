@@ -2,7 +2,6 @@
 
 import { markAsThankedAction } from '@/app/admin/_actions/messages.actions'
 import { MessageViewModel } from '@/src/interface-adapters/view-models/message.view-model'
-import { type GuestMessage } from '@/src/lib/admin/messages'
 import { formatRelativeTime } from '@/src/lib/format'
 import {
   CheckCircle2,
@@ -39,7 +38,7 @@ function MessageItem({
   message,
   index,
 }: {
-  message: GuestMessage
+  message: MessageViewModel
   index: number
 }) {
   const [pending, startTransition] = useTransition()

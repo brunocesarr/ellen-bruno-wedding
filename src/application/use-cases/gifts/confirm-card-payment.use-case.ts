@@ -140,6 +140,7 @@ export function confirmCardPaymentUseCase(d: Deps) {
           buildUntiedPaymentAlert({
             buyerName: guestName,
             amount: payment.transactionAmount,
+            provider: d.provider,
           })
         )
         return

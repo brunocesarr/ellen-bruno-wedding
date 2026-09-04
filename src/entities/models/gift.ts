@@ -36,7 +36,6 @@ export const GiftSchema = z.object({
   imagePath: z.string().nullable(),
   isReserved: z.boolean(),
   reservedByName: z.string().nullable(),
-  reservedByEmail: z.string().nullable(),
   reservedMessage: z.string().nullable(),
   reservedAt: z.date().nullable(),
   category: GiftCategorySchema,

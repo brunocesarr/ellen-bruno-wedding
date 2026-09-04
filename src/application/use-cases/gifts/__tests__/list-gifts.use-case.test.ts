@@ -11,7 +11,6 @@ const gift = (over: Partial<Gift>): Gift =>
     imagePath: null,
     isReserved: false,
     reservedByName: null,
-    reservedByEmail: null,
     reservedMessage: null,
     reservedAt: null,
     category: 'other',

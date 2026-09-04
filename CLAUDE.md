@@ -89,16 +89,6 @@ it relies on the authenticated layout. (Its `Deps` still lists `pixRepo` — the
 field is dead, kept only because deleting it isn't worth a signature churn; the
 file itself says so.)
 
-**Not every admin mutation goes through this pipeline.** `src/lib/admin/gifts.ts`
-and `src/lib/admin/messages.ts` are pre-Clean-Architecture `'use server'` files
-that query Supabase directly (no repository, no use case, no controller) and
-call `revalidatePath` with a hardcoded list instead of `revalidateGroup`.
-`GiftsTable.tsx` still calls `deleteGift` from there, and `MessagesGrid.tsx`
-imports its `GuestMessage` type — both components otherwise render data that
-_did_ come through `listGiftsAction` / `listMessagesAction`. Don't extend
-these two files; migrate the call site to the real use-case/controller/action
-stack when you touch it instead.
-
 **`getContainer()` / `getPublicContainer()`** are wrapped in React `cache()`, so
 the Supabase client + repositories are built once per request even when several
 controllers resolve the container in one render.
@@ -249,8 +239,10 @@ uuid)` locks `for update`, validates the amount, inserts the ledger row, and
   Postgres. Never add a PII column to `gifts_with_totals`.
 - **`confirmedTotal` vs `pledgedTotal`:** PIX confirmation is manual. Guests only
   ever see `confirmedTotal`; `pledgedTotal` is admin-facing.
-- `reserved_by_email` exists on the table but nothing can populate it — the
-  reserve flow never sets it. Dead column pending removal.
+- `reserved_by_email` is dropped as of
+  `20260904180000_drop_reserved_by_email.sql` — it was never populated by any
+  current `reserve_gift`/`reserve_gift_paid` signature. Run `pnpm db:push` and
+  `pnpm db:types` to apply.
 
 **Party-based invitations:** each guest carries `invite_token`,
 `party_invite_token` and `party_id`. One link resolves a household —

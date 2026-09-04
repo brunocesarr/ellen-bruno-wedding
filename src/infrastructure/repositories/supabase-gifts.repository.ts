@@ -41,7 +41,6 @@ const mapRow = (r: GiftTotalsRow): Gift => ({
   imagePath: r.image_path,
   isReserved: r.is_reserved ?? false,
   reservedByName: r.reserved_by_name,
-  reservedByEmail: r.reserved_by_email,
   reservedMessage: r.reserved_message,
   reservedAt: r.reserved_at ? new Date(r.reserved_at) : null,
   category: (r.category ?? 'other') as Gift['category'],

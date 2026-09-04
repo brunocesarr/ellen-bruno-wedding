@@ -19,7 +19,6 @@ const gift = (over: Partial<GiftViewModel>): GiftViewModel =>
     imageUrl: 'https://example.test/i.jpg',
     status: 'pending',
     reservedBy: null,
-    reservedByEmail: null,
     reservedAt: null,
     reservedMessage: null,
     kind: 'fixed_item',

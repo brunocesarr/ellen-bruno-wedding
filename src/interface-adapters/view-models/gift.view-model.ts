@@ -15,7 +15,6 @@ export type GiftViewModel = {
   imageUrl: string | null
   status: ReservationStatus
   reservedBy: string | null
-  reservedByEmail: string | null
   reservedAt: string | null
   reservedMessage: string | null
   kind: GiftKind
@@ -64,7 +63,6 @@ export function toGiftViewModel(
     imageUrl: resolveStorageUrl(g.imagePath, storage),
     status: g.status,
     reservedBy: g.reservedByName,
-    reservedByEmail: g.reservedByEmail,
     reservedAt: g.reservedAt ? g.reservedAt.toISOString() : null,
     reservedMessage: g.reservedMessage,
     kind: g.kind,
