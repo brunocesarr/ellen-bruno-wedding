@@ -21,12 +21,15 @@ const nextConfig: NextConfig = {
   },
 
   images: {
-    formats: ['image/avif', 'image/webp'],
-    deviceSizes: [360, 640, 768, 1024, 1280, 1920],
-    imageSizes: [16, 32, 64, 96, 128, 256, 384],
+    // Fewer formats/sizes/qualities means fewer distinct transform variants,
+    // each of which is a fresh full-size fetch of the original from Supabase
+    // Storage the first time it's requested — trimmed to cut cached egress.
+    formats: ['image/webp'],
+    deviceSizes: [640, 1024, 1920],
+    imageSizes: [64, 128, 256],
     minimumCacheTTL: 60 * 60 * 24 * 30,
     remotePatterns: [{ protocol: 'https', hostname: '**.supabase.co' }],
-    qualities: [70, 75, 80, 85, 90],
+    qualities: [75],
   },
 
   // Keep nodemailer out of the bundle; require it from node_modules at runtime.

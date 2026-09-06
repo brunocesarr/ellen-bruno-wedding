@@ -15,6 +15,9 @@ export class SupabaseStorageRepository implements IStorageRepository {
         contentType:
           contentType ??
           (file instanceof File ? file.type : 'application/octet-stream'),
+        // Paths are always randomUUID-named (see storage-upload.ts) — content
+        // at a given path never changes, so it's safe to cache indefinitely.
+        cacheControl: '31536000',
       })
     if (error) throw error
     return { path: data.path }
