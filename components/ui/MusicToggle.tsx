@@ -200,7 +200,7 @@ export function MusicToggle({ tracks }: Props) {
     <>
       <audio
         ref={audioRef}
-        preload="auto"
+        preload="none"
         onPlay={() => setIsPlaying(true)}
         onPause={() => setIsPlaying(false)}
         onEnded={advanceTrack}
