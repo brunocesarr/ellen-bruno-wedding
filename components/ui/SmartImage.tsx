@@ -35,6 +35,8 @@ function SmartImageContent({
   fill,
   className,
   priority,
+  preload,
+  loading,
   sizes,
   ...props
 }: Props) {
@@ -99,7 +101,8 @@ function SmartImageContent({
           fill={fill}
           src={currentSrc}
           alt={alt ?? ''}
-          loading={priority ? 'eager' : 'lazy'}
+          loading={loading ?? (priority || preload ? 'eager' : 'lazy')}
+          preload={preload}
           priority={priority}
           sizes={sizes ?? (fill ? '100vw' : undefined)}
           className={className}

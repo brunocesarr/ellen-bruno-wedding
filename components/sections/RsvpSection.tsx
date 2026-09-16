@@ -2,7 +2,7 @@
 
 import { SectionWrapper } from '@/components/layout/SectionWrapper'
 import { Button } from '@/components/ui/Button'
-import { WEDDING_DETAILS } from '@/src/lib/constants'
+import { SECTION_IDS, WEDDING_DETAILS } from '@/src/lib/constants'
 import { motion, type Variants } from 'motion/react'
 
 const formItemVariants: Variants = {
@@ -20,7 +20,7 @@ export function RsvpSection({ token }: Props) {
   const href = token ? `/rsvp?token=${encodeURIComponent(token)}` : '/rsvp'
 
   return (
-    <SectionWrapper id="rsvp" variant="cream" className="pb-28">
+    <SectionWrapper id={SECTION_IDS.rsvp} variant="cream" className="pb-28">
       <div className="text-center">
         <motion.p
           initial={{ opacity: 0, y: 10 }}

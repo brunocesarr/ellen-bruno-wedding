@@ -3,6 +3,7 @@ import {
   touchInviteLinkAction,
 } from '@/app/(public)/_actions/invite-access.actions'
 import { InvitationPageShell } from '@/components/invite/InvitationPageShell'
+import { RsvpQuickAccessButton } from '@/components/invite/RsvpQuickAccessButton'
 import { AboutSection } from '@/components/sections/AboutSection'
 import { CountdownSection } from '@/components/sections/CountdownSection'
 import { DressCodeSection } from '@/components/sections/DressCodeSection'
@@ -61,6 +62,7 @@ export default async function FullInvitePage({ searchParams }: Props) {
       <JourneyTeaserSection token={token} />
       <GallerySection />
       <FooterSection />
+      <RsvpQuickAccessButton />
     </InvitationPageShell>
   )
 }

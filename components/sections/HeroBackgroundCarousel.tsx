@@ -104,7 +104,11 @@ export function HeroBackgroundCarousel({
       >
         {positions.map((slide, position) => {
           const isClone = position === total
-          const shouldRender = isClone || position < ready
+          // The clone shares slide 1's URL. Mounting it up front puts a second,
+          // lazy <img> on the same src into the first paint — which Next's dev
+          // LCP check reads instead of the eager original. Hold it until the
+          // playhead is close.
+          const shouldRender = isClone ? ready >= total : position < ready
 
           return (
             <div
