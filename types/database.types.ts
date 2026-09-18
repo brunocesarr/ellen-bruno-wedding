@@ -14,6 +14,57 @@ export type Database = {
   }
   public: {
     Tables: {
+      expense_documents: {
+        Row: {
+          created_at: string
+          expense_id: string
+          file_name: string
+          file_path: string
+          id: string
+          installment_id: string | null
+          kind: Database['public']['Enums']['expense_document_kind']
+          mime_type: string
+          size_bytes: number
+        }
+        Insert: {
+          created_at?: string
+          expense_id: string
+          file_name: string
+          file_path: string
+          id?: string
+          installment_id?: string | null
+          kind: Database['public']['Enums']['expense_document_kind']
+          mime_type: string
+          size_bytes: number
+        }
+        Update: {
+          created_at?: string
+          expense_id?: string
+          file_name?: string
+          file_path?: string
+          id?: string
+          installment_id?: string | null
+          kind?: Database['public']['Enums']['expense_document_kind']
+          mime_type?: string
+          size_bytes?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'expense_documents_expense_id_fkey'
+            columns: ['expense_id']
+            isOneToOne: false
+            referencedRelation: 'expenses'
+            referencedColumns: ['id']
+          },
+          {
+            foreignKeyName: 'expense_documents_installment_id_fkey'
+            columns: ['installment_id']
+            isOneToOne: false
+            referencedRelation: 'expense_installments'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       expense_installments: {
         Row: {
           amount: number
@@ -636,6 +687,7 @@ export type Database = {
       touch_invite_link: { Args: { p_token: string }; Returns: undefined }
     }
     Enums: {
+      expense_document_kind: 'contract' | 'payment_proof'
       gift_category: 'home' | 'kitchen' | 'travel' | 'experience' | 'other'
       gift_kind: 'fixed_item' | 'open_item' | 'fund'
       guest_status: 'going' | 'pending' | 'not_going'
@@ -764,6 +816,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      expense_document_kind: ['contract', 'payment_proof'],
       gift_category: ['home', 'kitchen', 'travel', 'experience', 'other'],
       gift_kind: ['fixed_item', 'open_item', 'fund'],
       guest_status: ['going', 'pending', 'not_going'],

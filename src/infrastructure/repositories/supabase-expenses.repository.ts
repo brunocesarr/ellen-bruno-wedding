@@ -1,4 +1,7 @@
-import type { IExpensesRepository } from '@/src/application/repositories/expenses.repository.interface'
+import type {
+  ExpenseWriteResult,
+  IExpensesRepository,
+} from '@/src/application/repositories/expenses.repository.interface'
 import { ExpenseNotFoundError } from '@/src/entities/errors/expenses'
 import type {
   CreateExpenseInput,
@@ -63,31 +66,90 @@ export class SupabaseExpensesRepository implements IExpensesRepository {
     return data ? mapRow(data as ExpenseWithInstallments) : null
   }
 
-  private async replaceInstallments(
+  /** Storage keys of the documents hanging off these installments. */
+  private async documentPathsForInstallments(
+    installmentIds: string[]
+  ): Promise<string[]> {
+    if (installmentIds.length === 0) return []
+    const { data, error } = await this.client
+      .from('expense_documents')
+      .select('file_path')
+      .in('installment_id', installmentIds)
+    if (error) throw error
+    return (data ?? []).map((r) => r.file_path)
+  }
+
+  /**
+   * Reconciles the submitted rows against what is stored instead of wiping and
+   * re-inserting: `expense_documents.installment_id` references these rows with
+   * `on delete cascade`, so a delete-all would take every comprovante with it
+   * on any edit — even one that only fixed a typo in the description.
+   *
+   * A submitted id that does not belong to this expense is treated as a new
+   * row rather than trusted, so a tampered form can never repoint someone
+   * else's installment.
+   */
+  private async syncInstallments(
     expenseId: string,
-    installments: CreateExpenseInput['installments']
-  ): Promise<void> {
-    const { error: deleteError } = await this.client
+    installments: UpdateExpenseInput['installments']
+  ): Promise<{ orphanedDocumentPaths: string[] }> {
+    const { data: existing, error: existingError } = await this.client
       .from('expense_installments')
-      .delete()
+      .select('id')
       .eq('expense_id', expenseId)
-    if (deleteError) throw deleteError
+    if (existingError) throw existingError
 
-    const payload = installments.map(
-      (i) =>
-        ({
-          expense_id: expenseId,
-          due_date: i.dueDate,
-          amount: i.amount,
-          paid_amount: i.paidAmount,
-          paid_by: i.paidBy ?? null,
-        }) satisfies ExpenseInstallmentInsert
-    )
+    const existingIds = new Set((existing ?? []).map((r) => r.id))
+    const keptIds = new Set<string>()
+    const toUpdate: { id: string; row: ExpenseInstallmentInsert }[] = []
+    const toInsert: ExpenseInstallmentInsert[] = []
 
-    const { error: insertError } = await this.client
-      .from('expense_installments')
-      .insert(payload)
-    if (insertError) throw insertError
+    for (const i of installments) {
+      const row = {
+        expense_id: expenseId,
+        due_date: i.dueDate,
+        amount: i.amount,
+        paid_amount: i.paidAmount,
+        paid_by: i.paidBy ?? null,
+      } satisfies ExpenseInstallmentInsert
+
+      if (i.id && existingIds.has(i.id) && !keptIds.has(i.id)) {
+        keptIds.add(i.id)
+        toUpdate.push({ id: i.id, row })
+      } else {
+        toInsert.push(row)
+      }
+    }
+
+    const toDelete = [...existingIds].filter((id) => !keptIds.has(id))
+    const orphanedDocumentPaths =
+      await this.documentPathsForInstallments(toDelete)
+
+    if (toDelete.length > 0) {
+      const { error } = await this.client
+        .from('expense_installments')
+        .delete()
+        .in('id', toDelete)
+      if (error) throw error
+    }
+
+    for (const { id, row } of toUpdate) {
+      const { error } = await this.client
+        .from('expense_installments')
+        .update(row)
+        .eq('id', id)
+        .eq('expense_id', expenseId)
+      if (error) throw error
+    }
+
+    if (toInsert.length > 0) {
+      const { error } = await this.client
+        .from('expense_installments')
+        .insert(toInsert)
+      if (error) throw error
+    }
+
+    return { orphanedDocumentPaths }
   }
 
   // Writes go table-by-table, reads come back via getById — same
@@ -105,14 +167,14 @@ export class SupabaseExpensesRepository implements IExpensesRepository {
       .single()
     if (error) throw error
 
-    await this.replaceInstallments(row.id, data.installments)
+    await this.syncInstallments(row.id, data.installments)
 
     const created = await this.getById(row.id)
     if (!created) throw new ExpenseNotFoundError()
     return created
   }
 
-  async update(data: UpdateExpenseInput): Promise<Expense> {
+  async update(data: UpdateExpenseInput): Promise<ExpenseWriteResult> {
     const { id, installments, ...rest } = data
 
     const { error } = await this.client
@@ -124,16 +186,31 @@ export class SupabaseExpensesRepository implements IExpensesRepository {
       .eq('id', id)
     if (error) throw error
 
-    await this.replaceInstallments(id, installments)
+    const { orphanedDocumentPaths } = await this.syncInstallments(
+      id,
+      installments
+    )
 
     const updated = await this.getById(id)
     if (!updated) throw new ExpenseNotFoundError()
-    return updated
+    return { expense: updated, orphanedDocumentPaths }
   }
 
-  async delete(id: string): Promise<void> {
-    // expense_installments cascades via FK.
+  async delete(id: string): Promise<{ orphanedDocumentPaths: string[] }> {
+    // Read the storage keys first: the rows holding them are gone the moment
+    // the expense is deleted (expense_documents cascades on expense_id).
+    const { data: documents, error: documentsError } = await this.client
+      .from('expense_documents')
+      .select('file_path')
+      .eq('expense_id', id)
+    if (documentsError) throw documentsError
+
+    // expense_installments and expense_documents cascade via FK.
     const { error } = await this.client.from('expenses').delete().eq('id', id)
     if (error) throw error
+
+    return {
+      orphanedDocumentPaths: (documents ?? []).map((r) => r.file_path),
+    }
   }
 }

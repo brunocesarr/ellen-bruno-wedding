@@ -32,4 +32,12 @@ export class SupabaseStorageRepository implements IStorageRepository {
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
     return `${base}/storage/v1/object/public/${this.bucket}/${path}`
   }
+
+  async createSignedUrl(path: string, expiresInSeconds: number) {
+    const { data, error } = await this.client.storage
+      .from(this.bucket)
+      .createSignedUrl(path, expiresInSeconds)
+    if (error) throw error
+    return data.signedUrl
+  }
 }

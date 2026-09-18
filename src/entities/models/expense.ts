@@ -41,6 +41,16 @@ export const ExpenseSchema = z.object({
 export type Expense = z.infer<typeof ExpenseSchema>
 
 const InstallmentInputSchema = z.object({
+  /**
+   * Present for a row the form loaded from the database, absent for one the
+   * admin just added. The repository keeps matching rows in place instead of
+   * recreating them, so a comprovante attached to a parcela survives an edit
+   * to the expense — `expense_documents.installment_id` cascades on delete.
+   */
+  id: z.preprocess(
+    (v) => (typeof v === 'string' && v.trim() === '' ? undefined : v),
+    z.string().uuid().optional()
+  ),
   dueDate: z.string().min(1, 'Informe a data de vencimento'),
   amount: money(),
   paidAmount: paidAmount.default(0),

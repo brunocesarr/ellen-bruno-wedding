@@ -12,3 +12,10 @@ export function formatRelativeTime(iso: string) {
   if (diff < 604800) return rtf.format(-Math.round(diff / 86400), 'day')
   return new Date(iso).toLocaleDateString('pt-BR')
 }
+
+export function formatBytes(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`
+  const kb = bytes / 1024
+  if (kb < 1024) return `${Math.round(kb)} KB`
+  return `${(kb / 1024).toFixed(kb / 1024 < 10 ? 1 : 0)} MB`
+}

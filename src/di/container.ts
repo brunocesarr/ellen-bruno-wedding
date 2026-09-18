@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { SupabaseExpenseDocumentsRepository } from '@/src/infrastructure/repositories/supabase-expense-documents.repository'
 import { SupabaseExpensesRepository } from '@/src/infrastructure/repositories/supabase-expenses.repository'
 import { SupabaseGiftsRepository } from '@/src/infrastructure/repositories/supabase-gifts.repository'
 import { SupabaseGuestsRepository } from '@/src/infrastructure/repositories/supabase-guests.repository'
@@ -23,9 +24,15 @@ export const getContainer = cache(async () => {
     rsvpRepo: new SupabaseRsvpRepository(supabase),
     giftsRepo: new SupabaseGiftsRepository(supabase),
     expensesRepo: new SupabaseExpensesRepository(supabase),
+    expenseDocumentsRepo: new SupabaseExpenseDocumentsRepository(supabase),
     pixRepo: new SupabasePixConfirmationsRepository(supabase),
     storageRepo: new SupabaseStorageRepository(supabase, 'wedding-images'),
     audioStorageRepo: new SupabaseStorageRepository(supabase, 'wedding-audio'),
+    // Private bucket — reads go through createSignedUrl, never getPublicUrl.
+    documentStorageRepo: new SupabaseStorageRepository(
+      supabase,
+      'wedding-documents'
+    ),
     siteImagesRepo: new SupabaseSiteImagesRepository(supabase),
     songsRepo: new SupabaseSongsRepository(supabase),
     authService: new SupabaseAuthService(supabase),

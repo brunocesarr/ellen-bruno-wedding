@@ -8,15 +8,20 @@ import {
 } from '../manage-expense.use-case'
 
 const ID = '11111111-1111-4111-8111-111111111111'
+const INSTALLMENT_ID = '22222222-2222-4222-8222-222222222222'
 
-const deps = (user: unknown = { id: 'u1' }) => ({
+const deps = (user: unknown = { id: 'u1' }, orphaned: string[] = []) => ({
   expensesRepo: {
     list: vi.fn(),
     getById: vi.fn().mockResolvedValue(null),
     create: vi.fn(async (d: unknown) => d),
-    update: vi.fn(async (d: unknown) => d),
-    delete: vi.fn(),
+    update: vi.fn(async (d: unknown) => ({
+      expense: d,
+      orphanedDocumentPaths: orphaned,
+    })),
+    delete: vi.fn(async () => ({ orphanedDocumentPaths: orphaned })),
   },
+  documentStorageRepo: { remove: vi.fn() },
   authService: { getCurrentUser: vi.fn().mockResolvedValue(user) },
 })
 
@@ -134,6 +139,50 @@ describe('updateExpenseUseCase', () => {
       expect.objectContaining({ id: ID, description: 'Buffet atualizado' })
     )
   })
+
+  it('keeps a stored installment id so its comprovantes survive the edit', async () => {
+    const d = deps()
+    await updateExpenseUseCase(d as never)({
+      id: ID,
+      description: 'Buffet',
+      totalAmount: '100.00',
+      installments: oneInstallment({ id: INSTALLMENT_ID }),
+    })
+
+    const payload = payloadOf(d.expensesRepo.update) as {
+      installments: { id?: string }[]
+    }
+    expect(payload.installments[0]?.id).toBe(INSTALLMENT_ID)
+  })
+
+  it('drops an empty installment id so the row is inserted fresh', async () => {
+    const d = deps()
+    await updateExpenseUseCase(d as never)({
+      id: ID,
+      description: 'Buffet',
+      totalAmount: '100.00',
+      installments: oneInstallment({ id: '' }),
+    })
+
+    const payload = payloadOf(d.expensesRepo.update) as {
+      installments: { id?: string }[]
+    }
+    expect(payload.installments[0]?.id).toBeUndefined()
+  })
+
+  it('removes the storage objects orphaned by a dropped parcela', async () => {
+    const d = deps({ id: 'u1' }, ['expenses/a/proof.webp'])
+    await updateExpenseUseCase(d as never)({
+      id: ID,
+      description: 'Buffet',
+      totalAmount: '100.00',
+      installments: oneInstallment(),
+    })
+
+    expect(d.documentStorageRepo.remove).toHaveBeenCalledWith(
+      'expenses/a/proof.webp'
+    )
+  })
 })
 
 describe('deleteExpenseUseCase', () => {
@@ -147,5 +196,24 @@ describe('deleteExpenseUseCase', () => {
     const d = deps()
     await deleteExpenseUseCase(d as never)(ID)
     expect(d.expensesRepo.delete).toHaveBeenCalledWith(ID)
+  })
+
+  it('removes the storage objects the cascade orphaned', async () => {
+    const d = deps({ id: 'u1' }, ['expenses/a/1.pdf', 'expenses/a/2.webp'])
+    await deleteExpenseUseCase(d as never)(ID)
+
+    expect(d.documentStorageRepo.remove).toHaveBeenCalledWith(
+      'expenses/a/1.pdf'
+    )
+    expect(d.documentStorageRepo.remove).toHaveBeenCalledWith(
+      'expenses/a/2.webp'
+    )
+  })
+
+  it('still resolves when storage cleanup fails', async () => {
+    const d = deps({ id: 'u1' }, ['expenses/a/1.pdf'])
+    d.documentStorageRepo.remove.mockRejectedValue(new Error('storage down'))
+
+    await expect(deleteExpenseUseCase(d as never)(ID)).resolves.toBeUndefined()
   })
 })

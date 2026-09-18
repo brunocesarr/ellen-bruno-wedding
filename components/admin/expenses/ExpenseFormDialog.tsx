@@ -17,6 +17,8 @@ import { useActionState, useCallback, useMemo, useState } from 'react'
 
 type Row = {
   key: string
+  /** The stored expense_installments.id, or '' for a row added in this dialog. */
+  id: string
   dueDate: string
   amount: string
   paidAmount: string
@@ -26,6 +28,7 @@ type Row = {
 function emptyRow(): Row {
   return {
     key: crypto.randomUUID(),
+    id: '',
     dueDate: '',
     amount: '',
     paidAmount: '0',
@@ -37,6 +40,7 @@ function rowsFromExpense(expense?: ExpenseViewModel): Row[] {
   if (!expense || expense.installments.length === 0) return [emptyRow()]
   return expense.installments.map((i) => ({
     key: i.id,
+    id: i.id,
     dueDate: i.dueDate,
     amount: String(i.amount),
     paidAmount: String(i.paidAmount),
@@ -212,6 +216,12 @@ export function ExpenseFormDialog({ trigger, expense }: Props) {
                       <Trash2 className="h-4 w-4" />
                     </button>
                   </div>
+
+                  {/* Posted alongside the other parallel arrays so the server
+                      can match this row to its stored parcela instead of
+                      recreating it — see readInstallments in
+                      expenses.actions.ts. */}
+                  <input type="hidden" name="installmentId" value={row.id} />
 
                   <div className="grid gap-3 sm:grid-cols-4">
                     <Field label="Vencimento">

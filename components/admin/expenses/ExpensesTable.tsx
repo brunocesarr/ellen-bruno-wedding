@@ -10,6 +10,7 @@ import type {
 import {
   ChevronDown,
   ChevronRight,
+  Paperclip,
   Pencil,
   Receipt,
   Search,
@@ -17,6 +18,8 @@ import {
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { Fragment, useMemo, useState, useTransition } from 'react'
+import { ExpenseDocumentChip } from './ExpenseDocumentChip'
+import { ExpenseDocumentsDialog } from './ExpenseDocumentsDialog'
 import { ExpenseFormDialog } from './ExpenseFormDialog'
 
 const STATUS_TONE = {
@@ -48,24 +51,92 @@ function InstallmentRow({
   installment: InstallmentViewModel
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-t border-stone-100 px-4 py-2 text-xs first:border-t-0">
-      <span
-        className={
-          installment.isOverdue
-            ? 'whitespace-nowrap font-medium text-rose-600'
-            : 'whitespace-nowrap text-stone-500'
-        }
-      >
-        {installment.dueDateLabel}
-        {installment.isOverdue && ' · atrasada'}
-      </span>
-      <span className="whitespace-nowrap text-stone-700">
-        {installment.paidAmountLabel} de {installment.amountLabel}
-      </span>
-      <span className="min-w-0 truncate text-stone-400">
-        {installment.paidBy || '—'}
-      </span>
+    <div className="border-t border-stone-100 px-4 py-2 text-xs first:border-t-0">
+      <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1">
+        <span
+          className={
+            installment.isOverdue
+              ? 'whitespace-nowrap font-medium text-rose-600'
+              : 'whitespace-nowrap text-stone-500'
+          }
+        >
+          {installment.dueDateLabel}
+          {installment.isOverdue && ' · atrasada'}
+        </span>
+        <span className="whitespace-nowrap text-stone-700">
+          {installment.paidAmountLabel} de {installment.amountLabel}
+        </span>
+        <span className="min-w-0 truncate text-stone-400">
+          {installment.paidBy || '—'}
+        </span>
+      </div>
+
+      {/* Read-only here — attaching and removing happens in the documents
+          dialog, so the table stays a table. */}
+      {installment.documents.length > 0 && (
+        <div className="mt-1.5 flex flex-wrap gap-1.5">
+          {installment.documents.map((d) => (
+            <ExpenseDocumentChip key={d.id} doc={d} />
+          ))}
+        </div>
+      )}
     </div>
+  )
+}
+
+/**
+ * Contract + loose comprovantes, shown above the parcela list when a row is
+ * expanded. Read-only, and rendered as nothing at all when there is nothing
+ * attached — an empty placeholder would cost a line of vertical space on every
+ * expense that has no documents yet.
+ */
+function ExpenseLevelDocuments({ expense }: { expense: ExpenseViewModel }) {
+  const documents = [...expense.contracts, ...expense.looseProofs]
+  if (documents.length === 0) return null
+
+  return (
+    <div className="mb-2 flex flex-wrap gap-1.5">
+      {documents.map((d) => (
+        <ExpenseDocumentChip key={d.id} doc={d} />
+      ))}
+    </div>
+  )
+}
+
+/** Paperclip + count: one glyph that says whether anything is attached. */
+function DocumentsButton({
+  expense,
+  className,
+  withLabel = false,
+}: {
+  expense: ExpenseViewModel
+  className: string
+  withLabel?: boolean
+}) {
+  const count = expense.documentCount
+  return (
+    <ExpenseDocumentsDialog
+      expense={expense}
+      trigger={
+        <button
+          className={className}
+          aria-label={`Documentos (${count})`}
+          title={
+            count
+              ? `${count} documento(s) · ${expense.documentsSizeLabel}`
+              : 'Nenhum documento anexado'
+          }
+        >
+          <Paperclip className="h-4 w-4" />
+          {withLabel && 'Documentos'}
+          {count > 0 && (
+            <span className="rounded-full bg-amber-100 px-1.5 text-[10px] font-semibold tabular-nums text-amber-800">
+              {count}
+            </span>
+          )}
+        </button>
+      }
+    />
   )
 }
 
@@ -191,6 +262,10 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end gap-2">
+                        <DocumentsButton
+                          expense={e}
+                          className="inline-flex items-center gap-1 rounded-lg p-2 text-stone-500 hover:bg-stone-100"
+                        />
                         <ExpenseFormDialog
                           expense={e}
                           trigger={
@@ -215,6 +290,7 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
                   {isOpen && (
                     <tr>
                       <td colSpan={7} className="bg-stone-50/60 px-4 py-2">
+                        <ExpenseLevelDocuments expense={e} />
                         <div className="overflow-hidden rounded-lg bg-white">
                           {e.installments.map((i) => (
                             <InstallmentRow key={i.id} installment={i} />
@@ -282,14 +358,22 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
             </button>
 
             {expanded.has(e.id) && (
-              <div className="mt-2 overflow-hidden rounded-lg bg-stone-50">
-                {e.installments.map((i) => (
-                  <InstallmentRow key={i.id} installment={i} />
-                ))}
-              </div>
+              <>
+                <ExpenseLevelDocuments expense={e} />
+                <div className="mt-2 overflow-hidden rounded-lg bg-stone-50">
+                  {e.installments.map((i) => (
+                    <InstallmentRow key={i.id} installment={i} />
+                  ))}
+                </div>
+              </>
             )}
 
             <div className="mt-3 flex justify-end gap-2">
+              <DocumentsButton
+                expense={e}
+                withLabel
+                className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"
+              />
               <ExpenseFormDialog
                 expense={e}
                 trigger={

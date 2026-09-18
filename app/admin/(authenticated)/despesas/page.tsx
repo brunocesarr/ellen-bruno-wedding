@@ -4,10 +4,11 @@ import { ExpensesTable } from '@/components/admin/expenses/ExpensesTable'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { StatCard } from '@/components/admin/StatCard'
 import { buttonPrimary } from '@/src/lib/class-names'
-import { formatCurrencyBRL } from '@/src/lib/format'
+import { EXPENSE_DOCUMENTS_STORAGE_BUDGET_BYTES } from '@/src/lib/constants'
+import { formatBytes, formatCurrencyBRL } from '@/src/lib/format'
 import { unwrapForPage } from '@/src/lib/server-action-result'
 import { cn } from '@/src/lib/utils'
-import { CalendarClock, Plus, Receipt, Wallet } from 'lucide-react'
+import { CalendarClock, HardDrive, Plus, Receipt, Wallet } from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,6 +31,16 @@ export default async function DespesasPage() {
     .slice(0, 6)
 
   const nextDue = upcoming[0]
+
+  // Documents are the only thing on this page that consumes the Supabase free
+  // tier, so the gauge lives here rather than on the dashboard: the people who
+  // upload contracts are the ones who need to see the budget filling up.
+  const documentsBytes = expenses.reduce((s, e) => s + e.documentsSizeBytes, 0)
+  const documentCount = expenses.reduce((s, e) => s + e.documentCount, 0)
+  const documentsPercent = Math.min(
+    100,
+    Math.round((documentsBytes / EXPENSE_DOCUMENTS_STORAGE_BUDGET_BYTES) * 100)
+  )
 
   return (
     <div className="space-y-6">
@@ -76,6 +87,48 @@ export default async function DespesasPage() {
           accent="amber"
         />
       </div>
+
+      <SectionCard
+        title="Documentos"
+        description="Contratos e comprovantes anexados às despesas."
+      >
+        <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-2 text-sm">
+          <span className="inline-flex items-center gap-2 text-stone-600">
+            <HardDrive className="h-4 w-4 text-stone-400" />
+            {documentCount} arquivo(s)
+          </span>
+          <span className="tabular-nums text-stone-500">
+            {formatBytes(documentsBytes)} de{' '}
+            {formatBytes(EXPENSE_DOCUMENTS_STORAGE_BUDGET_BYTES)} ·{' '}
+            {documentsPercent}%
+          </span>
+        </div>
+
+        <div
+          className="mt-3 h-2 overflow-hidden rounded-full bg-stone-100"
+          role="progressbar"
+          aria-valuenow={documentsPercent}
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-label="Armazenamento de documentos utilizado"
+        >
+          <div
+            className={
+              documentsPercent >= 90
+                ? 'h-full rounded-full bg-rose-500'
+                : documentsPercent >= 70
+                  ? 'h-full rounded-full bg-amber-500'
+                  : 'h-full rounded-full bg-emerald-500'
+            }
+            style={{ width: `${Math.max(documentsPercent, 1)}%` }}
+          />
+        </div>
+
+        <p className="mt-2 text-xs text-stone-400">
+          Imagens são comprimidas antes do envio e os arquivos ficam em um
+          bucket privado — novos envios são bloqueados ao atingir o limite.
+        </p>
+      </SectionCard>
 
       {upcoming.length > 0 && (
         <SectionCard

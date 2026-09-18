@@ -16,18 +16,23 @@ export type ExpenseFormActionState = ExpenseMutationResult | null
 
 /**
  * Installment rows are submitted as parallel same-name fields
- * (`installmentDueDate`, `installmentAmount`, ...) rather than indexed/bracketed
+ * (`installmentId`, `installmentDueDate`, `installmentAmount`, ...) rather than indexed/bracketed
  * names — there's no existing repeater pattern in this codebase to follow, and
  * removing a row in the dialog removes all of its inputs together, so the
  * parallel arrays stay aligned by position.
  */
 function readInstallments(formData: FormData) {
+  const ids = formData.getAll('installmentId')
   const dueDates = formData.getAll('installmentDueDate')
   const amounts = formData.getAll('installmentAmount')
   const paidAmounts = formData.getAll('installmentPaidAmount')
   const paidBys = formData.getAll('installmentPaidBy')
 
   return dueDates.map((dueDate, i) => ({
+    // Empty for a row the admin just added; the repository then inserts rather
+    // than reusing a row, which is what keeps a parcela's comprovantes
+    // attached across an edit.
+    id: String(ids[i] ?? ''),
     dueDate: String(dueDate),
     amount: String(amounts[i] ?? ''),
     paidAmount: String(paidAmounts[i] ?? '0'),
