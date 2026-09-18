@@ -52,7 +52,7 @@ export function StatCard({
           </span>
         )}
       </header>
-      <p className="mt-3 break-words font-serif text-3xl font-semibold tracking-tight text-stone-900 md:text-4xl">
+      <p className="mt-3 break-words font-serif text-2xl font-semibold tracking-tight text-stone-900 sm:text-3xl md:text-4xl">
         {value}
       </p>
       {(delta || hint) && (

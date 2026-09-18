@@ -324,7 +324,7 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
               <ExpenseStatusBadge status={e.status} />
             </div>
 
-            <div className="mt-3 grid grid-cols-3 gap-2 text-xs">
+            <div className="mt-3 grid grid-cols-2 gap-2 text-xs">
               <div className="min-w-0">
                 <p className="text-stone-400">Total</p>
                 <p className="break-words font-medium text-stone-800">
@@ -368,7 +368,10 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
               </>
             )}
 
-            <div className="mt-3 flex justify-end gap-2">
+            {/* Three labelled buttons are ~346px wide against ~296px of card
+                at 360px, and justify-end pushes the overflow off the LEFT
+                edge. Wrapping matches GiftsTable's equivalent row. */}
+            <div className="mt-3 flex flex-wrap justify-end gap-2">
               <DocumentsButton
                 expense={e}
                 withLabel

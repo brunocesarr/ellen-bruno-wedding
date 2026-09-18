@@ -76,7 +76,7 @@ export function ExpenseDocumentChip({
           </button>
         }
       >
-        <header className="flex items-start justify-between gap-3 border-b border-stone-100 px-5 py-4">
+        <header className="flex shrink-0 items-start justify-between gap-3 border-b border-stone-100 px-5 py-4">
           <div className="min-w-0">
             <Dialog.Title className="truncate font-serif text-lg text-stone-900">
               {doc.fileName}

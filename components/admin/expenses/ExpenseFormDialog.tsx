@@ -137,9 +137,9 @@ export function ExpenseFormDialog({ trigger, expense }: Props) {
       trigger={trigger}
       open={open}
       onOpenChange={handleOpenChange}
-      contentClassName="max-h-[92vh] w-[92vw] max-w-3xl"
+      contentClassName="flex max-h-[92vh] w-[92vw] max-w-3xl flex-col"
     >
-      <header className="flex items-start justify-between border-b border-stone-100 px-5 py-4 md:px-6">
+      <header className="flex shrink-0 items-start justify-between border-b border-stone-100 px-5 py-4 md:px-6">
         <div>
           <Dialog.Title className="font-serif text-xl text-stone-900">
             {isEdit ? 'Editar despesa' : 'Nova despesa'}
@@ -163,7 +163,7 @@ export function ExpenseFormDialog({ trigger, expense }: Props) {
 
       <form
         action={formAction}
-        className="max-h-[calc(92vh-76px)] overflow-y-auto p-5 md:p-6"
+        className="min-h-0 flex-1 overflow-y-auto p-5 md:p-6"
       >
         {expense?.id && <input type="hidden" name="id" value={expense.id} />}
         <input type="hidden" name="totalAmount" value={total.toFixed(2)} />
@@ -223,7 +223,7 @@ export function ExpenseFormDialog({ trigger, expense }: Props) {
                       expenses.actions.ts. */}
                   <input type="hidden" name="installmentId" value={row.id} />
 
-                  <div className="grid gap-3 sm:grid-cols-4">
+                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                     <Field label="Vencimento">
                       <input
                         type="date"

@@ -47,6 +47,105 @@ const fmt = (d: Date) =>
 const needsNotification = (r: RsvpRequest) =>
   r.status !== 'pending' && r.notifiedAt === null
 
+/**
+ * Status, notification state and the action cluster are rendered twice — once
+ * in the desktop table, once in the mobile cards below it. They live here so
+ * the two never drift; GiftsTable and ExpensesTable duplicate their equivalents
+ * inline, but this one carries three branches of action logic and is worth the
+ * extraction.
+ */
+function StatusBadge({ status }: { status: RsvpRequest['status'] }) {
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUS_STYLES[status]}`}
+    >
+      {STATUS_LABELS[status]}
+    </span>
+  )
+}
+
+function NotifyBadge({ request: r }: { request: RsvpRequest }) {
+  return (
+    <>
+      {r.status === 'pending' ? (
+        <span className="text-stone-300">—</span>
+      ) : r.notifiedAt ? (
+        <span
+          title={`Enviado em ${fmt(r.notifiedAt)}`}
+          className="inline-flex items-center gap-1 text-xs text-emerald-700"
+        >
+          <Check className="h-3.5 w-3.5" />
+          Avisado
+        </span>
+      ) : (
+        <span
+          title={r.notifyError ?? 'Aviso não enviado'}
+          className="inline-flex items-center gap-1 text-xs font-medium text-rose-600"
+        >
+          <MailWarning className="h-3.5 w-3.5" />
+          Falhou
+          {r.notifyAttempts > 1 && ` (${r.notifyAttempts}x)`}
+        </span>
+      )}
+    </>
+  )
+}
+
+function RowActions({
+  request: r,
+  openDialog,
+}: {
+  request: RsvpRequest
+  openDialog: (kind: DialogKind, request: RsvpRequest) => void
+}) {
+  return (
+    <>
+      {r.status === 'pending' ? (
+        <div className="flex flex-wrap items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={() => openDialog('approved', r)}
+            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700"
+          >
+            <Check className="h-3.5 w-3.5" />
+            Aprovar
+          </button>
+          <button
+            type="button"
+            onClick={() => openDialog('rejected', r)}
+            className="inline-flex items-center gap-1.5 rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
+          >
+            <X className="h-3.5 w-3.5" />
+            Recusar
+          </button>
+          <button
+            type="button"
+            onClick={() => openDialog('delete', r)}
+            aria-label={`Excluir solicitação de ${r.fullName}`}
+            title="Excluir solicitação"
+            className="inline-flex items-center rounded-md p-1.5 text-stone-400 transition hover:bg-rose-50 hover:text-rose-600"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : needsNotification(r) ? (
+        <button
+          type="button"
+          onClick={() => openDialog('resend', r)}
+          className="inline-flex items-center gap-1.5 rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-800"
+        >
+          <Send className="h-3.5 w-3.5" />
+          Reenviar aviso
+        </button>
+      ) : (
+        <span className="text-xs text-stone-400">
+          {r.decidedAt ? fmt(r.decidedAt) : '—'}
+        </span>
+      )}
+    </>
+  )
+}
+
 export function RsvpRequestsTable({ requests }: Props) {
   const router = useRouter()
   const [pending, startTransition] = useTransition()
@@ -220,130 +319,136 @@ export function RsvpRequestsTable({ requests }: Props) {
             Nenhuma solicitação por aqui ainda.
           </p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-stone-200 text-xs uppercase tracking-wider text-stone-500">
-                  <th className="py-3 pr-4 font-medium">Nome</th>
-                  <th className="py-3 pr-4 font-medium">Contato</th>
-                  <th className="py-3 pr-4 font-medium">Comparecerá</th>
-                  <th className="py-3 pr-4 font-medium">Mensagem</th>
-                  <th className="py-3 pr-4 font-medium">Recebida</th>
-                  <th className="py-3 pr-4 font-medium">Status</th>
-                  <th className="py-3 pr-4 font-medium">Aviso</th>
-                  <th className="py-3 text-right font-medium">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-stone-100">
-                {requests.map((r) => (
-                  <tr key={r.id} className="align-top">
-                    <td className="py-4 pr-4 font-medium text-stone-900">
-                      {r.fullName}
-                    </td>
-                    <td className="py-4 pr-4">
+          <>
+            {/* Matches GiftsTable / ExpensesTable / PartyCard: the table is
+                desktop-only and a stacked card list takes over below md.
+                Eight columns cannot be read on a phone, and a sideways-
+                scrolling table hides the action buttons off-screen. */}
+            <div className="hidden overflow-x-auto md:block">
+              <table className="w-full text-left text-sm">
+                <thead>
+                  <tr className="border-b border-stone-200 text-xs uppercase tracking-wider text-stone-500">
+                    <th className="py-3 pr-4 font-medium">Nome</th>
+                    <th className="py-3 pr-4 font-medium">Contato</th>
+                    <th className="py-3 pr-4 font-medium">Comparecerá</th>
+                    <th className="py-3 pr-4 font-medium">Mensagem</th>
+                    <th className="py-3 pr-4 font-medium">Recebida</th>
+                    <th className="py-3 pr-4 font-medium">Status</th>
+                    <th className="py-3 pr-4 font-medium">Aviso</th>
+                    <th className="py-3 text-right font-medium">Ações</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-stone-100">
+                  {requests.map((r) => (
+                    <tr key={r.id} className="align-top">
+                      <td className="py-4 pr-4 font-medium text-stone-900">
+                        {r.fullName}
+                      </td>
+                      <td className="py-4 pr-4">
+                        <a
+                          href={`mailto:${r.email}`}
+                          className="inline-flex items-center gap-1.5 text-stone-600 underline-offset-2 hover:text-stone-900 hover:underline"
+                        >
+                          <Mail className="h-3.5 w-3.5" />
+                          {r.email}
+                        </a>
+                      </td>
+                      <td className="py-4 pr-4">
+                        {r.attending ? (
+                          <span className="text-emerald-700">Sim</span>
+                        ) : (
+                          <span className="text-stone-500">Não</span>
+                        )}
+                      </td>
+                      <td className="max-w-xs py-4 pr-4 text-stone-600">
+                        {r.message ? (
+                          <span className="line-clamp-3">{r.message}</span>
+                        ) : (
+                          <span className="text-stone-300">—</span>
+                        )}
+                      </td>
+                      <td className="whitespace-nowrap py-4 pr-4 text-stone-500">
+                        {fmt(r.createdAt)}
+                      </td>
+                      <td className="py-4 pr-4">
+                        <StatusBadge status={r.status} />
+                      </td>
+                      <td className="py-4 pr-4">
+                        <NotifyBadge request={r} />
+                      </td>
+                      <td className="py-4 text-right">
+                        <RowActions request={r} openDialog={openDialog} />
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="space-y-3 md:hidden">
+              {requests.map((r) => (
+                <article
+                  key={r.id}
+                  className="rounded-xl border border-stone-200 bg-white p-4"
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-stone-900">
+                        {r.fullName}
+                      </p>
                       <a
                         href={`mailto:${r.email}`}
-                        className="inline-flex items-center gap-1.5 text-stone-600 underline-offset-2 hover:text-stone-900 hover:underline"
+                        className="mt-0.5 inline-flex min-w-0 max-w-full items-center gap-1.5 text-xs text-stone-600 underline-offset-2 hover:text-stone-900 hover:underline"
                       >
-                        <Mail className="h-3.5 w-3.5" />
-                        {r.email}
+                        <Mail className="h-3.5 w-3.5 shrink-0" />
+                        <span className="truncate">{r.email}</span>
                       </a>
-                    </td>
-                    <td className="py-4 pr-4">
-                      {r.attending ? (
-                        <span className="text-emerald-700">Sim</span>
-                      ) : (
-                        <span className="text-stone-500">Não</span>
-                      )}
-                    </td>
-                    <td className="max-w-xs py-4 pr-4 text-stone-600">
-                      {r.message ? (
-                        <span className="line-clamp-3">{r.message}</span>
-                      ) : (
-                        <span className="text-stone-300">—</span>
-                      )}
-                    </td>
-                    <td className="whitespace-nowrap py-4 pr-4 text-stone-500">
-                      {fmt(r.createdAt)}
-                    </td>
-                    <td className="py-4 pr-4">
-                      <span
-                        className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${STATUS_STYLES[r.status]}`}
+                    </div>
+                    <StatusBadge status={r.status} />
+                  </div>
+
+                  <dl className="mt-3 grid grid-cols-2 gap-2 text-xs">
+                    <div className="min-w-0">
+                      <dt className="text-stone-400">Comparecerá</dt>
+                      <dd
+                        className={
+                          r.attending
+                            ? 'font-medium text-emerald-700'
+                            : 'font-medium text-stone-500'
+                        }
                       >
-                        {STATUS_LABELS[r.status]}
-                      </span>
-                    </td>
-                    <td className="py-4 pr-4">
-                      {r.status === 'pending' ? (
-                        <span className="text-stone-300">—</span>
-                      ) : r.notifiedAt ? (
-                        <span
-                          title={`Enviado em ${fmt(r.notifiedAt)}`}
-                          className="inline-flex items-center gap-1 text-xs text-emerald-700"
-                        >
-                          <Check className="h-3.5 w-3.5" />
-                          Avisado
-                        </span>
-                      ) : (
-                        <span
-                          title={r.notifyError ?? 'Aviso não enviado'}
-                          className="inline-flex items-center gap-1 text-xs font-medium text-rose-600"
-                        >
-                          <MailWarning className="h-3.5 w-3.5" />
-                          Falhou
-                          {r.notifyAttempts > 1 && ` (${r.notifyAttempts}x)`}
-                        </span>
-                      )}
-                    </td>
-                    <td className="py-4 text-right">
-                      {r.status === 'pending' ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => openDialog('approved', r)}
-                            className="inline-flex items-center gap-1.5 rounded-md bg-emerald-600 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-emerald-700"
-                          >
-                            <Check className="h-3.5 w-3.5" />
-                            Aprovar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openDialog('rejected', r)}
-                            className="inline-flex items-center gap-1.5 rounded-md border border-stone-300 px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-50"
-                          >
-                            <X className="h-3.5 w-3.5" />
-                            Recusar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => openDialog('delete', r)}
-                            aria-label={`Excluir solicitação de ${r.fullName}`}
-                            title="Excluir solicitação"
-                            className="inline-flex items-center rounded-md p-1.5 text-stone-400 transition hover:bg-rose-50 hover:text-rose-600"
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </button>
-                        </div>
-                      ) : needsNotification(r) ? (
-                        <button
-                          type="button"
-                          onClick={() => openDialog('resend', r)}
-                          className="inline-flex items-center gap-1.5 rounded-md bg-amber-700 px-3 py-1.5 text-xs font-medium text-white transition hover:bg-amber-800"
-                        >
-                          <Send className="h-3.5 w-3.5" />
-                          Reenviar aviso
-                        </button>
-                      ) : (
-                        <span className="text-xs text-stone-400">
-                          {r.decidedAt ? fmt(r.decidedAt) : '—'}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                        {r.attending ? 'Sim' : 'Não'}
+                      </dd>
+                    </div>
+                    <div className="min-w-0">
+                      <dt className="text-stone-400">Recebida</dt>
+                      <dd className="break-words font-medium text-stone-700">
+                        {fmt(r.createdAt)}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  {r.message && (
+                    <p className="mt-3 rounded-lg bg-stone-50 px-3 py-2 text-xs text-stone-600">
+                      {r.message}
+                    </p>
+                  )}
+
+                  {r.status !== 'pending' && (
+                    <p className="mt-3 text-xs">
+                      <NotifyBadge request={r} />
+                    </p>
+                  )}
+
+                  {/* Wraps rather than sitting in a row: three buttons plus a
+                      delete icon do not fit on one line at 360px. */}
+                  <div className="mt-3 flex flex-wrap justify-end gap-2">
+                    <RowActions request={r} openDialog={openDialog} />
+                  </div>
+                </article>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

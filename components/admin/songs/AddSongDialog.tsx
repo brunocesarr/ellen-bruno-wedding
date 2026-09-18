@@ -112,14 +112,14 @@ export function AddSongDialog() {
 
         <Dialog.Content
           className="
-            fixed left-1/2 top-1/2 z-50 w-[92vw] max-w-md
-            -translate-x-1/2 -translate-y-1/2 overflow-hidden
+            fixed left-1/2 top-1/2 z-50 flex max-h-[92vh] w-[92vw] max-w-md
+            -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden
             rounded-2xl bg-white shadow-2xl
             data-[state=open]:animate-in
             data-[state=open]:zoom-in-95
           "
         >
-          <header className="flex items-center justify-between border-b border-stone-100 px-6 py-4">
+          <header className="flex shrink-0 items-center justify-between border-b border-stone-100 px-6 py-4">
             <Dialog.Title className="font-serif text-lg text-stone-900">
               Nova música
             </Dialog.Title>
@@ -133,7 +133,11 @@ export function AddSongDialog() {
             </Dialog.Close>
           </header>
 
-          <form ref={formRef} action={formAction} className="space-y-4 p-6">
+          <form
+            ref={formRef}
+            action={formAction}
+            className="min-h-0 flex-1 space-y-4 overflow-y-auto p-6"
+          >
             <label className="block">
               <span className="mb-1 block text-xs font-medium text-stone-600">
                 Título

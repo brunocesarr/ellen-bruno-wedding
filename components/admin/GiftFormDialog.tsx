@@ -174,9 +174,9 @@ export function GiftFormDialog({ trigger, gift }: Props) {
       trigger={trigger}
       open={open}
       onOpenChange={handleOpenChange}
-      contentClassName="max-h-[92vh] w-[92vw] max-w-2xl"
+      contentClassName="flex max-h-[92vh] w-[92vw] max-w-2xl flex-col"
     >
-      <header className="flex items-start justify-between border-b border-stone-100 px-5 py-4 md:px-6">
+      <header className="flex shrink-0 items-start justify-between border-b border-stone-100 px-5 py-4 md:px-6">
         <div>
           <Dialog.Title className="font-serif text-xl text-stone-900">
             {isEdit ? 'Editar presente' : 'Novo presente'}
@@ -201,7 +201,7 @@ export function GiftFormDialog({ trigger, gift }: Props) {
       <form
         ref={formRef}
         action={formAction}
-        className="max-h-[calc(92vh-76px)] overflow-y-auto p-5 md:p-6"
+        className="min-h-0 flex-1 overflow-y-auto p-5 md:p-6"
       >
         {gift?.id && <input type="hidden" name="id" value={gift.id} />}
 

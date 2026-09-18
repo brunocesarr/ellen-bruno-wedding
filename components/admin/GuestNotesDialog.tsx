@@ -13,8 +13,11 @@ type Props = {
 
 export function GuestNotesDialog({ trigger, guestName, notes }: Props) {
   return (
-    <DialogShell trigger={trigger} contentClassName="w-[92vw] max-w-md">
-      <header className="flex items-start justify-between border-b border-stone-100 px-5 py-4 md:px-6">
+    <DialogShell
+      trigger={trigger}
+      contentClassName="flex max-h-[85vh] w-[92vw] max-w-md flex-col"
+    >
+      <header className="flex shrink-0 items-start justify-between border-b border-stone-100 px-5 py-4 md:px-6">
         <div className="flex min-w-0 items-start gap-3">
           <span className="grid h-9 w-9 flex-shrink-0 place-items-center rounded-full bg-amber-100 text-amber-800">
             <StickyNote className="h-4 w-4" />
@@ -37,13 +40,13 @@ export function GuestNotesDialog({ trigger, guestName, notes }: Props) {
         </Dialog.Close>
       </header>
 
-      <div className="px-5 py-5 md:px-6">
+      <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5 md:px-6">
         <p className="whitespace-pre-wrap rounded-xl bg-amber-50/60 p-4 text-sm leading-relaxed text-stone-700">
           {notes}
         </p>
       </div>
 
-      <footer className="flex justify-end border-t border-stone-100 bg-stone-50 px-5 py-3 md:px-6">
+      <footer className="flex shrink-0 justify-end border-t border-stone-100 bg-stone-50 px-5 py-3 md:px-6">
         <Dialog.Close className="rounded-full px-5 py-2 text-sm text-stone-600 transition hover:bg-stone-100">
           Fechar
         </Dialog.Close>

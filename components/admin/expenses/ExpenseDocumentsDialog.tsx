@@ -242,7 +242,7 @@ export function ExpenseDocumentsDialog({
       onOpenChange={handleOpenChange}
       contentClassName="flex max-h-[92vh] w-[94vw] max-w-2xl flex-col"
     >
-      <header className="flex items-start justify-between gap-3 border-b border-stone-100 px-5 py-4 md:px-6">
+      <header className="flex shrink-0 items-start justify-between gap-3 border-b border-stone-100 px-5 py-4 md:px-6">
         <div className="min-w-0">
           <Dialog.Title className="truncate font-serif text-xl text-stone-900">
             Documentos
