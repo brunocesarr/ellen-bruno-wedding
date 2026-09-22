@@ -1,5 +1,6 @@
 import 'server-only'
 
+import { SupabaseGuestManagerLinksRepository } from '@/src/infrastructure/repositories/supabase-guest-manager-links.repository'
 import { SupabaseGuestsRepository } from '@/src/infrastructure/repositories/supabase-guests.repository'
 import { SupabaseInviteLinksRepository } from '@/src/infrastructure/repositories/supabase-invite-links.repository'
 import { SupabaseRsvpRequestsRepository } from '@/src/infrastructure/repositories/supabase-rsvp-requests.repository'
@@ -24,6 +25,9 @@ export const getPublicContainer = cache(() => {
     guestsRepo: new SupabaseGuestsRepository(adminClient),
     rsvpRequestsRepo: new SupabaseRsvpRequestsRepository(adminClient),
     inviteLinksRepo: new SupabaseInviteLinksRepository(adminClient),
+    // Admin client, like every other guest-PII repository here: the manager
+    // token is validated server-side before a single guest row is returned.
+    guestManagerLinksRepo: new SupabaseGuestManagerLinksRepository(adminClient),
     emailService: createEmailService(),
     notificationService: createNotificationService(),
   }

@@ -238,6 +238,22 @@
   }
 }
 
+@utility vinyl-platter {
+  transform-box: view-box;
+  transform-origin: 24px 24px;
+  /* 33⅓ rpm is 1.8s a turn; 2.4s reads as "playing" without looking frantic. */
+  animation: rotate-slow 2.4s linear infinite;
+  /* Paused by default, and paused means FROZEN: a stopped record keeps the
+     groove position it stopped at instead of snapping back to 0deg. */
+  animation-play-state: paused;
+}
+
+/* Defined after vinyl-platter on purpose — same specificity, so source order
+   is what lets it win. */
+@utility vinyl-spinning {
+  animation-play-state: running;
+}
+
 @utility no-scrollbar {
   @apply [scrollbar-width:none] [&::-webkit-scrollbar]:hidden;
 }

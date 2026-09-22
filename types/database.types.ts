@@ -190,6 +190,45 @@ export type Database = {
         }
         Relationships: []
       }
+      guest_manager_links: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          is_active: boolean
+          label: string
+          last_used_at: string | null
+          revoked_at: string | null
+          token: string
+          updated_at: string
+          use_count: number
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token?: string
+          updated_at?: string
+          use_count?: number
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          is_active?: boolean
+          label?: string
+          last_used_at?: string | null
+          revoked_at?: string | null
+          token?: string
+          updated_at?: string
+          use_count?: number
+        }
+        Relationships: []
+      }
       guests: {
         Row: {
           confirmed_at: string | null
@@ -683,6 +722,10 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      touch_guest_manager_link: {
+        Args: { p_token: string }
+        Returns: undefined
       }
       touch_invite_link: { Args: { p_token: string }; Returns: undefined }
     }

@@ -104,8 +104,9 @@ access rather than loosened RLS. Preserve this split.
 - **`server-action-result.ts`** — `ActionResult<T>` + `unwrapForPage()`
   (redirect-on-unauthorized / throw / return data), used by every admin page.
 - **`revalidate.ts`** — `revalidateGroup(group)`. Groups: `guests`, `gifts`,
-  `messages`, `siteImages`, `invite`, `rsvpRequests`, `inviteLinks`. Single
-  source of truth for which paths a mutation invalidates.
+  `messages`, `siteImages`, `invite`, `rsvpRequests`, `inviteLinks`,
+  `guestManagerLinks`. Single source of truth for which paths a mutation
+  invalidates.
 - **`form-data.ts`** — typed extractors (`getString`, `getOptionalString`,
   `getBoolean`, `getNumber`, `getFile`). All use `fd.get()`, which returns the
   **first** match — if duplicate keys are possible, read `fd.getAll()` yourself.
@@ -147,6 +148,7 @@ globals.css             # Tailwind v4
   invite/                # Envelope reveal animation; ?token=, noindex
   invite/full/          # Full invitation; ?token= searchParam, noindex
   nossa-jornada/         # Standalone "Our journey" photo-story book
+  lista/                 # Guest-list manager; ?token=, noindex, force-dynamic
   presentes/            # Gift registry (list + detail [id])
   rsvp/                 # Public RSVP form
   _actions/             # gifts.actions.ts, rsvp.actions.ts,
@@ -201,7 +203,7 @@ them and nothing enforces they match — a known drift risk.
 ## Database
 
 Tables: `gifts`, `guests`, `rsvp`, `rsvp_requests`, `invite_links`,
-`pix_confirmations`, `site_images`, `keep_alive`.
+`guest_manager_links`, `pix_confirmations`, `site_images`, `keep_alive`.
 Enums: `gift_category`, `guest_status`, `rsvp_request_status`, `gift_kind`.
 View: `gifts_with_totals`.
 
@@ -265,6 +267,37 @@ as having no token at all. `touchInviteLinkAction` (visit counter) is fired
 from `after()` in `invite/full/page.tsx`, never awaited in render. Admin
 generates/revokes the active link from `/admin/solicitacoes` via
 `ShareableInviteLinkCard`.
+
+**Guest-manager links (`guest_manager_links` table)** give a trusted helper
+login-free access to `/lista?token=…`, where they can rename guests and change
+their status — nothing else. Several may be active at once (one labelled link
+per helper), so revoking one never touches another; `/admin/convidados` creates
+and revokes them via `GuestManagerLinksCard`. Three things carry the scope and
+must stay aligned:
+
+- `ManagedGuestSchema` (`entities/models/guest.ts`) is the PII projection —
+  no `inviteToken`/`partyInviteToken` (a manager link covers the whole list, so
+  leaking those would hand over every household's personal invite) and no
+  `notes`. `toManagedGuest()` in `guest-manager-access.use-case.ts` is the only
+  place guests cross that boundary.
+- `guestsRepo.updateNameAndStatus()` is a narrowed write touching exactly
+  `first_name`, `last_name`, `status`. Manager writes never go through
+  `update()` / `updateGuestUseCase`, which accept `notes` and `partyId` and
+  require admin auth. There is deliberately no create/delete counterpart.
+- `findUsableByToken()` enforces both `is_active` and `expires_at`, and
+  unknown/revoked/expired/malformed all surface as the same
+  `GuestManagerAccessDeniedError`, so a caller cannot probe token existence.
+
+`/lista` is `force-dynamic` (per-token PII — never give it a `revalidate`
+window) and `touchGuestManagerLinkAction` bumps the usage counter from
+`after()`, same as the shared invite link.
+
+Every mutation on either side of this feature is confirm-gated: rows in
+`GuestManagerBoard` never call the server themselves — they hand up a
+`PendingUpdate` (its own title/description/tone), the board confirms it via
+`ConfirmDialog`, and `BusyOverlay` (`components/ui/BusyOverlay.tsx`, `z-[60]`
+so it dims the dialog too) blocks the page while it runs. The admin card
+follows the same pattern for generate/revoke.
 
 **`rsvp_requests` is an outbox/retry:** `notify_attempts` / `notify_error` /
 `notified_at` make email failures retryable, with `status` + `decided_at` as an

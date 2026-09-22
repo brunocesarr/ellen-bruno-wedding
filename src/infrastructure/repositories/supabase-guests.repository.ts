@@ -150,6 +150,29 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
     if (error) throw new Error(error.message)
   }
 
+  async updateNameAndStatus(input: {
+    id: string
+    firstName?: string
+    lastName?: string
+    status?: GuestStatus
+  }): Promise<Guest> {
+    // Built field by field on purpose: whatever else the caller passed cannot
+    // reach the UPDATE statement.
+    const patch: GuestUpdate = {}
+    if (input.firstName !== undefined) patch.first_name = input.firstName
+    if (input.lastName !== undefined) patch.last_name = input.lastName
+    if (input.status !== undefined) patch.status = input.status
+
+    const { data, error } = await this.supabase
+      .from('guests')
+      .update(patch)
+      .eq('id', input.id)
+      .select('*')
+      .single()
+    if (error) throw new Error(error.message)
+    return mapRow(data)
+  }
+
   async setStatuses(
     updates: { id: string; status: GuestStatus }[]
   ): Promise<Guest[]> {

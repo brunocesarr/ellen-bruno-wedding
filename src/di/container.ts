@@ -3,6 +3,7 @@ import 'server-only'
 import { SupabaseExpenseDocumentsRepository } from '@/src/infrastructure/repositories/supabase-expense-documents.repository'
 import { SupabaseExpensesRepository } from '@/src/infrastructure/repositories/supabase-expenses.repository'
 import { SupabaseGiftsRepository } from '@/src/infrastructure/repositories/supabase-gifts.repository'
+import { SupabaseGuestManagerLinksRepository } from '@/src/infrastructure/repositories/supabase-guest-manager-links.repository'
 import { SupabaseGuestsRepository } from '@/src/infrastructure/repositories/supabase-guests.repository'
 import { SupabaseInviteLinksRepository } from '@/src/infrastructure/repositories/supabase-invite-links.repository'
 import { SupabasePixConfirmationsRepository } from '@/src/infrastructure/repositories/supabase-pix-confirmations.repository'
@@ -40,6 +41,7 @@ export const getContainer = cache(async () => {
     guestsRepo: new SupabaseGuestsRepository(supabase),
     rsvpRequestsRepo: new SupabaseRsvpRequestsRepository(supabase),
     inviteLinksRepo: new SupabaseInviteLinksRepository(supabase),
+    guestManagerLinksRepo: new SupabaseGuestManagerLinksRepository(supabase),
     emailService: createEmailService(),
     notificationService: createNotificationService(),
   }

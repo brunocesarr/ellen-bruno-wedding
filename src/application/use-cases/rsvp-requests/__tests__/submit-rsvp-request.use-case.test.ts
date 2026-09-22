@@ -95,6 +95,7 @@ function makeGuestsRepo(): GuestsRepoMock {
     create: vi.fn(),
     update: vi.fn(),
     delete: vi.fn(),
+    updateNameAndStatus: vi.fn(),
     setStatuses: vi.fn(),
   }
 

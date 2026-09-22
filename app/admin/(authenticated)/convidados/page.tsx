@@ -1,12 +1,20 @@
+import { listGuestManagerLinksAction } from '@/app/admin/_actions/guest-manager-links.actions'
 import { listGuestsAction } from '@/app/admin/_actions/guests.actions'
+import { GuestManagerLinksCard } from '@/components/admin/GuestManagerLinksCard'
 import { GuestsTable } from '@/components/admin/GuestsTable'
 import { SectionCard } from '@/components/admin/SectionCard'
 import { unwrapForPage } from '@/src/lib/server-action-result'
 
 export const dynamic = 'force-dynamic'
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://ellen-bruno-wedding.netlify.app'
+
 export default async function GuestsPage() {
-  const guests = unwrapForPage(await listGuestsAction())
+  const [guests, managerLinks] = await Promise.all([
+    listGuestsAction().then(unwrapForPage),
+    listGuestManagerLinksAction().then(unwrapForPage),
+  ])
 
   return (
     <section className="space-y-8">
@@ -18,6 +26,8 @@ export default async function GuestsPage() {
           </p>
         </div>
       </header>
+
+      <GuestManagerLinksCard links={managerLinks} siteUrl={SITE_URL} />
 
       <SectionCard
         title="Lista de convidados"

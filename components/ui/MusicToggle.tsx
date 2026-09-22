@@ -1,10 +1,24 @@
 'use client'
 
+import { TurntableIcon } from '@/components/ui/TurntableIcon'
 import type { MusicTrack } from '@/src/lib/music-catalog'
-import { SkipForward, Volume2, VolumeX } from 'lucide-react'
+import { SkipForward } from 'lucide-react'
 import { motion, useReducedMotion } from 'motion/react'
 import { usePathname } from 'next/navigation'
 import { useCallback, useEffect, useRef, useState } from 'react'
+
+/**
+ * Routes that are tools rather than part of the celebration: no toggle, and
+ * any music already playing fades out on arrival. `/lista` (the guest-list
+ * manager) belongs here for the same reason the admin does — someone is
+ * working, not browsing the invitation.
+ */
+const SILENT_ROUTE_PREFIXES = ['/admin', '/lista'] as const
+
+const isSilentRoute = (pathname: string | null) =>
+  SILENT_ROUTE_PREFIXES.some(
+    (prefix) => pathname === prefix || pathname?.startsWith(`${prefix}/`)
+  )
 
 const STORAGE_KEY = 'wedding:music-on'
 const TARGET_VOLUME = 0.35
@@ -47,7 +61,7 @@ type Props = {
 
 export function MusicToggle({ tracks }: Props) {
   const pathname = usePathname()
-  const isAdminRoute = pathname?.startsWith('/admin') ?? false
+  const silent = isSilentRoute(pathname)
 
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const fadeTimer = useRef<ReturnType<typeof setInterval> | null>(null)
@@ -157,7 +171,7 @@ export function MusicToggle({ tracks }: Props) {
     const audio = audioRef.current
     if (!audio) return
 
-    if (isAdminRoute) {
+    if (silent) {
       if (!audio.paused) fadeTo(0, () => audio.pause())
       return
     }
@@ -194,7 +208,7 @@ export function MusicToggle({ tracks }: Props) {
       window.removeEventListener('pointerdown', onGesture)
       window.removeEventListener('keydown', onGesture)
     }
-  }, [isAdminRoute, attemptPlay, fadeTo, loadCurrentTrack, tracks])
+  }, [silent, attemptPlay, fadeTo, loadCurrentTrack, tracks])
 
   return (
     <>
@@ -206,7 +220,7 @@ export function MusicToggle({ tracks }: Props) {
         onEnded={advanceTrack}
       />
 
-      {!isAdminRoute && (
+      {!silent && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -222,19 +236,9 @@ export function MusicToggle({ tracks }: Props) {
             aria-pressed={isPlaying}
             whileHover={{ scale: 1.08 }}
             whileTap={{ scale: 0.92 }}
-            className="flex h-11 w-11 items-center justify-center rounded-full border border-white/40 bg-white/30 p-2 text-stone-700 shadow-lg backdrop-blur-md transition-colors hover:bg-white/50"
+            className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border border-white/40 bg-white/30 p-0 text-stone-700 shadow-lg backdrop-blur-md transition-colors hover:bg-white/50"
           >
-            <motion.span
-              animate={isPlaying && !reduce ? { rotate: 360 } : { rotate: 0 }}
-              transition={{ duration: 8, repeat: Infinity, ease: 'linear' }}
-              className="flex"
-            >
-              {isPlaying ? (
-                <Volume2 className="h-5 w-5" />
-              ) : (
-                <VolumeX className="h-5 w-5" />
-              )}
-            </motion.span>
+            <TurntableIcon playing={isPlaying} reduce={reduce} />
           </motion.button>
 
           {tracks.length > 1 && (

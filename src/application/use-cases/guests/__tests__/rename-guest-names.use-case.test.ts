@@ -31,6 +31,7 @@ const repo = () => ({
   create: vi.fn(),
   update: vi.fn().mockImplementation((input) => Promise.resolve(input)),
   delete: vi.fn(),
+  updateNameAndStatus: vi.fn(),
   setStatuses: vi.fn(),
 })
 

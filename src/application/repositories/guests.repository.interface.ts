@@ -17,5 +17,18 @@ export interface IGuestsRepository {
   update(input: UpdateGuestInput): Promise<Guest>
   delete(id: string): Promise<void>
 
+  /**
+   * The guest-manager link's only write. Narrowed to the three columns a
+   * manager may touch, so that scope is enforced at the column level instead
+   * of resting on validation alone. Never widen it to take an
+   * UpdateGuestInput: `notes` and `partyId` are not a manager's to change.
+   */
+  updateNameAndStatus(input: {
+    id: string
+    firstName?: string
+    lastName?: string
+    status?: GuestStatus
+  }): Promise<Guest>
+
   setStatuses(updates: { id: string; status: GuestStatus }[]): Promise<Guest[]>
 }

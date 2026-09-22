@@ -69,3 +69,26 @@ export type ExpenseDocumentInsert =
 // --- Background music playlist ----------------------------------------------
 export type SongRow = Database['public']['Tables']['songs']['Row']
 export type SongInsert = Database['public']['Tables']['songs']['Insert']
+
+// --- Guest-manager links -----------------------------------------------------
+// Hand-written because `guest_manager_links` is not in database.types.ts until
+// the migration is applied. After `pnpm db:push && pnpm db:types`, replace both
+// with the generated pair —
+//   Database['public']['Tables']['guest_manager_links']['Row' | 'Insert']
+// — and drop the `untyped()` helper in the repository.
+export type GuestManagerLinkRow = {
+  id: string
+  token: string
+  label: string
+  is_active: boolean
+  expires_at: string | null
+  use_count: number
+  last_used_at: string | null
+  revoked_at: string | null
+  created_at: string
+  updated_at: string
+}
+export type GuestManagerLinkInsert = {
+  label?: string
+  expires_at?: string | null
+}

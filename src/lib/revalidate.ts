@@ -20,6 +20,7 @@ const GROUPS = {
     '/admin/resumo',
   ],
   inviteLinks: [['/invite/full', 'page'] as const, '/admin/solicitacoes'],
+  guestManagerLinks: ['/admin/convidados'],
   expenses: ['/admin', '/admin/despesas'],
   music: [['/', 'layout'] as const, '/admin/musicas'],
 } as const satisfies Record<string, readonly PathSpec[]>
