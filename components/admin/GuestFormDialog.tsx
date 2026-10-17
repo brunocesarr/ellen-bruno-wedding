@@ -160,6 +160,7 @@ export function GuestFormDialog({
             <Field label="Nome" error={errors.firstName?.message}>
               <input
                 {...register('firstName')}
+                // eslint-disable-next-line jsx-a11y/no-autofocus -- modal dialog: focus must land on the first field on open
                 autoFocus
                 placeholder="Ex: Ellen"
                 className={inputClassName}

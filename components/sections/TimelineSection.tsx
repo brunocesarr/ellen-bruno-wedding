@@ -44,7 +44,10 @@ export function TimelineSection() {
           </p>
         </motion.header>
 
+        {/* role="list" is deliberate: list-style is reset, and Safari/VoiceOver drops list semantics without it. */}
+        {/* eslint-disable-next-line jsx-a11y/no-redundant-roles */}
         <ol
+          role="list"
           className="
           mx-auto grid max-w-xl
           grid-cols-[minmax(80px,1fr)_28px_minmax(0,1.4fr)]
@@ -53,7 +56,6 @@ export function TimelineSection() {
           md:grid-cols-[minmax(120px,1fr)_28px_minmax(0,1.4fr)]
           md:gap-x-8 md:gap-y-14
         "
-          role="list"
         >
           {ITEMS.map((item, i) => (
             <TimelineRow

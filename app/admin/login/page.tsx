@@ -99,7 +99,6 @@ export default function LoginPage() {
               <input
                 type="email"
                 autoComplete="email"
-                autoFocus
                 placeholder="email@exemplo.com"
                 aria-invalid={!!errors.email}
                 className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-amber-600/30 ${

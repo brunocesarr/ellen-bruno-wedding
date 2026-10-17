@@ -84,6 +84,7 @@ export function MoveGuestDialog({ guest, allGuests, trigger, onMoved }: Props) {
         <div className="relative">
           <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-stone-400" />
           <input
+            // eslint-disable-next-line jsx-a11y/no-autofocus -- modal dialog: focus must land on the search field on open
             autoFocus
             type="search"
             value={query}

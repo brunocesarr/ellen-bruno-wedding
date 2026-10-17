@@ -19,11 +19,6 @@ type Props = {
   price: number | null
   minAmount: number | null
   suggestedAmounts: number[]
-  goalAmount: number | null
-  confirmedTotal: number
-  contributorCount: number
-  progressPct: number | null
-  amountLabel: string
   qrImage: string | null
   brCode: string | null
   isReserved: boolean
@@ -48,11 +43,6 @@ export function GiftPaymentSection({
   price,
   minAmount,
   suggestedAmounts,
-  goalAmount,
-  confirmedTotal,
-  contributorCount,
-  progressPct,
-  amountLabel,
   qrImage,
   brCode,
   isReserved,

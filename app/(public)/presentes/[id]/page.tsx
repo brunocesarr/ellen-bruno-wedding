@@ -62,11 +62,6 @@ export default async function GiftDetailPage({
         price={giftView.price}
         minAmount={giftView.minAmount}
         suggestedAmounts={giftView.suggestedAmounts}
-        goalAmount={giftView.goalAmount}
-        confirmedTotal={giftView.confirmedTotal}
-        contributorCount={giftView.contributorCount}
-        progressPct={giftView.progressPct}
-        amountLabel={giftView.amountLabel}
         qrImage={pix?.qrImage ?? null}
         brCode={pix?.brCode ?? null}
         isReserved={reservation.isReserved}

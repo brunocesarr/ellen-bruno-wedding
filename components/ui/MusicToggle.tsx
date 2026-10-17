@@ -212,6 +212,7 @@ export function MusicToggle({ tracks }: Props) {
 
   return (
     <>
+      {/* eslint-disable-next-line jsx-a11y/media-has-caption -- background music has no spoken content to caption */}
       <audio
         ref={audioRef}
         preload="none"

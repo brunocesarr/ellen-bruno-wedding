@@ -74,6 +74,7 @@ export function SongsManager({ songs }: Props) {
               </p>
 
               {song.audioUrl && (
+                // eslint-disable-next-line jsx-a11y/media-has-caption -- music tracks have no spoken content to caption
                 <audio
                   controls
                   preload="none"
