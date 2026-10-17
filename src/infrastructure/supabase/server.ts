@@ -1,3 +1,4 @@
+import { requireEnv } from '@/src/lib/env'
 import 'server-only'
 
 import type { Database } from '@/types/database.types'
@@ -8,8 +9,14 @@ import type { CookieToSet } from './types'
 export async function createSupabaseServerClient() {
   const cookieStore = await cookies()
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    requireEnv(
+      'NEXT_PUBLIC_SUPABASE_URL',
+      process.env.NEXT_PUBLIC_SUPABASE_URL
+    ),
+    requireEnv(
+      'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    ),
     {
       cookies: {
         getAll: () => cookieStore.getAll(),

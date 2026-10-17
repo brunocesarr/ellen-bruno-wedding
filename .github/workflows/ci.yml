@@ -15,10 +15,13 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # Advisory only: a new upstream advisory must not block unrelated PRs.
+      - run: pnpm audit --prod --audit-level=high
+        continue-on-error: true
       - run: pnpm lint
       - run: pnpm format
       - run: pnpm test:ci
       - run: pnpm build
         env:
-          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}.
+          NEXT_PUBLIC_SUPABASE_URL: ${{ vars.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: ${{ vars.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY }}

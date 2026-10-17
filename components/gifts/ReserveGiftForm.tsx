@@ -36,6 +36,7 @@ export function ReserveGiftForm({
   if (state.ok) {
     return (
       <motion.div
+        role="status"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="rounded-2xl bg-sage/10 p-8 text-center"
@@ -96,13 +97,19 @@ export function ReserveGiftForm({
       </Field>
 
       {state.error && !state.issues && (
-        <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
+        <p
+          role="alert"
+          className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark"
+        >
           {state.error}
         </p>
       )}
 
       {fieldError('amount') && (
-        <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
+        <p
+          role="alert"
+          className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark"
+        >
           {fieldError('amount')}
         </p>
       )}

@@ -1,3 +1,4 @@
+import { requireEnv } from '@/src/lib/env'
 import type { Database } from '@/types/database.types'
 import { createServerClient } from '@supabase/ssr'
 import type { NextRequest, NextResponse } from 'next/server'
@@ -8,8 +9,14 @@ export function createSupabaseProxyClient(
   res: NextResponse
 ): TypedSupabaseClient {
   return createServerClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    requireEnv(
+      'NEXT_PUBLIC_SUPABASE_URL',
+      process.env.NEXT_PUBLIC_SUPABASE_URL
+    ),
+    requireEnv(
+      'NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY',
+      process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
+    ),
     {
       cookies: {
         getAll: () => req.cookies.getAll(),

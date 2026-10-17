@@ -1,6 +1,7 @@
 import { MotionWrapper } from '@/components/layout/MotionWrapper'
 import { InvalidInviteNotice } from '@/components/public/InvalidInviteNotice'
 import { AboutSection } from '@/components/sections/AboutSection'
+import { EventJsonLd } from '@/components/sections/EventJsonLd'
 import { HeroSection } from '@/components/sections/HeroSection'
 import dynamic from 'next/dynamic'
 
@@ -43,6 +44,7 @@ export const revalidate = 60
 export default function WeddingPage() {
   return (
     <MotionWrapper>
+      <EventJsonLd />
       <InvalidInviteNotice />
       <HeroSection />
       <MonogramSection />

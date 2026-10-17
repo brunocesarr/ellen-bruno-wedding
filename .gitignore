@@ -47,3 +47,6 @@ supabase/.branches/
 supabase/.temp/
 # Local Netlify folder
 .netlify
+
+# One-off local image backup
+.backfill-backup/

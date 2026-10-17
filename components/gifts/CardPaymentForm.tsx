@@ -101,13 +101,19 @@ export function CardPaymentForm({
       </Field>
 
       {error && (
-        <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
+        <p
+          role="alert"
+          className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark"
+        >
           {error}
         </p>
       )}
 
       {fieldErrors.amount?.[0] && (
-        <p className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark">
+        <p
+          role="alert"
+          className="rounded border border-terracotta/30 bg-terracotta/5 p-3 text-sm text-terracotta-dark"
+        >
           {fieldErrors.amount[0]}
         </p>
       )}

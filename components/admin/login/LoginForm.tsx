@@ -83,7 +83,7 @@ export function LoginForm() {
               aria-describedby={errors.email ? 'email-error' : undefined}
               className={`
               w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm
-              outline-none transition
+              outline-none transition focus:ring-2 focus:ring-amber-600/30
               ${
                 errors.email
                   ? 'border-rose-400 focus:border-rose-500'
@@ -114,7 +114,7 @@ export function LoginForm() {
               aria-describedby={errors.password ? 'password-error' : undefined}
               className={`
               w-full rounded-lg border bg-white py-2.5 pl-10 pr-10 text-sm
-              outline-none transition
+              outline-none transition focus:ring-2 focus:ring-amber-600/30
               ${
                 errors.password
                   ? 'border-rose-400 focus:border-rose-500'

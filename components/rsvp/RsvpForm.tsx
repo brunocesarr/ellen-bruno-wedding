@@ -73,7 +73,10 @@ export function RsvpForm({ invite }: Props) {
 
   if (state && state.ok) {
     return (
-      <div className="mx-auto max-w-xl rounded-sm border border-sage/40 bg-sage/5 p-10 text-center">
+      <div
+        role="status"
+        className="mx-auto max-w-xl rounded-sm border border-sage/40 bg-sage/5 p-10 text-center"
+      >
         <p className="eyebrow text-sage">Confirmação recebida</p>
         <h3 className="mt-3 font-display text-3xl text-terracotta">
           Obrigado, {invite.guest.firstName}! 💕
@@ -233,7 +236,10 @@ export function RsvpForm({ invite }: Props) {
       </div>
 
       {state && !state.ok && state.error && !state.issues && (
-        <p className="mt-6 rounded-sm border border-terracotta/30 bg-terracotta/5 p-4 text-sm text-terracotta-dark">
+        <p
+          role="alert"
+          className="mt-6 rounded-sm border border-terracotta/30 bg-terracotta/5 p-4 text-sm text-terracotta-dark"
+        >
           {state.error}
         </p>
       )}

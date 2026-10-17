@@ -32,16 +32,7 @@ export async function enforceRateLimit(
 ): Promise<Extract<ActionResult<never>, { ok: false }> | null> {
   try {
     const supabase = createSupabaseAdminClient()
-    // The function isn't in types/database.types.ts until `pnpm db:types` is
-    // re-run after the migration, hence the narrow cast.
-    const { data, error } = await (
-      supabase as unknown as {
-        rpc: (
-          fn: string,
-          args: Record<string, unknown>
-        ) => PromiseLike<{ data: boolean | null; error: unknown }>
-      }
-    ).rpc('check_rate_limit', {
+    const { data, error } = await supabase.rpc('check_rate_limit', {
       p_key: `${bucket}:${await clientKey()}`,
       p_max: max,
       p_window_seconds: windowSeconds,

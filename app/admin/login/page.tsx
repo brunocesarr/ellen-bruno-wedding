@@ -102,7 +102,7 @@ export default function LoginPage() {
                 autoFocus
                 placeholder="email@exemplo.com"
                 aria-invalid={!!errors.email}
-                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm outline-none transition ${
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-amber-600/30 ${
                   errors.email
                     ? 'border-rose-400 focus:border-rose-500'
                     : 'border-stone-300 focus:border-amber-600'
@@ -128,7 +128,7 @@ export default function LoginPage() {
                 autoComplete="current-password"
                 placeholder="••••••••"
                 aria-invalid={!!errors.password}
-                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-10 text-sm outline-none transition ${
+                className={`w-full rounded-lg border bg-white py-2.5 pl-10 pr-10 text-sm outline-none transition focus:ring-2 focus:ring-amber-600/30 ${
                   errors.password
                     ? 'border-rose-400 focus:border-rose-500'
                     : 'border-stone-300 focus:border-amber-600'

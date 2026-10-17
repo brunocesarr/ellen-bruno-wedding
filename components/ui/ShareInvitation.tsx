@@ -1,6 +1,5 @@
 'use client'
 
-import { toPng } from 'html-to-image'
 import { Download, Share2 } from 'lucide-react'
 import { useRef, useState } from 'react'
 import { InvitationCard } from './InvitationCard'
@@ -12,6 +11,8 @@ export function ShareInvitation() {
 
   async function generate(): Promise<File | null> {
     if (!cardRef.current) return null
+    // Loaded on demand so the library never ships in the initial bundle.
+    const { toPng } = await import('html-to-image')
     const dataUrl = await toPng(cardRef.current, {
       pixelRatio: 2,
       cacheBust: true,

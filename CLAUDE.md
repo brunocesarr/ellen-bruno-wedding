@@ -128,6 +128,11 @@ access rather than loosened RLS. Preserve this split.
   back to the catalog's static `fallback` path. Wrapped in React `cache()`.
   Swallows every error except Next's `DYNAMIC_SERVER_USAGE` digest, so a
   Supabase outage degrades to fallback images instead of failing the render.
+- **`env.ts`** — `requireEnv(name, process.env.NAME)` for server-side Supabase
+  clients/proxy: a missing var fails with a readable pt-BR message. Pass a
+  _literal_ `process.env.X` access — a dynamic lookup would break
+  `NEXT_PUBLIC_*` inlining. `infrastructure/supabase/client.ts` (browser)
+  keeps plain accesses.
 - **`rate-limit.ts`** — `server-only`; `enforceRateLimit(bucket, { max,
 windowSeconds })` is a per-IP fixed-window limiter backed by the
   `check_rate_limit` Postgres function (`rate_limits` table, service role
@@ -135,8 +140,7 @@ windowSeconds })` is a per-IP fixed-window limiter backed by the
   `ActionResult` error or `null`; fails **open** on infra errors. Every public
   server action in `app/(public)/_actions/` calls it first. Public forms also
   render `components/ui/Honeypot.tsx` (field `website`); actions silently drop
-  submissions that fill it. After applying the migration run `pnpm db:types`,
-  then drop the narrow `rpc` cast in `rate-limit.ts`.
+  submissions that fill it. Apply the migration with `pnpm db:push`.
 - **`journey-catalog.ts`** — static content for the "Nossa Jornada" photo-story
   feature (books/pages/photo layouts); photos reference `site-images-catalog`
   keys rather than embedding URLs.
@@ -201,6 +205,12 @@ layout/                 # FloralFrame, MotionWrapper, …
 `app/admin/(authenticated)/layout.tsx`, which calls `supabase.auth.getUser()` and
 `redirect('/admin/login')`. Adding a page under `(authenticated)/` protects it;
 adding it elsewhere does not.
+
+**Nightly backup:** `netlify/functions/backup-data.ts` (`0 6 * * *`, same env
+vars as keep-alive) dumps the core tables as one JSON file per day into the
+private `backups` Storage bucket (migration `20261016130000_backups_bucket.sql`,
+no policies → service role only) and keeps the last 14. The free Supabase plan
+has no automatic backups. Restore is manual from the JSON.
 
 **Two independent keep-alive paths, with different env vars:**
 `netlify/functions/supabase-keep-alive.ts` (scheduled `*/5 * * * *` — bumped
@@ -360,12 +370,23 @@ admin approval step before a request becomes a real guest.
   production — an `immutable` header makes Turbopack serve stale chunks and
   produce "module factory is not available".
 
+## Lint guardrails
+
+`eslint.config.mjs` enables the full `jsx-a11y` recommended set as **warnings**
+(`control-has-associated-label` is off — too noisy), and a
+`no-restricted-imports` **error** so `src/application` and `src/entities` can
+never import `@/src/infrastructure`, `@/src/di` or `next/*`. Landing page also
+ships `EventJsonLd` (schema.org Event from `WEDDING_DETAILS`), `app/manifest.ts`,
+`robots.ts` and `sitemap.ts`. Dependabot (weekly, grouped) and a non-blocking
+`pnpm audit` step in CI cover dependencies.
+
 ## Testing
 
 Vitest + `@testing-library/react` + jsdom; setup file `vitest.setup.ts`. Tests
 live in `__tests__/` beside their subject. Coverage is the **use-case layer**
 plus pure `interface-adapters` logic (e.g. `gift-ranking`); infrastructure, RPCs
-and UI are untested — verify those manually.
+and UI are untested (the two payment webhook routes have route-level tests under
+`app/api/*/webhook/__tests__`) — verify those manually.
 
 Zod gotcha: `.optional()` **omits absent keys** rather than setting them to
 `undefined`, and `expect.objectContaining({ k: undefined })` requires the key to
@@ -486,13 +507,9 @@ reusing one, a resubmitted form would still create a second ledger row. Wiring
 txid to the contribution id for bank-statement reconciliation still needs that
 duplicate-submit story solved first.
 
-**Two use cases already exist for this but are not wired up anywhere:**
-`src/application/use-cases/pix/generate-pix-qr.use-case.ts` and
-`list-untied-pix.use-case.ts` (would let admin see PIX payments with no
-`gift_id` — i.e. paid but unmatched to a gift). No controller, action, or UI
-calls either one. If you need "list untied PIX" for the admin dashboard, this
-is the use case to wire in — check it still matches `IPixConfirmationsRepository`
-before assuming it's ready to use as-is.
+`list-untied-pix.use-case.ts` feeds the admin `/admin/resumo` page through
+`app/admin/_actions/pix.actions.ts` (paid PIX with no `gift_id`).
+`generate-pix-qr.use-case.ts` exists but nothing calls it.
 
 ## Card payments (Mercado Pago / PagBank)
 

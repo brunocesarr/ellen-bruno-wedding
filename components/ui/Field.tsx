@@ -31,7 +31,15 @@ export function Field({
       </label>
       {children}
       {hint && !error && <p className="text-xs text-ink-muted">{hint}</p>}
-      {error && <p className="text-xs text-terracotta-dark">{error}</p>}
+      {error && (
+        <p
+          id={`${htmlFor}-error`}
+          role="alert"
+          className="text-xs text-terracotta-dark"
+        >
+          {error}
+        </p>
+      )}
     </div>
   )
 }
