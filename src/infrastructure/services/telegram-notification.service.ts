@@ -1,6 +1,9 @@
 import 'server-only'
 
-import type { INotificationService } from '@/src/application/services/notification.service.interface'
+import type {
+  IAnimationSender,
+  INotificationService,
+} from '@/src/application/services/notification.service.interface'
 
 type TelegramConfig = { botToken: string; chatId: string }
 
@@ -11,7 +14,9 @@ function readConfig(): TelegramConfig | null {
   return { botToken, chatId }
 }
 
-export class TelegramNotificationService implements INotificationService {
+export class TelegramNotificationService
+  implements INotificationService, IAnimationSender
+{
   constructor(private readonly config: TelegramConfig) {}
 
   async send(message: string): Promise<void> {
@@ -33,18 +38,49 @@ export class TelegramNotificationService implements INotificationService {
       throw new Error(`Telegram API respondeu ${res.status}: ${body}`)
     }
   }
+
+  async sendAnimation(animationUrl: string, caption: string): Promise<void> {
+    const res = await fetch(
+      `https://api.telegram.org/bot${this.config.botToken}/sendAnimation`,
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          chat_id: this.config.chatId,
+          animation: animationUrl,
+          caption,
+          parse_mode: 'HTML',
+        }),
+      }
+    )
+
+    if (!res.ok) {
+      const body = await res.text().catch(() => '')
+      throw new Error(`Telegram API respondeu ${res.status}: ${body}`)
+    }
+  }
 }
 
 /** Dev/CI fallback so missing credentials never break the flow. */
-export class NoopNotificationService implements INotificationService {
+export class NoopNotificationService
+  implements INotificationService, IAnimationSender
+{
   async send(message: string): Promise<void> {
     console.info('[NoopNotificationService] notification suppressed', {
       message,
     })
   }
+
+  async sendAnimation(animationUrl: string, caption: string): Promise<void> {
+    console.info('[NoopNotificationService] animation suppressed', {
+      animationUrl,
+      caption,
+    })
+  }
 }
 
-export function createNotificationService(): INotificationService {
+export function createNotificationService(): INotificationService &
+  IAnimationSender {
   const config = readConfig()
 
   if (!config) {
