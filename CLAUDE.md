@@ -128,6 +128,15 @@ access rather than loosened RLS. Preserve this split.
   back to the catalog's static `fallback` path. Wrapped in React `cache()`.
   Swallows every error except Next's `DYNAMIC_SERVER_USAGE` digest, so a
   Supabase outage degrades to fallback images instead of failing the render.
+- **`rate-limit.ts`** — `server-only`; `enforceRateLimit(bucket, { max,
+windowSeconds })` is a per-IP fixed-window limiter backed by the
+  `check_rate_limit` Postgres function (`rate_limits` table, service role
+  only, raw IP never stored — free, no external service). Returns an
+  `ActionResult` error or `null`; fails **open** on infra errors. Every public
+  server action in `app/(public)/_actions/` calls it first. Public forms also
+  render `components/ui/Honeypot.tsx` (field `website`); actions silently drop
+  submissions that fill it. After applying the migration run `pnpm db:types`,
+  then drop the narrow `rpc` cast in `rate-limit.ts`.
 - **`journey-catalog.ts`** — static content for the "Nossa Jornada" photo-story
   feature (books/pages/photo layouts); photos reference `site-images-catalog`
   keys rather than embedding URLs.
@@ -164,6 +173,8 @@ admin/
     imagens/            # Site image uploads
     solicitacoes/       # Public RSVP requests + shareable invite link admin
     resumo/             # Stats summary
+    despesas/           # Wedding expenses + attached documents (expenses use cases)
+    musicas/            # Background-music tracks (songs use cases)
   _actions/             # gifts.actions.ts, rsvp-requests.actions.ts,
                         # invite-links.actions.ts, dashboard.actions.ts, …
   auth/callback/route.ts # exchangeCodeForSession → /admin
@@ -245,6 +256,13 @@ uuid)` locks `for update`, validates the amount, inserts the ledger row, and
   `20260904180000_drop_reserved_by_email.sql` — it was never populated by any
   current `reserve_gift`/`reserve_gift_paid` signature. Run `pnpm db:push` and
   `pnpm db:types` to apply.
+
+**Reservation idempotency:** `ReserveGiftForm` mints a `contributionId` on first submit
+(client-only, never during SSR — a cached page would give every visitor the same id)
+and posts it; `reserveGiftUseCase` passes it to `reserve_gift`. A resubmit
+trips `pix_confirmations`' primary key, the RPC rolls back, and
+`SupabaseGiftsRepository.reserve` maps the `23505` to the first submission's
+result instead of an error.
 
 **Party-based invitations:** each guest carries `invite_token`,
 `party_invite_token` and `party_id`. One link resolves a household —

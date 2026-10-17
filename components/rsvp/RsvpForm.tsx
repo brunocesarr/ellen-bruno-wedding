@@ -10,6 +10,7 @@ import {
   FieldSelect,
   FieldTextarea,
 } from '@/components/ui/Field'
+import { Honeypot } from '@/components/ui/Honeypot'
 import { Guest } from '@/src/entities/models/guest'
 import { useActionState } from 'react'
 import { AnimatedButton } from '../ui/AnimatedButton'
@@ -90,7 +91,8 @@ export function RsvpForm({ invite }: Props) {
   }
 
   return (
-    <form action={action} className="mx-auto max-w-4xl">
+    <form action={action} className="relative mx-auto max-w-4xl">
+      <Honeypot />
       <div className="grid grid-cols-1 gap-x-12 gap-y-7 md:grid-cols-2">
         <Field
           label="Seu primeiro nome"

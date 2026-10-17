@@ -103,7 +103,19 @@ export class SupabaseGiftsRepository implements IGiftsRepository {
     } satisfies ReserveGiftArgs
 
     const { data, error } = await this.client.rpc('reserve_gift', args)
-    if (error) throw mapSentinel(error.message ?? '') ?? error
+    if (error) {
+      // Same contribution id submitted twice: the RPC rolled back on the
+      // ledger's primary key, so exactly one row exists. Report the first
+      // submission's outcome instead of an error.
+      if (
+        error.code === '23505' &&
+        error.message?.includes('pix_confirmations')
+      ) {
+        const gift = await this.getById(p.id)
+        if (gift) return { gift, contributionId: p.contributionId }
+      }
+      throw mapSentinel(error.message ?? '') ?? error
+    }
 
     const row = Array.isArray(data) ? data[0] : data
     if (!row) throw new GiftNotFoundError()

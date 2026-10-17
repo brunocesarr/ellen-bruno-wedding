@@ -148,5 +148,8 @@ export const ReserveGiftInputSchema = z.object({
   name: z.string().min(2, 'Informe seu nome').max(120),
   message: z.string().max(500).optional(),
   amount: money().optional(), // required for open_item/fund — the RPC enforces
+  // Minted once per form mount; makes a resubmit hit the ledger's PK instead
+  // of creating a second row.
+  contributionId: z.string().uuid().optional(),
 })
 export type ReserveGiftInput = z.infer<typeof ReserveGiftInputSchema>

@@ -2,9 +2,10 @@
 
 import { reserveGiftAction } from '@/app/(public)/_actions/gifts.actions'
 import { Field, FieldInput, FieldTextarea } from '@/components/ui/Field'
+import { Honeypot } from '@/components/ui/Honeypot'
 import type { ActionResult } from '@/src/lib/server-action-result'
 import { motion } from 'motion/react'
-import { useActionState } from 'react'
+import { useActionState, useRef } from 'react'
 import { AnimatedButton } from '../ui/AnimatedButton'
 
 const initial: ActionResult<{ id: string; name: string }> = {
@@ -20,7 +21,17 @@ export function ReserveGiftForm({
   /** Set for open_item / fund — the exact figure the displayed QR was built from. */
   amount?: string | null
 }) {
-  const [state, action, pending] = useActionState(reserveGiftAction, initial)
+  // Minted on first submit (client-only, so a cached page can never hand every
+  // visitor the same id) and reused for any resubmit of this form.
+  const contributionId = useRef<string | null>(null)
+  const [state, action, pending] = useActionState(
+    (prev: typeof initial, formData: FormData) => {
+      contributionId.current ??= crypto.randomUUID()
+      formData.set('contributionId', contributionId.current)
+      return reserveGiftAction(prev, formData)
+    },
+    initial
+  )
 
   if (state.ok) {
     return (
@@ -46,8 +57,9 @@ export function ReserveGiftForm({
   return (
     <form
       action={action}
-      className="space-y-6 rounded-3xl bg-white p-6 shadow-sm md:p-8"
+      className="relative space-y-6 rounded-3xl bg-white p-6 shadow-sm md:p-8"
     >
+      <Honeypot />
       <input type="hidden" name="giftId" value={giftId} />
 
       {/* Omitted for fixed_item, where the gift's own price is used. */}

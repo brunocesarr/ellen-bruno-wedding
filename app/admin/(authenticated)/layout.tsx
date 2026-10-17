@@ -44,7 +44,10 @@ export default async function AuthenticatedAdminLayout({
               name: user.user_metadata?.name ?? 'Casal',
             }}
           />
-          <main className="min-w-0 flex-1 px-4 pb-16 pt-6 md:px-8 md:pt-8">
+          <main
+            id="main"
+            className="min-w-0 flex-1 px-4 pb-16 pt-6 md:px-8 md:pt-8"
+          >
             {children}
           </main>
         </div>

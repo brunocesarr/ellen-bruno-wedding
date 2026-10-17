@@ -19,7 +19,7 @@ export function reserveGiftUseCase(deps: {
       name: result.data.name,
       message: result.data.message,
       amount: result.data.amount,
-      contributionId: randomUUID(),
+      contributionId: result.data.contributionId ?? randomUUID(),
     })
 
     // Best-effort admin alert. Never blocks the reservation.

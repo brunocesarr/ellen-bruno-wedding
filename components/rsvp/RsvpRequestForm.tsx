@@ -9,6 +9,7 @@ import {
 } from '@/components/ui/Field'
 import { useActionState } from 'react'
 import { AnimatedButton } from '../ui/AnimatedButton'
+import { Honeypot, HONEYPOT_FIELD } from '../ui/Honeypot'
 
 type SubmitActionState = Awaited<
   ReturnType<typeof submitRsvpRequestAction>
@@ -22,6 +23,7 @@ export function RsvpRequestForm() {
         email: (formData.get('email') as string | null) ?? '',
         attending: formData.get('attending') === 'going',
         message: (formData.get('message') as string | null) ?? undefined,
+        [HONEYPOT_FIELD]: (formData.get(HONEYPOT_FIELD) as string | null) ?? '',
       }),
     null
   )
@@ -52,7 +54,8 @@ export function RsvpRequestForm() {
     state && !state.ok && !state.issues ? state.error : undefined
 
   return (
-    <form action={action} className="mx-auto max-w-4xl">
+    <form action={action} className="relative mx-auto max-w-4xl">
+      <Honeypot />
       <p className="mx-auto mb-10 max-w-2xl text-center text-sm leading-relaxed text-ink-muted">
         Você chegou aqui sem um convite personalizado — sem problemas! Preencha
         seus dados abaixo e nós confirmaremos sua presença em seguida. Esta

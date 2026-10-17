@@ -19,6 +19,27 @@ const repo = () => ({
 const notify = () => ({ send: vi.fn().mockResolvedValue(undefined) })
 
 describe('reserveGiftUseCase', () => {
+  it('reuses a client-supplied contribution id so resubmits hit the ledger PK', async () => {
+    const giftsRepo = repo()
+    const cid = '22222222-2222-4222-8222-222222222222'
+    await reserveGiftUseCase({
+      giftsRepo: giftsRepo as never,
+      notificationService: notify(),
+    })({ giftId: ID, name: 'Ana', amount: '50', contributionId: cid })
+    expect(giftsRepo.reserve).toHaveBeenCalledWith(
+      expect.objectContaining({ contributionId: cid })
+    )
+  })
+
+  it('rejects a malformed contribution id', async () => {
+    await expect(
+      reserveGiftUseCase({
+        giftsRepo: repo() as never,
+        notificationService: notify(),
+      })({ giftId: ID, name: 'Ana', contributionId: 'x' })
+    ).rejects.toBeInstanceOf(ValidationError)
+  })
+
   it('rejects a malformed gift id', async () => {
     await expect(
       reserveGiftUseCase({

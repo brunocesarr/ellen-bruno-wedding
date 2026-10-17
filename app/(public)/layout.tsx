@@ -5,5 +5,9 @@ export default function PublicLayout({
 }: {
   children: React.ReactNode
 }) {
-  return <PageTransition>{children}</PageTransition>
+  return (
+    <main id="main" tabIndex={-1} className="outline-none">
+      <PageTransition>{children}</PageTransition>
+    </main>
+  )
 }

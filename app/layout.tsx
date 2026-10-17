@@ -95,6 +95,12 @@ export default async function RootLayout({
         className="font-body antialiased relative bg-ivory"
         cz-shortcut-listen="true"
       >
+        <a
+          href="#main"
+          className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-full focus:bg-white focus:px-4 focus:py-2 focus:text-sm focus:text-ink focus:shadow-lg"
+        >
+          Pular para o conteúdo
+        </a>
         <NuqsAdapter>
           <RouteLoader />
           {children}
