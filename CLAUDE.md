@@ -212,6 +212,18 @@ private `backups` Storage bucket (migration `20261016130000_backups_bucket.sql`,
 no policies → service role only) and keeps the last 14. The free Supabase plan
 has no automatic backups. Restore is manual from the JSON.
 
+**Overdue-expense alert:** `netlify/functions/expense-overdue-alert.ts`
+(`0 11 * * *` = 08:00 Brasília) calls `GET /api/expense-alerts` with
+`Bearer CRON_SECRET`; the route runs `notifyOverdueExpensesUseCase`, which sends
+**one** Telegram digest of every installment that is unpaid with a due date
+before today (Brasília date, not UTC), most late first, capped at 20 lines.
+Nothing is sent when nothing is overdue. Unlike the best-effort gift/RSVP
+alerts a send failure is **not** swallowed — the route returns 500 so the
+scheduled run shows as failed. Needs `CRON_SECRET` + `NEXT_PUBLIC_SITE_URL` (or
+Netlify's `URL`) on the function, and the Telegram vars on the site. Missing
+Telegram vars degrade to the no-op logger, so check the function log, not just
+your chat, when testing.
+
 **Two independent keep-alive paths, with different env vars:**
 `netlify/functions/supabase-keep-alive.ts` (scheduled `*/5 * * * *` — bumped
 from once a day after intermittent Netlify edge-function timeouts on admin

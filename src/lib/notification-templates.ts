@@ -111,3 +111,46 @@ export function buildUntiedPaymentAlert(params: {
     `Ver no painel: ${siteUrl()}/admin/resumo`,
   ].join('\n')
 }
+
+export type OverdueInstallmentItem = {
+  description: string
+  installmentNumber: number
+  installmentCount: number
+  /** "YYYY-MM-DD" */
+  dueDate: string
+  daysLate: number
+  remaining: number
+}
+
+// Telegram caps a message at 4096 chars; ~20 lines stays well under it.
+const MAX_OVERDUE_LINES = 20
+
+const formatIsoDate = (iso: string) => iso.split('-').reverse().join('/')
+
+/** Daily digest: every unpaid installment whose due date has passed. */
+export function buildOverdueExpensesAlert(
+  items: OverdueInstallmentItem[]
+): string {
+  const total = items.reduce((sum, i) => sum + i.remaining, 0)
+  const shown = items.slice(0, MAX_OVERDUE_LINES)
+
+  const lines = [
+    `⏰ <b>${items.length === 1 ? '1 parcela vencida' : `${items.length} parcelas vencidas`}</b> sem pagamento`,
+    `💰 Total em atraso: ${formatCurrencyBRL(total)}`,
+    '',
+    ...shown.map(
+      (i) =>
+        `• ${escapeHtml(i.description)} (${i.installmentNumber}/${i.installmentCount}) — ` +
+        `${formatCurrencyBRL(i.remaining)}, venceu em ${formatIsoDate(i.dueDate)} ` +
+        `(${i.daysLate} ${i.daysLate === 1 ? 'dia' : 'dias'} de atraso)`
+    ),
+  ]
+
+  if (items.length > shown.length) {
+    lines.push(`… e mais ${items.length - shown.length}`)
+  }
+
+  lines.push('', `Ver no painel: ${siteUrl()}/admin/despesas`)
+
+  return lines.join('\n')
+}
