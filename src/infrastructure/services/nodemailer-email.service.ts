@@ -107,10 +107,7 @@ export class NodemailerEmailService implements IEmailService {
 
       // sendMail resolves even when the server accepted the envelope but
       // rejected this recipient — treat that as a failure.
-      // `rejected` is Array<string | Address>, so normalise before joining.
-      const rejected = (info.rejected ?? []).map((entry) =>
-        typeof entry === 'string' ? entry : entry.address
-      )
+      const rejected = info.rejected ?? []
 
       if (rejected.length > 0) {
         throw new Error(`Gmail rejected recipient(s): ${rejected.join(', ')}`)
