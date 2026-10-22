@@ -119,3 +119,75 @@ export function getExpenseDocumentUrlUseCase(d: Deps) {
     return { url, fileName: document.fileName }
   }
 }
+
+export type ExpenseDocumentFile = {
+  /** Folder inside the archive: the expense description. */
+  folder: string
+  fileName: string
+  data: Buffer
+}
+
+const KIND_PREFIX = { contract: 'Contrato', payment_proof: 'Comprovante' }
+
+/**
+ * Every document of one expense — or of all of them when `expenseId` is
+ * omitted — as raw files for the caller to bundle. Names are deduplicated
+ * per folder so two uploads called "comprovante.jpg" don't overwrite each
+ * other in the archive.
+ */
+export function downloadExpenseDocumentsUseCase(d: Deps) {
+  return async (
+    expenseId?: string
+  ): Promise<{ label: string; files: ExpenseDocumentFile[] }> => {
+    if (!(await d.authService.getCurrentUser())) {
+      throw new UnauthenticatedError()
+    }
+
+    const [expenses, documents] = await Promise.all([
+      d.expensesRepo.list(),
+      d.expenseDocumentsRepo.list(),
+    ])
+
+    const scope = expenseId
+      ? expenses.filter((e) => e.id === expenseId)
+      : expenses
+    if (expenseId && scope.length === 0) throw new ExpenseNotFoundError()
+
+    const byId = new Map(scope.map((e) => [e.id, e]))
+    const wanted = documents.filter((doc) => byId.has(doc.expenseId))
+    if (wanted.length === 0) {
+      throw new ExpenseDocumentNotFoundError()
+    }
+
+    const used = new Set<string>()
+    const files: ExpenseDocumentFile[] = []
+    const downloaded = await Promise.all(
+      wanted.map(async (doc) => ({
+        doc,
+        data: await d.documentStorageRepo.download(doc.filePath),
+      }))
+    )
+
+    for (const { doc, data } of downloaded) {
+      const folder = byId.get(doc.expenseId)?.description ?? 'Despesa'
+      const base = `${KIND_PREFIX[doc.kind]} - ${doc.fileName}`
+      let fileName = base
+      for (let n = 2; used.has(`${folder}/${fileName}`); n++) {
+        const dot = base.lastIndexOf('.')
+        fileName =
+          dot > 0
+            ? `${base.slice(0, dot)} (${n})${base.slice(dot)}`
+            : `${base} (${n})`
+      }
+      used.add(`${folder}/${fileName}`)
+      files.push({ folder, fileName, data })
+    }
+
+    return {
+      label: expenseId
+        ? (scope[0]?.description ?? 'despesa')
+        : 'todas-as-despesas',
+      files,
+    }
+  }
+}

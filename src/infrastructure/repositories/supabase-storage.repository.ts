@@ -28,6 +28,14 @@ export class SupabaseStorageRepository implements IStorageRepository {
     if (error) throw error
   }
 
+  async download(path: string) {
+    const { data, error } = await this.client.storage
+      .from(this.bucket)
+      .download(path)
+    if (error) throw error
+    return Buffer.from(await data.arrayBuffer())
+  }
+
   getPublicUrl(path: string, _options?: { width?: number; quality?: number }) {
     const base = process.env.NEXT_PUBLIC_SUPABASE_URL!
     return `${base}/storage/v1/object/public/${this.bucket}/${path}`

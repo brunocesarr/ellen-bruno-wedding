@@ -1,5 +1,6 @@
 import {
   deleteExpenseDocumentUseCase,
+  downloadExpenseDocumentsUseCase,
   getExpenseDocumentUrlUseCase,
   uploadExpenseDocumentUseCase,
 } from '@/src/application/use-cases/expenses/manage-expense-document.use-case'
@@ -22,4 +23,9 @@ export async function deleteExpenseDocumentController(id: string) {
 export async function getExpenseDocumentUrlController(id: string) {
   const c = await getContainer()
   return handle(() => getExpenseDocumentUrlUseCase(c)(id))
+}
+
+export async function downloadExpenseDocumentsController(expenseId?: string) {
+  const c = await getContainer()
+  return handle(() => downloadExpenseDocumentsUseCase(c)(expenseId))
 }

@@ -10,6 +10,7 @@ import type {
 import {
   ChevronDown,
   ChevronRight,
+  Download,
   Paperclip,
   Pencil,
   Receipt,
@@ -100,6 +101,41 @@ function ExpenseLevelDocuments({ expense }: { expense: ExpenseViewModel }) {
         <ExpenseDocumentChip key={d.id} doc={d} />
       ))}
     </div>
+  )
+}
+
+/** Plain link: the route answers with a zip attachment, so no JS is needed. */
+function DownloadDocumentsLink({
+  expense,
+  className,
+  withLabel = false,
+}: {
+  expense: ExpenseViewModel
+  className: string
+  withLabel?: boolean
+}) {
+  if (expense.documentCount === 0) {
+    return (
+      <span
+        className={`${className} cursor-not-allowed opacity-40`}
+        aria-disabled="true"
+        title="Nenhum documento para baixar"
+      >
+        <Download className="h-4 w-4" />
+        {withLabel && 'Baixar'}
+      </span>
+    )
+  }
+  return (
+    <a
+      href={`/api/admin/expenses/documents?expenseId=${expense.id}`}
+      className={className}
+      aria-label="Baixar todos os documentos"
+      title="Baixar todos os documentos (.zip)"
+    >
+      <Download className="h-4 w-4" />
+      {withLabel && 'Baixar'}
+    </a>
   )
 }
 
@@ -266,6 +302,10 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
                           expense={e}
                           className="inline-flex items-center gap-1 rounded-lg p-2 text-stone-500 hover:bg-stone-100"
                         />
+                        <DownloadDocumentsLink
+                          expense={e}
+                          className="inline-flex items-center rounded-lg p-2 text-stone-500 hover:bg-stone-100"
+                        />
                         <ExpenseFormDialog
                           expense={e}
                           trigger={
@@ -373,6 +413,11 @@ export function ExpensesTable({ expenses }: { expenses: ExpenseViewModel[] }) {
                 edge. Wrapping matches GiftsTable's equivalent row. */}
             <div className="mt-3 flex flex-wrap justify-end gap-2">
               <DocumentsButton
+                expense={e}
+                withLabel
+                className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"
+              />
+              <DownloadDocumentsLink
                 expense={e}
                 withLabel
                 className="inline-flex items-center gap-1.5 rounded-lg bg-stone-100 px-3 py-1.5 text-sm text-stone-700"

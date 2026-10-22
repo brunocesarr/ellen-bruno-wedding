@@ -5,6 +5,8 @@ export interface IStorageRepository {
     contentType?: string
   ): Promise<{ path: string }>
   remove(path: string): Promise<void>
+  /** Raw bytes of an object — used to bundle private documents into a zip. */
+  download(path: string): Promise<Buffer>
   getPublicUrl(
     path: string,
     options?: { width?: number; quality?: number }

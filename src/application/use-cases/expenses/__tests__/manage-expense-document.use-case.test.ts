@@ -9,6 +9,7 @@ import { EXPENSE_DOCUMENTS_STORAGE_BUDGET_BYTES } from '@/src/lib/constants'
 import { describe, expect, it, vi } from 'vitest'
 import {
   deleteExpenseDocumentUseCase,
+  downloadExpenseDocumentsUseCase,
   getExpenseDocumentUrlUseCase,
   uploadExpenseDocumentUseCase,
 } from '../manage-expense-document.use-case'
@@ -212,5 +213,89 @@ describe('getExpenseDocumentUrlUseCase', () => {
       url: 'https://signed.example/x',
       fileName: 'contrato.pdf',
     })
+  })
+})
+
+describe('downloadExpenseDocumentsUseCase', () => {
+  const OTHER_EXPENSE_ID = '55555555-5555-4555-8555-555555555555'
+  const doc = (over: Record<string, unknown>) => ({
+    ...storedDocument,
+    ...over,
+  })
+
+  const make = ({ user = { id: 'u1' } as unknown } = {}) => {
+    const documents = [
+      doc({
+        id: 'd1',
+        filePath: 'a/1',
+        fileName: 'recibo.jpg',
+        kind: 'payment_proof',
+      }),
+      doc({
+        id: 'd2',
+        filePath: 'a/2',
+        fileName: 'recibo.jpg',
+        kind: 'payment_proof',
+      }),
+      doc({ id: 'd3', filePath: 'b/1', expenseId: OTHER_EXPENSE_ID }),
+    ]
+    return {
+      expenseDocumentsRepo: { list: vi.fn().mockResolvedValue(documents) },
+      expensesRepo: {
+        list: vi
+          .fn()
+          .mockResolvedValue([
+            expense,
+            { ...expense, id: OTHER_EXPENSE_ID, description: 'Fotógrafo' },
+          ]),
+      },
+      documentStorageRepo: {
+        download: vi.fn(async (p: string) => Buffer.from(p)),
+      },
+      authService: { getCurrentUser: vi.fn().mockResolvedValue(user) },
+    }
+  }
+
+  it('throws when there is no session', async () => {
+    await expect(
+      downloadExpenseDocumentsUseCase(make({ user: null }) as never)()
+    ).rejects.toBeInstanceOf(UnauthenticatedError)
+  })
+
+  it('bundles only the requested expense, renaming duplicate file names', async () => {
+    const out = await downloadExpenseDocumentsUseCase(make() as never)(
+      EXPENSE_ID
+    )
+
+    expect(out.label).toBe('Buffet')
+    expect(out.files.map((f) => `${f.folder}/${f.fileName}`)).toEqual([
+      'Buffet/Comprovante - recibo.jpg',
+      'Buffet/Comprovante - recibo (2).jpg',
+    ])
+  })
+
+  it('bundles every expense when no id is given', async () => {
+    const out = await downloadExpenseDocumentsUseCase(make() as never)()
+
+    expect(out.files).toHaveLength(3)
+    expect(new Set(out.files.map((f) => f.folder))).toEqual(
+      new Set(['Buffet', 'Fotógrafo'])
+    )
+  })
+
+  it('throws when the expense does not exist', async () => {
+    await expect(
+      downloadExpenseDocumentsUseCase(make() as never)(
+        '66666666-6666-4666-8666-666666666666'
+      )
+    ).rejects.toBeInstanceOf(ExpenseNotFoundError)
+  })
+
+  it('throws when there is nothing to download', async () => {
+    const d = make()
+    d.expenseDocumentsRepo.list.mockResolvedValue([])
+    await expect(
+      downloadExpenseDocumentsUseCase(d as never)(EXPENSE_ID)
+    ).rejects.toBeInstanceOf(ExpenseDocumentNotFoundError)
   })
 })

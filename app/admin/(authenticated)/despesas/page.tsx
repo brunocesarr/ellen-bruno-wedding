@@ -8,7 +8,14 @@ import { EXPENSE_DOCUMENTS_STORAGE_BUDGET_BYTES } from '@/src/lib/constants'
 import { formatBytes, formatCurrencyBRL } from '@/src/lib/format'
 import { unwrapForPage } from '@/src/lib/server-action-result'
 import { cn } from '@/src/lib/utils'
-import { CalendarClock, HardDrive, Plus, Receipt, Wallet } from 'lucide-react'
+import {
+  CalendarClock,
+  Download,
+  HardDrive,
+  Plus,
+  Receipt,
+  Wallet,
+} from 'lucide-react'
 
 export const dynamic = 'force-dynamic'
 
@@ -97,6 +104,14 @@ export default async function DespesasPage() {
             <HardDrive className="h-4 w-4 text-stone-400" />
             {documentCount} arquivo(s)
           </span>
+          {documentCount > 0 && (
+            <a
+              href="/api/admin/expenses/documents"
+              className="inline-flex items-center gap-2 rounded-full border border-stone-300 bg-white px-3 py-1.5 text-sm text-stone-700 hover:bg-stone-50"
+            >
+              <Download className="h-4 w-4" /> Baixar todos (.zip)
+            </a>
+          )}
           <span className="tabular-nums text-stone-500">
             {formatBytes(documentsBytes)} de{' '}
             {formatBytes(EXPENSE_DOCUMENTS_STORAGE_BUDGET_BYTES)} ·{' '}
