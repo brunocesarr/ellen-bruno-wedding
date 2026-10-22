@@ -25,7 +25,24 @@ SAGE = (122, 140, 110)
 GOLD = (201, 162, 90)
 BLUSH = (244, 214, 208)
 
+ASSETS = Path(__file__).resolve().parent / "assets"
 _emoji_cache: dict[str, Image.Image] = {}
+
+
+def dog_portrait(px: int) -> Image.Image:
+    """The couple's dog (scripts/assets/dog.jpg), circle-cropped with a gold ring."""
+    key = f"dog{px}"
+    if key not in _emoji_cache:
+        scale = 4  # supersample the mask for smooth edges
+        photo = Image.open(ASSETS / "dog.jpg").convert("RGBA").resize((px, px), Image.LANCZOS)
+        mask = Image.new("L", (px * scale, px * scale), 0)
+        ImageDraw.Draw(mask).ellipse((0, 0, px * scale - 1, px * scale - 1), fill=255)
+        photo.putalpha(mask.resize((px, px), Image.LANCZOS))
+        ring = Image.new("RGBA", (px + 12, px + 12), (0, 0, 0, 0))
+        ImageDraw.Draw(ring).ellipse((0, 0, px + 11, px + 11), fill=GOLD + (255,))
+        ring.alpha_composite(photo, (6, 6))
+        _emoji_cache[key] = ring
+    return _emoji_cache[key]
 
 
 def emoji(char: str, px: int) -> Image.Image:
@@ -66,10 +83,10 @@ def frame(day: int, i: int, confetti) -> Image.Image:
 
     wedding_day = day == 0
     bounce = abs(math.sin(t)) * 26
-    paste_center(img, emoji("🐶", 150), SIZE / 2 - 20 if wedding_day else SIZE / 2, 130 - bounce)
+    paste_center(img, dog_portrait(150), SIZE / 2 - 20 if wedding_day else SIZE / 2, 130 - bounce)
     if wedding_day:
         paste_center(img, emoji("💍", 70), SIZE / 2 + 80, 180 - bounce * 0.5)
-    paste_center(img, emoji("🎀", 54), SIZE / 2 - 5, 190 - bounce) if not wedding_day else None
+    paste_center(img, emoji("🎀", 54), SIZE / 2, 200 - bounce) if not wedding_day else None
 
     if wedding_day:
         centered_text(d, "HOJE É O DIA!", 235, ImageFont.truetype(TEXT_FONT, 46), SAGE)
