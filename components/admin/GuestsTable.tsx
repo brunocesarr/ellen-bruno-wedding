@@ -92,6 +92,11 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
     [list]
   )
 
+  const childrenCount = useMemo(
+    () => list.filter((g) => g.isChild).length,
+    [list]
+  )
+
   const handleSaved = useCallback((saved: Guest) => {
     setList((prev) => {
       const exists = prev.some((g) => g.id === saved.id)
@@ -187,6 +192,13 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         <Counter label="Confirmados" value={totals.going} tone="emerald" />
         <Counter label="Pendentes" value={totals.pending} tone="amber" />
         <Counter label="Não vão" value={totals.not_going} tone="rose" />
+        {childrenCount > 0 && (
+          <Counter
+            label="Crianças (< 5)"
+            value={childrenCount}
+            tone="neutral"
+          />
+        )}
       </div>
 
       {parties.length === 0 ? (

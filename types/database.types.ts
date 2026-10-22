@@ -236,6 +236,7 @@ export type Database = {
           first_name: string
           id: string
           invite_token: string
+          is_child: boolean
           last_name: string
           notes: string | null
           party_id: string
@@ -249,6 +250,7 @@ export type Database = {
           first_name: string
           id?: string
           invite_token?: string
+          is_child?: boolean
           last_name: string
           notes?: string | null
           party_id?: string
@@ -262,6 +264,7 @@ export type Database = {
           first_name?: string
           id?: string
           invite_token?: string
+          is_child?: boolean
           last_name?: string
           notes?: string | null
           party_id?: string
@@ -731,6 +734,7 @@ export type Database = {
           first_name: string
           id: string
           invite_token: string
+          is_child: boolean
           last_name: string
           notes: string | null
           party_id: string

@@ -37,6 +37,8 @@ export type DashboardStats = {
     going: number
     pending: number
     notGoing: number
+    children: number
+    childrenGoing: number
   }
   requestsSummary: {
     total: number

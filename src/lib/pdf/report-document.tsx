@@ -18,7 +18,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     color: '#292524',
   },
-  title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginBottom: 2 },
+  title: { fontSize: 18, fontFamily: 'Helvetica-Bold', marginBottom: 6 },
   subtitle: { fontSize: 10, color: '#78716c', marginBottom: 18 },
   sectionHeading: {
     fontSize: 12,
@@ -72,14 +72,17 @@ export type ReportColumn = {
   align?: 'left' | 'right'
 }
 
+/** A plain string, or text followed by a bold highlight (e.g. a name + a flag). */
+export type ReportCell = string | { text: string; bold: string }
+
 export type ReportSection = {
   heading?: string
-  rows: string[][]
+  rows: ReportCell[][]
 }
 
 type Props = {
   title: string
-  subtitle: string
+  subtitle?: string
   columns: ReportColumn[]
   sections: ReportSection[]
   totalsRow?: string[]
@@ -90,7 +93,7 @@ function Row({
   columns,
   bold = false,
 }: {
-  cells: string[]
+  cells: ReportCell[]
   columns: ReportColumn[]
   bold?: boolean
 }) {
@@ -105,7 +108,14 @@ function Row({
             bold ? styles.totalsCell : undefined,
           ]}
         >
-          {cell}
+          {typeof cell === 'string' ? (
+            cell
+          ) : (
+            <>
+              {cell.text}
+              <Text style={styles.totalsCell}>{cell.bold}</Text>
+            </>
+          )}
         </Text>
       ))}
     </View>
@@ -123,7 +133,7 @@ function ReportDocument({
     <Document title={title}>
       <Page size="A4" style={styles.page}>
         <Text style={styles.title}>{title}</Text>
-        <Text style={styles.subtitle}>{subtitle}</Text>
+        {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
 
         {sections.map((section, si) => (
           <View key={si}>

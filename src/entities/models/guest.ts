@@ -13,6 +13,7 @@ export const GuestSchema = z.object({
   partyInviteToken: z.string().uuid(),
   partyId: z.string().uuid(),
   notes: z.string().max(500).nullable(),
+  isChild: z.boolean(),
   confirmedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -30,6 +31,7 @@ export const CreateGuestInputSchema = z.object({
   lastName: z.string().min(1, 'Informe o sobrenome').max(80),
   status: GuestStatusSchema.default('pending'),
   notes: z.string().max(500).optional(),
+  isChild: z.boolean().optional(),
 
   partyId: z.string().uuid().optional(),
 })

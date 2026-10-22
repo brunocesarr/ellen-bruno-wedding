@@ -62,6 +62,7 @@ export function GuestFormDialog({
     lastName: guest?.lastName ?? '',
     status: guest?.status ?? 'pending',
     notes: guest?.notes ?? '',
+    isChild: guest?.isChild ?? false,
     partyId: guest?.partyId ?? parentPartyId,
   }
 
@@ -89,6 +90,7 @@ export function GuestFormDialog({
       lastName: values.lastName.trim(),
       status: values.status,
       notes: values.notes?.trim() || undefined,
+      isChild: values.isChild ?? false,
       partyId: values.partyId,
     }
 
@@ -204,6 +206,15 @@ export function GuestFormDialog({
               ))}
             </div>
           </Field>
+
+          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50">
+            <input
+              type="checkbox"
+              {...register('isChild')}
+              className="h-4 w-4 accent-amber-700"
+            />
+            Criança (menos de 5 anos)
+          </label>
 
           <Field label="Observações (opcional)" error={errors.notes?.message}>
             <textarea

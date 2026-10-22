@@ -57,6 +57,7 @@ const asGuest = (overrides: Partial<Guest> = {}): Guest => ({
   partyInviteToken: '44444444-4444-4444-8444-444444444444',
   partyId: '55555555-5555-4555-8555-555555555555',
   notes: null,
+  isChild: false,
   confirmedAt: null,
   createdAt: new Date('2026-01-01T10:00:00Z'),
   updatedAt: new Date('2026-01-01T10:00:00Z'),

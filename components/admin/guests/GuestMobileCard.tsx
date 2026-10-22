@@ -8,6 +8,7 @@ import {
   type GuestListCallbacks,
 } from '@/src/lib/guests'
 import { Copy, Link as LinkIcon, Pencil, Trash2, Users } from 'lucide-react'
+import { ChildBadge } from './ChildBadge'
 import { MoveGuestDialog } from './MoveGuestDialog'
 import { NotesIndicator } from './NotesIndicator'
 
@@ -30,7 +31,10 @@ export function GuestMobileCard({
         </div>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <p className="font-medium text-stone-800">{fullName(guest)}</p>
+            <p className="flex flex-wrap items-center gap-2 font-medium text-stone-800">
+              {fullName(guest)}
+              {guest.isChild && <ChildBadge />}
+            </p>
             <StatusPill status={STATUS_PILL[guest.status]} />
           </div>
           <p className="mt-0.5 text-xs text-stone-500">

@@ -7,6 +7,7 @@ import {
   type GuestListCallbacks,
 } from '@/src/lib/guests'
 import { Copy, Link as LinkIcon, Pencil, Trash2, Users } from 'lucide-react'
+import { ChildBadge } from './ChildBadge'
 import { MoveGuestDialog } from './MoveGuestDialog'
 import { NotesIndicator } from './NotesIndicator'
 
@@ -29,7 +30,10 @@ export function GuestRow({
             {guest.firstName.charAt(0).toUpperCase()}
           </div>
           <div className="min-w-0">
-            <p className="font-medium text-stone-800">{fullName(guest)}</p>
+            <p className="flex items-center gap-2 font-medium text-stone-800">
+              {fullName(guest)}
+              {guest.isChild && <ChildBadge />}
+            </p>
             {isHead ? (
               <p className="text-[11px] uppercase tracking-wider text-amber-700">
                 Titular do convite

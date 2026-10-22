@@ -4,7 +4,10 @@ import type { Guest, GuestStatus } from '@/src/entities/models/guest'
 import { fullName, STATUS_LABEL } from '@/src/lib/guests'
 import { renderReportPdf, type ReportColumn } from './report-document'
 
-const columns: ReportColumn[] = [{ header: 'Nome', width: '100%' }]
+const columns: ReportColumn[] = [
+  { header: '#', width: '8%' },
+  { header: 'Nome', width: '92%' },
+]
 
 // Confirmado → Pendente → Não vai, matching the order used across the admin.
 const STATUS_ORDER: GuestStatus[] = ['going', 'pending', 'not_going']
@@ -27,22 +30,20 @@ export async function renderGuestsReportPdf(
       )
 
     return {
-      heading: `${STATUS_LABEL[status]} (${members.length})`,
-      rows: members.map((g) => [fullName(g)]),
+      heading: statusFilter ? undefined : STATUS_LABEL[status],
+      rows: members.map((g, i) => [
+        String(i + 1),
+        g.isChild
+          ? { text: `${fullName(g)} `, bold: '(criança, menos de 5 anos)' }
+          : fullName(g),
+      ]),
     }
   })
 
-  const total = statusFilter
-    ? guests.filter((g) => g.status === statusFilter).length
-    : guests.length
-
-  const scope = statusFilter
-    ? `apenas "${STATUS_LABEL[statusFilter]}"`
-    : 'agrupado por status'
+  const scope = statusFilter ? STATUS_LABEL[statusFilter] : 'Todos'
 
   return renderReportPdf({
-    title: 'Lista de convidados',
-    subtitle: `Gerado em ${new Date().toLocaleDateString('pt-BR')} — ${scope}, ordenado por nome. Total: ${total} convidado(s).`,
+    title: `Lista de convidados - ${scope} - ${new Date().toLocaleDateString('pt-BR')}`,
     columns,
     sections,
   })

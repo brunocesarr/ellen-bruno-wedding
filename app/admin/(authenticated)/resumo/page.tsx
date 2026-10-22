@@ -37,7 +37,7 @@ export default async function ResumoPage() {
           <StatCard
             label="Convidados"
             value={stats.guestsSummary.total}
-            hint={`${stats.guestsSummary.going} confirmados`}
+            hint={`${stats.guestsSummary.going} confirmados${stats.guestsSummary.children > 0 ? ` · ${stats.guestsSummary.children} crianças` : ''}`}
             accent="stone"
           />
           <StatCard
