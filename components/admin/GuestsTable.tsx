@@ -8,9 +8,14 @@ import { Counter } from '@/components/ui/Counter'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { useCopyToClipboard } from '@/hooks/useCopyToClipboard'
 import { useGuestDeletion } from '@/hooks/useGuestDeletion'
-import type { Guest, GuestStatus } from '@/src/entities/models/guest'
+import {
+  CHILD_AGE_GROUPS,
+  type Guest,
+  type GuestStatus,
+} from '@/src/entities/models/guest'
 import { buttonPrimary } from '@/src/lib/class-names'
 import {
+  CHILD_AGE_GROUP_LABEL,
   filterPartyMembers,
   fullName,
   groupByParty,
@@ -92,8 +97,12 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
     [list]
   )
 
-  const childrenCount = useMemo(
-    () => list.filter((g) => g.isChild).length,
+  const childrenByGroup = useMemo(
+    () =>
+      CHILD_AGE_GROUPS.map((group) => ({
+        group,
+        count: list.filter((g) => g.childAgeGroup === group).length,
+      })).filter((c) => c.count > 0),
     [list]
   )
 
@@ -192,13 +201,14 @@ export function GuestsTable({ guests }: { guests: Guest[] }) {
         <Counter label="Confirmados" value={totals.going} tone="emerald" />
         <Counter label="Pendentes" value={totals.pending} tone="amber" />
         <Counter label="Não vão" value={totals.not_going} tone="rose" />
-        {childrenCount > 0 && (
+        {childrenByGroup.map(({ group, count }) => (
           <Counter
-            label="Crianças (< 5)"
-            value={childrenCount}
+            key={group}
+            label={`Crianças (${CHILD_AGE_GROUP_LABEL[group]})`}
+            value={count}
             tone="neutral"
           />
-        )}
+        ))}
       </div>
 
       {parties.length === 0 ? (

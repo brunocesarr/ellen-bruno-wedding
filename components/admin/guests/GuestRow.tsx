@@ -32,7 +32,9 @@ export function GuestRow({
           <div className="min-w-0">
             <p className="flex items-center gap-2 font-medium text-stone-800">
               {fullName(guest)}
-              {guest.isChild && <ChildBadge />}
+              {guest.childAgeGroup && (
+                <ChildBadge group={guest.childAgeGroup} />
+              )}
             </p>
             {isHead ? (
               <p className="text-[11px] uppercase tracking-wider text-amber-700">

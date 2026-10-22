@@ -4,6 +4,10 @@ export const GUEST_STATUSES = ['going', 'pending', 'not_going'] as const
 export const GuestStatusSchema = z.enum(GUEST_STATUSES)
 export type GuestStatus = z.infer<typeof GuestStatusSchema>
 
+export const CHILD_AGE_GROUPS = ['under_5', 'from_6_to_10'] as const
+export const ChildAgeGroupSchema = z.enum(CHILD_AGE_GROUPS)
+export type ChildAgeGroup = z.infer<typeof ChildAgeGroupSchema>
+
 export const GuestSchema = z.object({
   id: z.string().uuid(),
   firstName: z.string().min(1).max(80),
@@ -13,7 +17,7 @@ export const GuestSchema = z.object({
   partyInviteToken: z.string().uuid(),
   partyId: z.string().uuid(),
   notes: z.string().max(500).nullable(),
-  isChild: z.boolean(),
+  childAgeGroup: ChildAgeGroupSchema.nullable(),
   confirmedAt: z.date().nullable(),
   createdAt: z.date(),
   updatedAt: z.date(),
@@ -31,7 +35,7 @@ export const CreateGuestInputSchema = z.object({
   lastName: z.string().min(1, 'Informe o sobrenome').max(80),
   status: GuestStatusSchema.default('pending'),
   notes: z.string().max(500).optional(),
-  isChild: z.boolean().optional(),
+  childAgeGroup: ChildAgeGroupSchema.nullable().optional(),
 
   partyId: z.string().uuid().optional(),
 })

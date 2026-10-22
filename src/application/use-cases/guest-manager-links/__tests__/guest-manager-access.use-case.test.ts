@@ -37,7 +37,7 @@ const guest: Guest = {
   partyInviteToken: '55555555-5555-4555-8555-555555555555',
   partyId: '66666666-6666-4666-8666-666666666666',
   notes: 'Alergia a frutos do mar',
-  isChild: false,
+  childAgeGroup: null,
   confirmedAt: null,
   createdAt: new Date('2026-08-01T10:00:00Z'),
   updatedAt: new Date('2026-08-01T10:00:00Z'),

@@ -33,7 +33,9 @@ export function GuestMobileCard({
           <div className="flex items-start justify-between gap-2">
             <p className="flex flex-wrap items-center gap-2 font-medium text-stone-800">
               {fullName(guest)}
-              {guest.isChild && <ChildBadge />}
+              {guest.childAgeGroup && (
+                <ChildBadge group={guest.childAgeGroup} />
+              )}
             </p>
             <StatusPill status={STATUS_PILL[guest.status]} />
           </div>

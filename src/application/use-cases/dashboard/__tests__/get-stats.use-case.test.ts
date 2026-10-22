@@ -38,7 +38,7 @@ const guest = (overrides: Partial<Guest> = {}): Guest => ({
   partyInviteToken: 'pt1',
   partyId: 'party-1',
   notes: null,
-  isChild: false,
+  childAgeGroup: null,
   confirmedAt: null,
   createdAt: new Date('2026-01-01'),
   updatedAt: new Date('2026-01-01'),
@@ -235,18 +235,19 @@ describe('getDashboardStatsUseCase — gifts by category', () => {
       pledgedTotal: 200,
     })
   })
-  it('counts children under 5, and how many of them are confirmed', async () => {
+  it('counts children of every age bracket, and how many of them are confirmed', async () => {
     const deps = makeDeps({
       guests: [
-        guest({ id: 'g1', status: 'going', isChild: true }),
-        guest({ id: 'g2', status: 'pending', isChild: true }),
+        guest({ id: 'g1', status: 'going', childAgeGroup: 'under_5' }),
+        guest({ id: 'g2', status: 'pending', childAgeGroup: 'under_5' }),
         guest({ id: 'g3', status: 'going' }),
+        guest({ id: 'g4', status: 'going', childAgeGroup: 'from_6_to_10' }),
       ],
     })
 
     const stats = await getDashboardStatsUseCase(deps as never)()
 
-    expect(stats.guestsSummary.children).toBe(2)
-    expect(stats.guestsSummary.childrenGoing).toBe(1)
+    expect(stats.guestsSummary.children).toBe(3)
+    expect(stats.guestsSummary.childrenGoing).toBe(2)
   })
 })

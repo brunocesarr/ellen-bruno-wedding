@@ -1,7 +1,7 @@
 import 'server-only'
 
 import type { Guest, GuestStatus } from '@/src/entities/models/guest'
-import { fullName, STATUS_LABEL } from '@/src/lib/guests'
+import { CHILD_AGE_GROUP_LABEL, fullName, STATUS_LABEL } from '@/src/lib/guests'
 import { renderReportPdf, type ReportColumn } from './report-document'
 
 const columns: ReportColumn[] = [
@@ -33,8 +33,11 @@ export async function renderGuestsReportPdf(
       heading: statusFilter ? undefined : STATUS_LABEL[status],
       rows: members.map((g, i) => [
         String(i + 1),
-        g.isChild
-          ? { text: `${fullName(g)} `, bold: '(criança, menos de 5 anos)' }
+        g.childAgeGroup
+          ? {
+              text: `${fullName(g)} `,
+              bold: `(criança, ${CHILD_AGE_GROUP_LABEL[g.childAgeGroup].toLowerCase()})`,
+            }
           : fullName(g),
       ]),
     }

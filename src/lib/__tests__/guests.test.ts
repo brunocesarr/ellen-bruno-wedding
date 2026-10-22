@@ -18,7 +18,7 @@ const guest = (
     partyInviteToken: `party-invite-${seq}`,
     partyId: `party-${seq}`,
     notes: null,
-    isChild: false,
+    childAgeGroup: null,
     confirmedAt: null,
     createdAt: new Date('2026-01-01'),
     updatedAt: new Date('2026-01-01'),

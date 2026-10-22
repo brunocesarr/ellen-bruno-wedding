@@ -1,4 +1,8 @@
-import type { Guest, GuestStatus } from '@/src/entities/models/guest'
+import type {
+  ChildAgeGroup,
+  Guest,
+  GuestStatus,
+} from '@/src/entities/models/guest'
 
 export type NonEmptyArray<T> = readonly [T, ...T[]]
 export type StatusFilter = 'all' | GuestStatus
@@ -25,6 +29,11 @@ export const STATUS_LABEL: Record<GuestStatus, string> = {
   going: 'Confirmado',
   pending: 'Pendente',
   not_going: 'Não vai',
+}
+
+export const CHILD_AGE_GROUP_LABEL: Record<ChildAgeGroup, string> = {
+  under_5: 'Menos de 5 anos',
+  from_6_to_10: 'De 6 a 10 anos',
 }
 
 export const fullName = (g: Guest) => `${g.firstName} ${g.lastName}`.trim()

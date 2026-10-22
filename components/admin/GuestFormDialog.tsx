@@ -7,6 +7,8 @@ import {
 import { DialogShell } from '@/components/ui/DialogShell'
 import { FormField as Field } from '@/components/ui/FormField'
 import {
+  CHILD_AGE_GROUPS,
+  ChildAgeGroupSchema,
   CreateGuestInputSchema,
   GUEST_STATUSES,
   type CreateGuestInput,
@@ -14,6 +16,7 @@ import {
   type GuestStatus,
 } from '@/src/entities/models/guest'
 import { inputField as inputClassName } from '@/src/lib/class-names'
+import { CHILD_AGE_GROUP_LABEL } from '@/src/lib/guests'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as Dialog from '@radix-ui/react-dialog'
 import { Loader2, X } from 'lucide-react'
@@ -24,6 +27,8 @@ import { z } from 'zod'
 
 const guestFormSchema = CreateGuestInputSchema.extend({
   notes: z.string().max(500, 'Máximo 500 caracteres').optional().default(''),
+  // '' is the select's "not a child" option; mapped to null on submit.
+  childAgeGroup: z.union([ChildAgeGroupSchema, z.literal('')]).optional(),
 })
 
 type GuestFormInput = z.input<typeof guestFormSchema>
@@ -62,7 +67,7 @@ export function GuestFormDialog({
     lastName: guest?.lastName ?? '',
     status: guest?.status ?? 'pending',
     notes: guest?.notes ?? '',
-    isChild: guest?.isChild ?? false,
+    childAgeGroup: guest?.childAgeGroup ?? '',
     partyId: guest?.partyId ?? parentPartyId,
   }
 
@@ -90,7 +95,7 @@ export function GuestFormDialog({
       lastName: values.lastName.trim(),
       status: values.status,
       notes: values.notes?.trim() || undefined,
-      isChild: values.isChild ?? false,
+      childAgeGroup: values.childAgeGroup || null,
       partyId: values.partyId,
     }
 
@@ -207,14 +212,16 @@ export function GuestFormDialog({
             </div>
           </Field>
 
-          <label className="flex cursor-pointer items-center gap-3 rounded-lg border border-stone-200 bg-white px-3 py-2.5 text-sm text-stone-700 has-[:checked]:border-amber-600 has-[:checked]:bg-amber-50">
-            <input
-              type="checkbox"
-              {...register('isChild')}
-              className="h-4 w-4 accent-amber-700"
-            />
-            Criança (menos de 5 anos)
-          </label>
+          <Field label="Criança?" error={errors.childAgeGroup?.message}>
+            <select {...register('childAgeGroup')} className={inputClassName}>
+              <option value="">Não é criança</option>
+              {CHILD_AGE_GROUPS.map((group) => (
+                <option key={group} value={group}>
+                  {CHILD_AGE_GROUP_LABEL[group]}
+                </option>
+              ))}
+            </select>
+          </Field>
 
           <Field label="Observações (opcional)" error={errors.notes?.message}>
             <textarea

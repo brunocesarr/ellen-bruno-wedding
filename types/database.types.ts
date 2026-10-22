@@ -231,12 +231,12 @@ export type Database = {
       }
       guests: {
         Row: {
+          child_age_group: Database['public']['Enums']['child_age_group'] | null
           confirmed_at: string | null
           created_at: string
           first_name: string
           id: string
           invite_token: string
-          is_child: boolean
           last_name: string
           notes: string | null
           party_id: string
@@ -245,12 +245,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          child_age_group?:
+            Database['public']['Enums']['child_age_group'] | null
           confirmed_at?: string | null
           created_at?: string
           first_name: string
           id?: string
           invite_token?: string
-          is_child?: boolean
           last_name: string
           notes?: string | null
           party_id?: string
@@ -259,12 +260,13 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          child_age_group?:
+            Database['public']['Enums']['child_age_group'] | null
           confirmed_at?: string | null
           created_at?: string
           first_name?: string
           id?: string
           invite_token?: string
-          is_child?: boolean
           last_name?: string
           notes?: string | null
           party_id?: string
@@ -729,12 +731,12 @@ export type Database = {
       set_guest_statuses: {
         Args: { p_updates: Json }
         Returns: {
+          child_age_group: Database['public']['Enums']['child_age_group'] | null
           confirmed_at: string | null
           created_at: string
           first_name: string
           id: string
           invite_token: string
-          is_child: boolean
           last_name: string
           notes: string | null
           party_id: string
@@ -756,6 +758,7 @@ export type Database = {
       touch_invite_link: { Args: { p_token: string }; Returns: undefined }
     }
     Enums: {
+      child_age_group: 'under_5' | 'from_6_to_10'
       expense_document_kind: 'contract' | 'payment_proof'
       gift_category: 'home' | 'kitchen' | 'travel' | 'experience' | 'other'
       gift_kind: 'fixed_item' | 'open_item' | 'fund'
@@ -885,6 +888,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      child_age_group: ['under_5', 'from_6_to_10'],
       expense_document_kind: ['contract', 'payment_proof'],
       gift_category: ['home', 'kitchen', 'travel', 'experience', 'other'],
       gift_kind: ['fixed_item', 'open_item', 'fund'],

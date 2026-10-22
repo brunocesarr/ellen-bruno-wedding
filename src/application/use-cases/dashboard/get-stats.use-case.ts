@@ -166,9 +166,10 @@ export function getDashboardStatsUseCase(d: Deps) {
       going: guests.filter((g) => g.status === 'going').length,
       pending: guests.filter((g) => g.status === 'pending').length,
       notGoing: guests.filter((g) => g.status === 'not_going').length,
-      children: guests.filter((g) => g.isChild).length,
-      childrenGoing: guests.filter((g) => g.isChild && g.status === 'going')
-        .length,
+      children: guests.filter((g) => g.childAgeGroup !== null).length,
+      childrenGoing: guests.filter(
+        (g) => g.childAgeGroup !== null && g.status === 'going'
+      ).length,
     }
 
     const requestsSummary = {

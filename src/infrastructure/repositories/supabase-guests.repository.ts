@@ -35,7 +35,7 @@ const mapRow = (row: GuestRow): Guest => ({
   partyInviteToken: row.party_invite_token,
   partyId: row.party_id,
   notes: row.notes,
-  isChild: row.is_child,
+  childAgeGroup: row.child_age_group,
   confirmedAt: row.confirmed_at ? new Date(row.confirmed_at) : null,
   createdAt: new Date(row.created_at),
   updatedAt: new Date(row.updated_at),
@@ -118,7 +118,7 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
         last_name: input.lastName,
         status: input.status,
         notes: input.notes ?? null,
-        is_child: input.isChild ?? false,
+        child_age_group: input.childAgeGroup ?? null,
         ...(input.partyId ? { party_id: input.partyId } : {}),
       })
       .select('*')
@@ -135,7 +135,8 @@ export class SupabaseGuestsRepository implements IGuestsRepository {
     if (rest.lastName !== undefined) patch.last_name = rest.lastName
     if (rest.status !== undefined) patch.status = rest.status
     if (rest.notes !== undefined) patch.notes = rest.notes
-    if (rest.isChild !== undefined) patch.is_child = rest.isChild
+    if (rest.childAgeGroup !== undefined)
+      patch.child_age_group = rest.childAgeGroup
     if (rest.partyId !== undefined) patch.party_id = rest.partyId
 
     const { data, error } = await this.supabase
